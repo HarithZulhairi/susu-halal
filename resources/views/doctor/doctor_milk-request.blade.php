@@ -4,6 +4,8 @@
 @section('title', 'Milk Request Records')
 
 @section('content')
+  <link rel="stylesheet" href="{{ asset('css/doctor_milk-request.css') }}">
+
   <div class="page-header">
     <h1>Milk Request Records</h1>
     <p>Manage and track all milk processing requests</p>
