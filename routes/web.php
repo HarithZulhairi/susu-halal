@@ -19,12 +19,23 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/doctor/milk-records', function () {
-    return view('doctor.milk-records');
+require __DIR__.'/auth.php';
+
+
+// Milk Request Module
+
+Route::get('/doctor/milk-request', function () {
+    return view('doctor.doctor_milk-request');
 });
 
+Route::get('/doctor/test', function () {
+    return view('doctor.doctor_test');
+});
 
-require __DIR__.'/auth.php';
+Route::get('/doctor/prescribe-milk', function () {
+    return view('doctor.doctor_prescribe-milk');
+});
+
 
 
 // Milk Prcoessing and Record Module
