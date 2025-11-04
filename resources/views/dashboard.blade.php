@@ -11,6 +11,13 @@
                 <div class="p-6 text-gray-900">
                     {{ __("You're logged in!") }}
                 </div>
+                <div class="milk-process-button">
+                    <a href="{{ route('milk.process') }}">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Go to Milk Process
+                        </button>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
