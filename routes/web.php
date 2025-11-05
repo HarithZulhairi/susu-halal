@@ -77,6 +77,6 @@ Route::get('/hmmc/list-of-infants', function () {
 // Milk Prcoessing and Record Module
 
 Route::get('/nurse/milk-process', function () {
-    return view('milk processing and records/nurse_MilkProcess');
+    return view('nurse_milk-process-record');
 })->name('milk.process');
 
