@@ -1,0 +1,202 @@
+/* General Layout */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background: #f9fafb;
+  color: #333;
+  overflow-x: hidden; /* Prevent side scroll */
+}
+
+/* Container Layout (Sidebar + Content) */
+.container {
+  display: flex;
+  min-height: 100vh; /* Use min-height instead of fixed height */
+  height: auto; /* Allow natural height growth */
+  overflow: hidden; /* Prevent double scroll on container */
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  background: #f9fafb;
+  /* Remove overflow-y:auto to prevent double scroll */
+  overflow-y: visible; 
+}
+
+
+.page-header h1 {
+  margin-bottom: 4px;
+  font-size: 26px;
+  color: #1a202c;
+}
+
+.page-header p {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* Section Styling */
+.appointment-section {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+/* Header Controls */
+.header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.actions-header button {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 10px;
+  transition: all 0.2s ease;
+}
+
+.actions-header button i {
+  margin-right: 5px;
+}
+
+.actions-header button:hover {
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+/* Tabs */
+.tabs {
+  border-bottom: 2px solid #e2e8f0;
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #718096;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-button.active {
+  color: #4c51bf;
+  border-bottom: 2px solid #4c51bf;
+  font-weight: 600;
+}
+
+.tab-button .count {
+  color: #a0aec0;
+  font-weight: 400;
+}
+
+/* Table */
+.table-container {
+  overflow-x: auto;
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.records-table th, .records-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #edf2f7;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.records-table th {
+  background-color: #f7fafc;
+  color: #718096;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Status */
+.status-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.pending { background-color: #feebc8; color: #d69e2e; }
+.confirmed { background-color: #c6f6d5; color: #38a169; }
+
+/* Confirm Button */
+.btn-confirm {
+  background-color: #4c51bf;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-confirm:hover:not(.confirmed) {
+  background-color: #3d42a5;
+}
+
+.btn-confirm.confirmed {
+  background-color: #c6f6d5;
+  color: #38a169;
+  border: 1px solid #9ae6b4;
+  cursor: default;
+}
+
+/* --- Inline Action Buttons (Display Fixed) --- */
+.actions {
+  display: inline-block;
+}
+
+.actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  margin-right: 4px;
+}
+
+.actions button:first-child {
+  margin-left: 0;
+}
+
+.actions button:last-child {
+  margin-right: 0;
+}
+
+.actions .btn-view i { color: #2563eb; }
+.actions .btn-delete i { color: #dc2626; }
+.actions .btn-more i { color: #6b7280; }
+
+.actions button:hover {
+  background: #f3f4f6;
+}
+
+/* Align vertically inside the cell */
+.records-table td.actions {
+  padding-top: 30px;
+  padding-bottom: 16px;
+}
