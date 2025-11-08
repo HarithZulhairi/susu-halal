@@ -27,6 +27,10 @@ Route::get('/hmmc/dashboard', function () {
     return view('hmmc.hmmc_dashboard');
 })->name('hmmc.dashboard');
 
+Route::get('/donor/dashboard', function () {
+    return view('donor.donor_dashboard');
+})->name('donor.dashboard');
+
 Route::get('/hmmc/manage-users', function () {
     return view('hmmc.hmmc_manage-users');
 })->name('hmmc.manage-users');
@@ -38,6 +42,70 @@ Route::get('/donor/profile', function () {
 Route::get('/donor/edit-profile', function () {
     return view('donor.donor_edit-profile');
 })->name('donor.edit-profile');
+
+Route::get('/doctor/profile', function () {
+    return view('doctor.doctor_profile');
+})->name('doctor.profile');
+
+Route::get('/doctor/edit-profile', function () {
+    return view('doctor.doctor_edit-profile');
+})->name('doctor.edit-profile');
+
+Route::get('/doctor/dashboard', function () {
+    return view('doctor.doctor_dashboard');
+})->name('doctor.dashboard');
+
+Route::get('/nurse/dashboard', function () {
+    return view('nurse.nurse_dashboard');
+})->name('nurse.dashboard');
+
+Route::get('/nurse/profile', function () {
+    return view('nurse.nurse_profile');
+})->name('nurse.profile');
+
+Route::get('/nurse/edit-profile', function () {
+    return view('nurse.nurse_edit-profile');
+})->name('nurse.edit-profile');
+
+Route::get('/labtech/dashboard', function () {
+    return view('labtech.labtech_dashboard');
+})->name('labtech.dashboard');
+
+Route::get('/labtech/profile', function () {
+    return view('labtech.labtech_profile');
+})->name('labtech.profile');
+
+Route::get('/labtech/edit-profile', function () {
+    return view('labtech.labtech_edit-profile');
+})->name('labtech.edit-profile');
+
+Route::get('/shariah/dashboard', function () {
+    return view('shariah.shariah_dashboard');
+})->name('shariah.dashboard');
+
+Route::get('/shariah/profile', function () {
+    return view('shariah.shariah_profile');
+})->name('shariah.profile');
+
+Route::get('/shariah/edit-profile', function () {
+    return view('shariah.shariah_edit-profile');
+})->name('shariah.edit-profile');
+
+Route::get('/parent/dashboard', function () {
+    return view('parent.parent_dashboard');
+})->name('parent.dashboard');
+
+Route::get('/parent/profile', function () {
+    return view('parent.parent_profile');
+})->name('parent.profile');
+
+Route::get('/parent/edit-profile', function () {
+    return view('parent.parent_edit-profile');
+})->name('parent.edit-profile');
+
+Route::get('/hmmc/create-new-user', function () {
+    return view('hmmc.hmmc_create-new-user');
+})->name('hmmc.create-new-user');
 
 
 // Milk Request Module

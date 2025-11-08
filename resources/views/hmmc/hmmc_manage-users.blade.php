@@ -14,7 +14,7 @@
                     <button class="btn-export">
                         <i class="fas fa-download"></i> Export
                     </button>
-                    <button class="btn-add-user">
+                    <button class="btn-add-user" onclick="openRoleModal()">
                         <i class="fas fa-plus"></i> Add New User
                     </button>
                 </div>
@@ -214,4 +214,86 @@
             </table>
         </div>
     </div>
+
+    <!-- Role Selection Modal -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Select User Role</h2>
+            <p class="modal-subtitle">Choose the type of user you want to create</p>
+            
+            <div class="role-cards">
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'parent']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-baby"></i>
+                        </div>
+                        <h3>Parent</h3>
+                        <p>Milk donor or recipient</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'shariah']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-book-quran"></i>
+                        </div>
+                        <h3>Shariah Committee</h3>
+                        <p>Islamic compliance expert</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'nurse']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-user-nurse"></i>
+                        </div>
+                        <h3>Nurse</h3>
+                        <p>Healthcare professional</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'clinician']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h3>Clinician</h3>
+                        <p>Medical practitioner</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'lab-tech']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h3>Lab Technician</h3>
+                        <p>Laboratory specialist</p>
+                    </div>
+                </a>
+            </div>
+
+            <button class="btn-cancel-modal" onclick="closeRoleModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function openRoleModal() {
+            document.getElementById('roleModal').style.display = 'flex';
+        }
+
+        function closeRoleModal() {
+            document.getElementById('roleModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('roleModal');
+            if (event.target === modal) {
+                closeRoleModal();
+            }
+        }
+    </script>
 @endsection

@@ -27,8 +27,8 @@
   <div class="sidebar-section">
     <h4>PARENT</h4>
     <ul>
-      <li><a href="#"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-      <li><a href="#"><i class="fa-solid fa-house"></i> Profile</a></li>
+      <li><a href="{{ route('parent.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+      <li><a href="{{ route('parent.profile') }}"><i class="fa-solid fa-house"></i> Profile</a></li>
       <li class="{{ request()->routeIs('doctor.milk-request-form') ? 'active' : '' }}">
         <a href="{{ route('doctor.milk-request-form') }}"><i class="fa-solid fa-droplet"></i> Request Milk Form</a>
       </li>

@@ -27,8 +27,8 @@
   <div class="sidebar-section">
     <h4>Doctor</h4>
     <ul>
-      <li><a href="#"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-      <li><a href="#"><i class="fa-solid fa-house"></i> Profile</a></li>
+      <li><a href="{{ route('doctor.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+      <li><a href="{{ route('doctor.profile') }}"><i class="fa-solid fa-house"></i> Profile</a></li>
       <li>
         <a href="{{ route('doctor.donor-candidate-list') }}"><i class="fa-solid fa-droplet"></i> Donor Candidates</a>
       </li>

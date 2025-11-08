@@ -101,14 +101,17 @@
     </style>
     @stack('styles')
 </head>
-
+ 
 <body>
 
 <nav style="background: var(--white); box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000;">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
-        <a href="{{ url('/') }}" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none;">
-            Rahma Milk Bank
-        </a>
+        <a href="{{ url('/') }}" style="display: flex; align-items: center;">
+    <img src="{{ asset('images/hmmc_logo_clear.png') }}" 
+         alt="HALIMATUSSAADIA Mother's Milk Centre Logo" 
+         style="width: 200px; height: auto;">
+</a>
+
 
         <ul style="display: flex; list-style: none; gap: 25px; margin: 0;">
             <li><a href="{{ url('/') }}" style="text-decoration: none; color: var(--dark); font-weight: 500;">Home</a></li>
@@ -133,7 +136,7 @@
                 Providing safe, screened donor milk to infants in need while upholding Islamic principles and values.
             </p>
             <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-                <a href="#" class="btn btn-primary">Become a Donor</a>
+                <a href="{{ route('register') }}" class="btn btn-primary">Become a Donor</a>
                 <a href="#" class="btn btn-secondary">Request Milk</a>
             </div>
         </div>
@@ -383,10 +386,13 @@
     <footer style="background: var(--dark); color: var(--white); padding: 60px 0 20px;">
         <div class="container">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
-                <div>
-                    <h3 style="color: var(--secondary); margin-bottom: 20px; font-size: 1.5rem;">Rahma Milk Bank</h3>
-                    <p>Providing Shariah-compliant human milk sharing services to support mothers and infants in need.</p>
-                </div>
+                <div style="text-align: left;">
+    <img src="{{ asset('images/hmmc_logo_clear.png') }}" 
+         alt="HALIMATUSSAADIA Mother's Milk Centre Logo" 
+         style="width: 270px; height: auto; margin-bottom: 15px;">
+    <p>Providing Shariah-compliant human milk sharing services to support mothers and infants in need.</p>
+</div>
+
                 <div>
                     <h4 style="color: var(--secondary); margin-bottom: 15px;">Quick Links</h4>
                     <ul style="list-style: none;">
@@ -425,7 +431,7 @@
                 </div>
             </div>
             <div style="text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <p>&copy; 2023 Rahma Milk Bank. All rights reserved.</p>
+                <p>&copy; 2025 Halimatus Saadia Mother's Milk Centre. All rights reserved.</p>
             </div>
         </div>
     </footer>

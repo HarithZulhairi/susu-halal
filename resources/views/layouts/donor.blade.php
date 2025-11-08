@@ -27,7 +27,7 @@
   <div class="sidebar-section">
     <h4>Donor</h4>
     <ul>
-      <li><a href="#"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+      <li><a href="{{ route('donor.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a></li>
       <li><a href="{{ route('donor.profile') }}"><i class="fa-solid fa-house"></i> Profile</a></li>
       <li class="{{ request()->routeIs('doctor.milk-request-form') ? 'active' : '' }}">
         <a href="{{ route('doctor.milk-request-form') }}"><i class="fa-solid fa-droplet"></i> Request Milk Form</a>
