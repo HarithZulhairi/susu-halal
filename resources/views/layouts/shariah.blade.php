@@ -40,8 +40,8 @@
     <h4>Management</h4>
     <ul>
       <li><a href="{{ route('shariah.manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records</a></li>
-      <li><a href="#"><i class="fa-solid fa-baby"></i> Recipient</a></li>
-      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li><a href="{{ route('shariah.view-milk-processing') }}"><i class="fa-solid fa-baby"></i> Milk Process</a></li>
+      <li><a href="{{ route('shariah.infant-request') }}"><i class="fa-solid fa-gear"></i> Infant Milk Request</a></li>
       <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
         <a href="{{ route('doctor.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request List</a>
       </li>

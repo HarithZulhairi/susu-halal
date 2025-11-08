@@ -41,9 +41,11 @@
     <ul>
       <li><a href="{{ route('nurse.donor-appointment-record') }}"><i class="fa-solid fa-file-lines"></i> Donor Appointment</a></li>
       <li><a href="{{ route('nurse.manage-milk-records') }}"><i class="fa-solid fa-baby"></i> Milk Records</a></li>
-      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li><a href="{{ route('nurse.allocate-milk') }}"><i class="fa-solid fa-gear"></i> Milk Allocation</a></li>
+      <li><a href="{{ route('nurse.milk-request-list') }}"><i class="fa-solid fa-gear"></i> Choose Milk</a></li>
+      <li><a href="{{ route('nurse.set-infant-weight') }}"><i class="fa-solid fa-gear"></i> Infant Weight</a></li>
       <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
-        <a href="{{ route('doctor.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request List</a>
+        <a href="{{ route('nurse.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request List</a>
       </li>
     </ul>
   </div>

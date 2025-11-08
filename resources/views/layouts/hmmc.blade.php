@@ -39,10 +39,10 @@
     <h4>Management</h4>
     <ul>
       <li><a href="{{ route('hmmc.manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records</a></li>
-      <li><a href="#"><i class="fa-solid fa-baby"></i> Recipient</a></li>
+      <li><a href="{{ route('hmmc.list-of-infants') }}"><i class="fa-solid fa-baby"></i> Recipient</a></li>
       <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
       <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
-        <a href="{{ route('doctor.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request List</a>
+        <a href="#"><i class="fa-solid fa-list"></i> Request List</a>
       </li>
     </ul>
   </div>

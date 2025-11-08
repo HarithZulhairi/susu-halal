@@ -114,13 +114,17 @@ Route::get('/doctor/milk-request', function () {
     return view('doctor.doctor_milk-request');
 })->name('doctor.list-milk-request');
 
-Route::get('/doctor/test', function () {
-    return view('doctor.doctor_test');
-});
+Route::get('/nurse/milk-request', function () {
+    return view('nurse.nurse_milk-request');
+})->name('nurse.list-milk-request');
 
-Route::get('/doctor/prescribe-milk', function () {
-    return view('doctor.doctor_prescribe-milk');
-});
+// Route::get('/doctor/test', function () {
+//     return view('doctor.doctor_test');
+// });
+
+// Route::get('/doctor/prescribe-milk', function () {
+//     return view('doctor.doctor_prescribe-milk');
+// });
 
 Route::get('/doctor/milk-request/create', function () {
     return view('doctor.doctor_milk-request-form');
@@ -145,6 +149,10 @@ Route::get('/parent/my-infant-request', function () {
 Route::get('/hmmc/list-of-infants', function () {
     return view('hmmc.hmmc_list-of-infants');
 })->name('hmmc.list-of-infants');
+
+Route::get('/shariah/infant-request', function () {
+    return view('shariah.shariah_infant-request');
+})->name('shariah.infant-request');
 
 // Milk Prcoessing and Record Module
 

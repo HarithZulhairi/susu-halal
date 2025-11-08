@@ -1,0 +1,357 @@
+/* ========== General Layout ========== */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background: #f9fafb;
+  color: #333;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ========== Main Content ========== */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  background: #f9fafb;
+}
+
+/* ========== Page Header ========== */
+.page-header h1 {
+  margin-bottom: 4px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-header p {
+  color: #6b7280;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+/* ========== Card Container ========== */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+/* ========== Card Header ========== */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.card-header .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.card-header .btn {
+  background: #f3f4f6;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.card-header .btn:hover {
+  background: #e5e7eb;
+}
+
+.card-header .btn i {
+  font-size: 14px;
+}
+
+.card-header .btn-more {
+  padding: 8px 12px;
+}
+
+/* ========== Table Styles ========== */
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.requests-table thead {
+  background: #f9fafb;
+}
+
+.requests-table th {
+  text-align: left;
+  padding: 14px 20px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.requests-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s;
+}
+
+.requests-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.requests-table td {
+  padding: 20px 20px;
+  vertical-align: middle;
+  color: #374151;
+  font-size: 14px;
+}
+
+/* ========== Request ID & Donor ID ========== */
+.requests-table td:first-child,
+.requests-table td:nth-child(2) {
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ========== Volume ========== */
+.requests-table td:nth-child(3) {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* ========== Dates ========== */
+.requests-table td:nth-child(4),
+.requests-table td:nth-child(5) {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ========== Status Badges ========== */
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-badge.waiting {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.approved {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.allocated {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.canceled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ========== Milk Kinship Badges ========== */
+.kinship-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+  min-width: 60px;
+  text-transform: uppercase;
+}
+
+.kinship-badge.yes {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.kinship-badge.no {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ========== Action Buttons ========== */
+.actions {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  margin-right: 4px;
+}
+
+.actions button:first-child {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.actions button:last-child {
+  margin-right: 0;
+}
+
+.actions .btn-view i { 
+  color: #2563eb;
+}
+
+.actions .btn-delete i { 
+  color: #dc2626;
+}
+
+.actions .btn-more i { 
+  color: #6b7280;
+}
+
+.actions button:hover {
+  background: #f3f4f6;
+}
+
+.actions button:hover i {
+  transform: scale(1.15);
+  transition: transform 0.2s ease;
+}
+
+.requests-table td.actions {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  text-align: left;
+}
+
+/* ========== Empty State ========== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 1200px) {
+  .main-content {
+    padding: 30px;
+  }
+  
+  .requests-table th,
+  .requests-table td {
+    padding: 16px 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .card-header .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .requests-table {
+    font-size: 13px;
+  }
+  
+  .requests-table th,
+  .requests-table td {
+    padding: 12px 12px;
+  }
+  
+  .status-badge,
+  .kinship-badge {
+    font-size: 11px;
+    padding: 5px 12px;
+    min-width: 60px;
+  }
+  
+  /* Stack table on small screens */
+  .requests-table thead {
+    display: none;
+  }
+  
+  .requests-table tbody tr {
+    display: block;
+    margin-bottom: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .requests-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+  }
+  
+  .requests-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+  
+  .requests-table td.actions {
+    justify-content: flex-end;
+  }
+}
