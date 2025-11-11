@@ -14,10 +14,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Authentication routes
-Route::get('/login', [LoginController::class, 'create'])->name('login');
-Route::post('/login', [LoginController::class, 'store']);
-Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
 // Role-based dashboard routes (protected by auth middleware)
 Route::middleware(['auth'])->group(function () {
@@ -56,8 +52,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-require __DIR__.'/auth.php';
 
 // User Management Module
 
@@ -267,3 +261,5 @@ Route::get('/doctor/donor-candidate-list', function () {
 Route::get('/nurse/donor-candidate-list', function () {
     return view('nurse.nurse_donor-candidate-list');
 })->name('nurse.donor-candidate-list');
+
+require __DIR__.'/auth.php';
