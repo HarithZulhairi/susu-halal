@@ -34,5 +34,7 @@ class Donor extends Model
 
     // Example Usage
     // <p>Donor ID: {{ $donor->formatted_id }}</p>
-    // Output: Donor ID: #D1
+
+    // Output
+    // Donor ID: #D1
 }
