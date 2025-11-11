@@ -10,15 +10,18 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, Lab Technician</h1>
+            <div>
+                <h1>Welcome, {{ auth()->user()->name ?? 'Lab Technician' }}</h1>
+                <p class="muted">Shariah-compliant Human Milk Bank • Laboratory Dashboard</p>
+            </div>
             <div class="header-actions">
                 <button class="btn-secondary">
                     <i class="fas fa-file-export"></i>
-                    Export
+                    Export Report
                 </button>
                 <button class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Add New User
+                    <i class="fas fa-vial"></i>
+                    New Record
                 </button>
             </div>
         </div>
@@ -28,75 +31,74 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Users</span>
+                <span class="stat-label">Total Milk Samples</span>
                 <div class="stat-icon blue">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-bottle-droplet"></i>
                 </div>
             </div>
-            <div class="stat-value">248</div>
+            <div class="stat-value">{{ $totalSamples ?? 320 }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                12% from last month
+                10% this month
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Active Donors</span>
+                <span class="stat-label">Processed Samples</span>
                 <div class="stat-icon green">
-                    <i class="fas fa-check"></i>
+                    <i class="fas fa-flask"></i>
                 </div>
             </div>
-            <div class="stat-value">195</div>
+            <div class="stat-value">{{ $processedSamples ?? 250 }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                8% from last month
+                8% increase
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Donations</span>
+                <span class="stat-label">Pending Pasteurization</span>
                 <div class="stat-icon orange">
-                    <i class="fas fa-hand-holding-heart"></i>
+                    <i class="fas fa-temperature-high"></i>
                 </div>
             </div>
-            <div class="stat-value">2,847</div>
-            <div class="stat-change negative">
-                <i class="fas fa-arrow-down"></i>
-                20% from last month
+            <div class="stat-value">{{ $pendingPasteurization ?? 40 }}</div>
+            <div class="stat-change warning">
+                <i class="fas fa-exclamation-circle"></i>
+                Needs attention
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">System Alerts</span>
-                <div class="stat-icon red">
-                    <i class="fas fa-exclamation-triangle"></i>
+                <span class="stat-label">Storage Used</span>
+                <div class="stat-icon purple">
+                    <i class="fas fa-snowflake"></i>
                 </div>
             </div>
-            <div class="stat-value">41</div>
-            <div class="stat-change warning">
-                <i class="fas fa-arrow-up"></i>
-                3 news today
+            <div class="stat-value">{{ $storageUsed ?? '78%' }}</div>
+            <div class="stat-change neutral">
+                <i class="fas fa-warehouse"></i>
+                Freezer 3 near capacity
             </div>
         </div>
     </div>
 
     <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Donations Statistics -->
-        <div class="card donations-card">
+        <!-- Milk Processing Statistics -->
+        <div class="card chart-card">
             <div class="card-header">
-                <h2>Donations Statistics</h2>
+                <h2>Milk Processing & Dispatch Statistics</h2>
                 <a href="#" class="view-report">
-                    View Report
+                    View Full Report
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="chart-placeholder">
-                <i class="fas fa-chart-line"></i>
-                <p>Monthly Donation Volume Chart</p>
+            <div class="chart-body" style="height: 400px; position: relative;">
+                <canvas id="labTechChart"></canvas>
             </div>
         </div>
 
@@ -106,31 +108,31 @@
             <div class="quick-stats-list">
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">New Donors This Week</div>
-                    </div>
-                    <span class="quick-stat-badge positive">+10</span>
-                </div>
-                <div class="quick-stat-item">
-                    <div class="quick-stat-info">
                         <div class="quick-stat-value">12</div>
-                        <div class="quick-stat-label">Milk Requests</div>
+                        <div class="quick-stat-label">New Samples Today</div>
                     </div>
                     <span class="quick-stat-badge positive">+12</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">Pending Approvals</div>
+                        <div class="quick-stat-value">6</div>
+                        <div class="quick-stat-label">Samples Under Pasteurization</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge warning">Processing</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">Active Campaigns</div>
+                        <div class="quick-stat-value">9</div>
+                        <div class="quick-stat-label">Dispatched Today</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge positive">+9</span>
+                </div>
+                <div class="quick-stat-item">
+                    <div class="quick-stat-info">
+                        <div class="quick-stat-value">3</div>
+                        <div class="quick-stat-label">Alerts</div>
+                    </div>
+                    <span class="quick-stat-badge danger">Check</span>
                 </div>
             </div>
         </div>
@@ -138,12 +140,12 @@
 
     <!-- Bottom Grid -->
     <div class="bottom-grid">
-        <!-- Recent User Registrations -->
+        <!-- Recent Milk Records -->
         <div class="card users-card">
             <div class="card-header">
-                <h2>Recent User Registrations</h2>
+                <h2>Recent Milk Records</h2>
                 <a href="#" class="view-all">
-                    View All Users
+                    View All Records
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -151,88 +153,35 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>USER</th>
-                            <th>ROLE</th>
-                            <th>STATUS</th>
-                            <th>REGISTRATION DATE</th>
-                            <th>ACTIONS</th>
+                            <th>Sample ID</th>
+                            <th>Donor</th>
+                            <th>Status</th>
+                            <th>Volume</th>
+                            <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar teal">SA</div>
-                                    <div>
-                                        <div class="user-name">Sarah Ahmad</div>
-                                        <div class="user-email">sarah.ahmad2@email.com</div>
-                                    </div>
-                                </div>
+                            <td>#MLK-2451</td>
+                            <td>Fatima Khan</td>
+                            <td><span class="badge badge-active">Processed</span></td>
+                            <td>250ml</td>
+                            <td>May 16, 2024</td>
+                            <td class="actions">
+                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>#MLK-2448</td>
+                            <td>Aisyah N.</td>
+                            <td><span class="badge badge-pending">Pending Pasteurization</span></td>
+                            <td>200ml</td>
                             <td>May 15, 2024</td>
                             <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar blue">NJ</div>
-                                    <div>
-                                        <div class="user-name">Nurse Jamila</div>
-                                        <div class="user-email">n.jamila@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-nurse">Nurse</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
-                            <td>May 14, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal">AS</div>
-                                    <div>
-                                        <div class="user-name">Ahmed Al-Sayed</div>
-                                        <div class="user-email">a.alsayed@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-advisor">Shariah Advisor</span></td>
-                            <td><span class="badge badge-pending">Pending</span></td>
-                            <td>May 12, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar pink">FK</div>
-                                    <div>
-                                        <div class="user-name">Fatima Khan</div>
-                                        <div class="user-email">f.khan@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-inactive">Inactive</span></td>
-                            <td>May 10, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -245,23 +194,23 @@
             <h2>Recent Activity</h2>
             <div class="activity-list">
                 <div class="activity-item">
-                    <div class="activity-icon blue">
-                        <i class="fas fa-user-plus"></i>
+                    <div class="activity-icon green">
+                        <i class="fas fa-flask"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">New User Registration</div>
-                        <div class="activity-description">Sarah Ahmad registered as a donor</div>
-                        <div class="activity-time">3 hours ago</div>
+                        <div class="activity-title">Sample Processed</div>
+                        <div class="activity-description">Sample #MLK-2451 completed pasteurization</div>
+                        <div class="activity-time">2 hours ago</div>
                     </div>
                 </div>
                 <div class="activity-item">
-                    <div class="activity-icon green">
-                        <i class="fas fa-hand-holding-heart"></i>
+                    <div class="activity-icon orange">
+                        <i class="fas fa-temperature-high"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">Milk Donation Processed</div>
-                        <div class="activity-description">250ml donation from Fatima Khan</div>
-                        <div class="activity-time">4 hours ago</div>
+                        <div class="activity-title">Pasteurization Started</div>
+                        <div class="activity-description">Sample #MLK-2448 now in process</div>
+                        <div class="activity-time">3 hours ago</div>
                     </div>
                 </div>
                 <div class="activity-item">
@@ -269,18 +218,8 @@
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">System Alert</div>
-                        <div class="activity-description">Email service is currently offline</div>
-                        <div class="activity-time">6 hours ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon orange">
-                        <i class="fas fa-sync"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">System Update</div>
-                        <div class="activity-description">Security patch applied successfully</div>
+                        <div class="activity-title">Alert: Storage Limit</div>
+                        <div class="activity-description">Freezer 3 at 92% capacity</div>
                         <div class="activity-time">1 day ago</div>
                     </div>
                 </div>
@@ -288,4 +227,66 @@
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('labTechChart');
+const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.05)');
+
+const gradientTeal = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientTeal.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
+gradientTeal.addColorStop(1, 'rgba(20, 184, 166, 0.05)');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Processed Samples',
+                data: [40, 55, 60, 65, 75, 90, 110],
+                borderColor: '#3B82F6',
+                backgroundColor: gradientBlue,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#3B82F6',
+                pointHoverRadius: 7,
+            },
+            {
+                label: 'Dispatched Milk',
+                data: [20, 35, 45, 50, 60, 80, 95],
+                borderColor: '#14B8A6',
+                backgroundColor: gradientTeal,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#14B8A6',
+                pointHoverRadius: 7,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: '#444', padding: 15, font: { size: 13 } }
+            }
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#555' } },
+            x: { grid: { display: false }, ticks: { color: '#555' } }
+        },
+        animations: {
+            tension: { duration: 2000, easing: 'easeOutElastic', from: 0.6, to: 0.4 }
+        }
+    }
+});
+</script>
+
 @endsection

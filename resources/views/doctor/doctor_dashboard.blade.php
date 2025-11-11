@@ -10,15 +10,18 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, Doctor</h1>
+            <div>
+                <h1>Welcome, {{ auth()->user()->name ?? 'Doctor' }}</h1>
+                <p class="muted">Shariah-compliant Human Milk Bank • Doctor dashboard</p>
+            </div>
             <div class="header-actions">
                 <button class="btn-secondary">
                     <i class="fas fa-file-export"></i>
                     Export
                 </button>
                 <button class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Add New User
+                    <i class="fas fa-prescription"></i>
+                    New Prescription
                 </button>
             </div>
         </div>
@@ -28,75 +31,74 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Users</span>
+                <span class="stat-label">Total Patients</span>
                 <div class="stat-icon blue">
                     <i class="fas fa-users"></i>
                 </div>
             </div>
-            <div class="stat-value">248</div>
+            <div class="stat-value">{{ $totalPatients ?? 124 }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                12% from last month
+                {{ $patientChange ?? '5%' }} from last month
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Active Donors</span>
+                <span class="stat-label">Active Prescriptions</span>
                 <div class="stat-icon green">
-                    <i class="fas fa-check"></i>
+                    <i class="fas fa-file-medical"></i>
                 </div>
             </div>
-            <div class="stat-value">195</div>
+            <div class="stat-value">{{ $activePrescriptions ?? 42 }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                8% from last month
+                {{ $prescriptionChange ?? '7%' }} from last month
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Donations</span>
+                <span class="stat-label">Pending Milk Requests</span>
                 <div class="stat-icon orange">
-                    <i class="fas fa-hand-holding-heart"></i>
+                    <i class="fas fa-baby-bottle"></i>
                 </div>
             </div>
-            <div class="stat-value">2,847</div>
-            <div class="stat-change negative">
-                <i class="fas fa-arrow-down"></i>
-                20% from last month
+            <div class="stat-value">{{ $pendingRequests ?? 8 }}</div>
+            <div class="stat-change warning">
+                <i class="fas fa-exclamation-circle"></i>
+                Action needed
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">System Alerts</span>
-                <div class="stat-icon red">
-                    <i class="fas fa-exclamation-triangle"></i>
+                <span class="stat-label">Appointments Today</span>
+                <div class="stat-icon purple">
+                    <i class="fas fa-calendar-check"></i>
                 </div>
             </div>
-            <div class="stat-value">41</div>
-            <div class="stat-change warning">
-                <i class="fas fa-arrow-up"></i>
-                3 news today
+            <div class="stat-value">{{ $appointmentsToday ?? 5 }}</div>
+            <div class="stat-change neutral">
+                <i class="fas fa-clock"></i>
+                {{ $appointmentChange ?? '2 completed' }}
             </div>
         </div>
     </div>
 
     <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Donations Statistics -->
-        <div class="card donations-card">
+        <!-- Prescription Statistics -->
+        <div class="card chart-card">
             <div class="card-header">
-                <h2>Donations Statistics</h2>
+                <h2>Prescription & Milk Request Trends</h2>
                 <a href="#" class="view-report">
                     View Report
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="chart-placeholder">
-                <i class="fas fa-chart-line"></i>
-                <p>Monthly Donation Volume Chart</p>
+            <div class="chart-body" style="height: 300px; position: relative;">
+                <canvas id="doctorStatsChart"></canvas>
             </div>
         </div>
 
@@ -106,31 +108,31 @@
             <div class="quick-stats-list">
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">New Donors This Week</div>
+                        <div class="quick-stat-value">{{ $newPatients ?? 6 }}</div>
+                        <div class="quick-stat-label">New Patients This Week</div>
                     </div>
-                    <span class="quick-stat-badge positive">+10</span>
+                    <span class="quick-stat-badge positive">+{{ $newPatientsChange ?? 6 }}</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">12</div>
-                        <div class="quick-stat-label">Milk Requests</div>
+                        <div class="quick-stat-value">{{ $milkRequestsApproved ?? 14 }}</div>
+                        <div class="quick-stat-label">Milk Requests Approved</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge positive">+{{ $requestsApprovedChange ?? 14 }}</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">Pending Approvals</div>
+                        <div class="quick-stat-value">{{ $prescriptionsPending ?? 4 }}</div>
+                        <div class="quick-stat-label">Pending Prescriptions</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge warning">Pending</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">Active Campaigns</div>
+                        <div class="quick-stat-value">{{ $followupsThisWeek ?? 9 }}</div>
+                        <div class="quick-stat-label">Follow-ups Scheduled</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge positive">+{{ $followupChange ?? 9 }}</span>
                 </div>
             </div>
         </div>
@@ -138,12 +140,12 @@
 
     <!-- Bottom Grid -->
     <div class="bottom-grid">
-        <!-- Recent User Registrations -->
+        <!-- Recent Prescriptions -->
         <div class="card users-card">
             <div class="card-header">
-                <h2>Recent User Registrations</h2>
+                <h2>Recent Prescriptions</h2>
                 <a href="#" class="view-all">
-                    View All Users
+                    View All
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -151,10 +153,10 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>USER</th>
-                            <th>ROLE</th>
+                            <th>PATIENT</th>
+                            <th>REQUEST TYPE</th>
                             <th>STATUS</th>
-                            <th>REGISTRATION DATE</th>
+                            <th>DATE</th>
                             <th>ACTIONS</th>
                         </tr>
                     </thead>
@@ -162,77 +164,37 @@
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar teal">SA</div>
+                                    <div class="user-avatar teal">NA</div>
                                     <div>
-                                        <div class="user-name">Sarah Ahmad</div>
-                                        <div class="user-email">sarah.ahmad2@email.com</div>
+                                        <div class="user-name">Nur Aisyah</div>
+                                        <div class="user-email">nur.aisyah@email.com</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
+                            <td><span class="badge badge-request">Milk Request</span></td>
+                            <td><span class="badge badge-active">Approved</span></td>
                             <td>May 15, 2024</td>
                             <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar blue">NJ</div>
+                                    <div class="user-avatar blue">AM</div>
                                     <div>
-                                        <div class="user-name">Nurse Jamila</div>
-                                        <div class="user-email">n.jamila@email.com</div>
+                                        <div class="user-name">Ahmad Malik</div>
+                                        <div class="user-email">a.malik@email.com</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-nurse">Nurse</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
+                            <td><span class="badge badge-prescription">Prescription</span></td>
+                            <td><span class="badge badge-pending">Pending</span></td>
                             <td>May 14, 2024</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal">AS</div>
-                                    <div>
-                                        <div class="user-name">Ahmed Al-Sayed</div>
-                                        <div class="user-email">a.alsayed@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-advisor">Shariah Advisor</span></td>
-                            <td><span class="badge badge-pending">Pending</span></td>
-                            <td>May 12, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar pink">FK</div>
-                                    <div>
-                                        <div class="user-name">Fatima Khan</div>
-                                        <div class="user-email">f.khan@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-inactive">Inactive</span></td>
-                            <td>May 10, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fa-solid fa-eye"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -245,47 +207,114 @@
             <h2>Recent Activity</h2>
             <div class="activity-list">
                 <div class="activity-item">
-                    <div class="activity-icon blue">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">New User Registration</div>
-                        <div class="activity-description">Sarah Ahmad registered as a donor</div>
-                        <div class="activity-time">3 hours ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
                     <div class="activity-icon green">
-                        <i class="fas fa-hand-holding-heart"></i>
+                        <i class="fas fa-prescription-bottle-medical"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">Milk Donation Processed</div>
-                        <div class="activity-description">250ml donation from Fatima Khan</div>
-                        <div class="activity-time">4 hours ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon red">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">System Alert</div>
-                        <div class="activity-description">Email service is currently offline</div>
-                        <div class="activity-time">6 hours ago</div>
+                        <div class="activity-title">New Prescription</div>
+                        <div class="activity-description">Issued for Baby Adam (250ml)</div>
+                        <div class="activity-time">2 hours ago</div>
                     </div>
                 </div>
                 <div class="activity-item">
                     <div class="activity-icon orange">
-                        <i class="fas fa-sync"></i>
+                        <i class="fas fa-baby"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">System Update</div>
-                        <div class="activity-description">Security patch applied successfully</div>
-                        <div class="activity-time">1 day ago</div>
+                        <div class="activity-title">Milk Request Submitted</div>
+                        <div class="activity-description">Patient: Fatimah Ali</div>
+                        <div class="activity-time">4 hours ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon blue">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Appointment Completed</div>
+                        <div class="activity-description">Consultation with Dr. Rahman</div>
+                        <div class="activity-time">Yesterday</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('doctorStatsChart');
+
+// gradient fill for purple line
+const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientBlue.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+gradientBlue.addColorStop(1, 'rgba(99, 102, 241, 0.05)');
+
+// gradient fill for green line
+const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientGreen.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+gradientGreen.addColorStop(1, 'rgba(16, 185, 129, 0.05)');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Prescriptions',
+                data: [30, 45, 55, 48, 60, 72, 90],
+                borderColor: '#6366F1',
+                backgroundColor: gradientBlue,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#6366F1',
+                pointHoverRadius: 7,
+            },
+            {
+                label: 'Milk Requests',
+                data: [20, 35, 40, 38, 50, 65, 75],
+                borderColor: '#10B981',
+                backgroundColor: gradientGreen,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#10B981',
+                pointHoverRadius: 7,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: { color: '#444', boxWidth: 12, padding: 15, font: { size: 13 } }
+            },
+            tooltip: {
+                backgroundColor: '#fff',
+                titleColor: '#111',
+                bodyColor: '#333',
+                borderColor: '#E2E8F0',
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                    label: context => `${context.dataset.label}: ${context.formattedValue}`
+                }
+            }
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#555', stepSize: 20 } },
+            x: { grid: { display: false }, ticks: { color: '#555' } }
+        },
+        animations: {
+            tension: { duration: 2000, easing: 'easeOutElastic', from: 0.5, to: 0.4 }
+        }
+    }
+});
+</script>
+
 @endsection

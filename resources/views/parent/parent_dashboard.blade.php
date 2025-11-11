@@ -10,16 +10,16 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, Parent</h1>
+            <h1>Welcome, {{ auth()->user()->name ?? 'Parent' }}</h1>
             <div class="header-actions">
                 <button class="btn-secondary">
                     <i class="fas fa-file-export"></i>
-                    Export
+                    Export Records
                 </button>
-                <button class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Add New User
-                </button>
+                <a href="{{ route('parent.my-infant-request') }}" class="btn-primary">
+                    <i class="fas fa-baby"></i>
+                    New Milk Request
+                </a>
             </div>
         </div>
     </div>
@@ -28,122 +28,121 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Users</span>
+                <span class="stat-label">Milk Requests</span>
                 <div class="stat-icon blue">
-                    <i class="fas fa-users"></i>
+                    <i class="fas fa-hand-holding-medical"></i>
                 </div>
             </div>
-            <div class="stat-value">248</div>
+            <div class="stat-value">{{ $totalRequests ?? 8 }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                12% from last month
+                {{ $requestsChange ?? '15%' }} from last month
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Active Donors</span>
+                <span class="stat-label">Milk Received</span>
                 <div class="stat-icon green">
-                    <i class="fas fa-check"></i>
+                    <i class="fas fa-bottle-droplet"></i>
                 </div>
             </div>
-            <div class="stat-value">195</div>
+            <div class="stat-value">{{ number_format($milkReceived ?? 3250) }}ml</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                8% from last month
+                {{ $receivedChange ?? '22%' }} from last month
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Donations</span>
+                <span class="stat-label">Pending Requests</span>
                 <div class="stat-icon orange">
-                    <i class="fas fa-hand-holding-heart"></i>
+                    <i class="fas fa-clock"></i>
                 </div>
             </div>
-            <div class="stat-value">2,847</div>
-            <div class="stat-change negative">
-                <i class="fas fa-arrow-down"></i>
-                20% from last month
+            <div class="stat-value">{{ $pendingRequests ?? 2 }}</div>
+            <div class="stat-change warning">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ $pendingChange ?? 'Awaiting approval' }}
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">System Alerts</span>
+                <span class="stat-label">Infants Registered</span>
                 <div class="stat-icon red">
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <i class="fas fa-baby-carriage"></i>
                 </div>
             </div>
-            <div class="stat-value">41</div>
-            <div class="stat-change warning">
-                <i class="fas fa-arrow-up"></i>
-                3 news today
+            <div class="stat-value">{{ $infantsRegistered ?? 1 }}</div>
+            <div class="stat-change positive">
+                <i class="fas fa-heart"></i>
+                Your little one
             </div>
         </div>
     </div>
 
     <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Donations Statistics -->
+        <!-- Milk Request History -->
         <div class="card donations-card">
             <div class="card-header">
-                <h2>Donations Statistics</h2>
-                <a href="#" class="view-report">
-                    View Report
+                <h2>Milk Request History</h2>
+                <a href="{{ route('parent.my-infant-request') }}" class="view-report">
+                    View All Requests
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="chart-placeholder">
-                <i class="fas fa-chart-line"></i>
-                <p>Monthly Donation Volume Chart</p>
+            <div class="chart-body" style="height: 400px; position: relative;">
+                <canvas id="milkVolumeChart"></canvas>
             </div>
         </div>
 
-        <!-- Quick Stats -->
+        <!-- Quick Actions -->
         <div class="card quick-stats-card">
-            <h2>Quick Stats</h2>
+            <h2>Quick Actions</h2>
             <div class="quick-stats-list">
-                <div class="quick-stat-item">
+                <a href="{{ route('parent.my-infant-request') }}" class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">New Donors This Week</div>
+                        <div class="quick-stat-value"><i class="fas fa-baby"></i></div>
+                        <div class="quick-stat-label">Request Milk</div>
                     </div>
-                    <span class="quick-stat-badge positive">+10</span>
-                </div>
-                <div class="quick-stat-item">
+                    <span class="quick-stat-badge primary">New Request</span>
+                </a>
+                <a href="{{ route('parent.profile') }}" class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">12</div>
-                        <div class="quick-stat-label">Milk Requests</div>
+                        <div class="quick-stat-value"><i class="fas fa-user"></i></div>
+                        <div class="quick-stat-label">View Profile</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
-                </div>
-                <div class="quick-stat-item">
+                    <span class="quick-stat-badge primary">View</span>
+                </a>
+                <a href="{{ route('parent.edit-profile') }}" class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">Pending Approvals</div>
+                        <div class="quick-stat-value"><i class="fas fa-user-edit"></i></div>
+                        <div class="quick-stat-label">Update Profile</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
-                </div>
-                <div class="quick-stat-item">
+                    <span class="quick-stat-badge primary">Edit</span>
+                </a>
+                <a href="{{ route('parent.my-infant-request') }}" class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
-                        <div class="quick-stat-label">Active Campaigns</div>
+                        <div class="quick-stat-value"><i class="fas fa-history"></i></div>
+                        <div class="quick-stat-label">Request History</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
-                </div>
+                    <span class="quick-stat-badge primary">View All</span>
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Bottom Grid -->
     <div class="bottom-grid">
-        <!-- Recent User Registrations -->
+        <!-- Recent Milk Requests -->
         <div class="card users-card">
             <div class="card-header">
-                <h2>Recent User Registrations</h2>
-                <a href="#" class="view-all">
-                    View All Users
+                <h2>Recent Milk Requests</h2>
+                <a href="{{ route('parent.my-infant-request') }}" class="view-all">
+                    View All Requests
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
@@ -151,10 +150,10 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>USER</th>
-                            <th>ROLE</th>
+                            <th>REQUEST DATE</th>
+                            <th>QUANTITY</th>
                             <th>STATUS</th>
-                            <th>REGISTRATION DATE</th>
+                            <th>INFANT DETAILS</th>
                             <th>ACTIONS</th>
                         </tr>
                     </thead>
@@ -162,77 +161,73 @@
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar teal">SA</div>
+                                    <div class="user-avatar teal"><i class="fas fa-calendar"></i></div>
                                     <div>
-                                        <div class="user-name">Sarah Ahmad</div>
-                                        <div class="user-email">sarah.ahmad2@email.com</div>
+                                        <div class="user-name">May 18, 2024</div>
+                                        <div class="user-email">Urgent Request</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
-                            <td>May 15, 2024</td>
+                            <td><span class="badge badge-donor">500ml</span></td>
+                            <td><span class="badge badge-active">Approved</span></td>
+                            <td>Baby Girl (3 months)</td>
                             <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn"><i class="fas fa-edit"></i></button>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar blue">NJ</div>
+                                    <div class="user-avatar blue"><i class="fas fa-calendar"></i></div>
                                     <div>
-                                        <div class="user-name">Nurse Jamila</div>
-                                        <div class="user-email">n.jamila@email.com</div>
+                                        <div class="user-name">May 15, 2024</div>
+                                        <div class="user-email">Regular Request</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-nurse">Nurse</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
-                            <td>May 14, 2024</td>
+                            <td><span class="badge badge-nurse">750ml</span></td>
+                            <td><span class="badge badge-pending">Processing</span></td>
+                            <td>Baby Boy (2 months)</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn"><i class="fas fa-edit"></i></button>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar dark-teal">AS</div>
+                                    <div class="user-avatar dark-teal"><i class="fas fa-calendar"></i></div>
                                     <div>
-                                        <div class="user-name">Ahmed Al-Sayed</div>
-                                        <div class="user-email">a.alsayed@email.com</div>
+                                        <div class="user-name">May 10, 2024</div>
+                                        <div class="user-email">Monthly Supply</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-advisor">Shariah Advisor</span></td>
-                            <td><span class="badge badge-pending">Pending</span></td>
-                            <td>May 12, 2024</td>
+                            <td><span class="badge badge-advisor">1000ml</span></td>
+                            <td><span class="badge badge-active">Completed</span></td>
+                            <td>Baby Girl (4 months)</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn"><i class="fas fa-file-download"></i></button>
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar pink">FK</div>
+                                    <div class="user-avatar pink"><i class="fas fa-calendar"></i></div>
                                     <div>
-                                        <div class="user-name">Fatima Khan</div>
-                                        <div class="user-email">f.khan@email.com</div>
+                                        <div class="user-name">May 5, 2024</div>
+                                        <div class="user-email">Initial Request</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-inactive">Inactive</span></td>
-                            <td>May 10, 2024</td>
+                            <td><span class="badge badge-donor">300ml</span></td>
+                            <td><span class="badge badge-inactive">Archived</span></td>
+                            <td>Baby Boy (1 month)</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn"><i class="fas fa-file-download"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -246,46 +241,138 @@
             <div class="activity-list">
                 <div class="activity-item">
                     <div class="activity-icon blue">
-                        <i class="fas fa-user-plus"></i>
+                        <i class="fas fa-hand-holding-medical"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">New User Registration</div>
-                        <div class="activity-description">Sarah Ahmad registered as a donor</div>
-                        <div class="activity-time">3 hours ago</div>
+                        <div class="activity-title">Milk Request Submitted</div>
+                        <div class="activity-description">500ml request for your infant</div>
+                        <div class="activity-time">2 days ago</div>
                     </div>
                 </div>
                 <div class="activity-item">
                     <div class="activity-icon green">
-                        <i class="fas fa-hand-holding-heart"></i>
+                        <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">Milk Donation Processed</div>
-                        <div class="activity-description">250ml donation from Fatima Khan</div>
-                        <div class="activity-time">4 hours ago</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon red">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">System Alert</div>
-                        <div class="activity-description">Email service is currently offline</div>
-                        <div class="activity-time">6 hours ago</div>
+                        <div class="activity-title">Request Approved</div>
+                        <div class="activity-description">Your milk request has been approved</div>
+                        <div class="activity-time">3 days ago</div>
                     </div>
                 </div>
                 <div class="activity-item">
                     <div class="activity-icon orange">
-                        <i class="fas fa-sync"></i>
+                        <i class="fas fa-truck"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">System Update</div>
-                        <div class="activity-description">Security patch applied successfully</div>
-                        <div class="activity-time">1 day ago</div>
+                        <div class="activity-title">Milk Delivery</div>
+                        <div class="activity-description">750ml milk ready for pickup</div>
+                        <div class="activity-time">1 week ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon red">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Profile Updated</div>
+                        <div class="activity-description">You updated your contact information</div>
+                        <div class="activity-time">2 weeks ago</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+</script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('milkVolumeChart');
+
+// gradient fill for blue line
+const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
+gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
+
+// gradient fill for green line
+const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientGreen.addColorStop(0, 'rgba(72, 187, 120, 0.4)');
+gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Infant Milk Request Volume (ml)',
+                data: [900, 800, 500, 500, 300, 200, 300],
+                borderColor: '#4B9CD3',
+                backgroundColor: gradientBlue,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#4B9CD3',
+                pointHoverRadius: 7,
+            },
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#444',
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    padding: 15,
+                    font: { size: 13 }
+                }
+            },
+            tooltip: {
+                usePointStyle: true,
+                backgroundColor: '#fff',
+                titleColor: '#111',
+                bodyColor: '#333',
+                borderColor: '#E2E8F0',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: true,
+                boxPadding: 5,
+                callbacks: {
+                    label: function(context) {
+                        return `${context.dataset.label}: ${context.formattedValue}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#555', stepSize: 500 }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#555' }
+            }
+        },
+        animations: {
+            tension: {
+                duration: 2000,
+                easing: 'easeOutElastic',
+                from: 0.5,
+                to: 0.4,
+                loop: false
+            }
+        }
+    }
+});
+</script>
 @endsection

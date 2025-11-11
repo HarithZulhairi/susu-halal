@@ -16,7 +16,7 @@
                     <i class="fas fa-file-export"></i>
                     Export
                 </button>
-                <button class="btn-primary">
+                <button class="btn-primary" onclick="openRoleModal()">
                     <i class="fas fa-plus"></i>
                     Add New User
                 </button>
@@ -94,10 +94,9 @@
                     <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
-            <div class="chart-placeholder">
-                <i class="fas fa-chart-line"></i>
-                <p>Monthly Donation Volume Chart</p>
-            </div>
+        <div class="chart-body" style="height: 400px; position: relative;">
+            <canvas id="milkVolumeChart"></canvas>
+        </div>
         </div>
 
         <!-- Quick Stats -->
@@ -288,4 +287,187 @@
         </div>
     </div>
 </div>
+    <!-- Role Selection Modal -->
+    <div id="roleModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Select User Role</h2>
+            <p class="modal-subtitle">Choose the type of user you want to create</p>
+            
+            <div class="role-cards">
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'parent']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-baby"></i>
+                        </div>
+                        <h3>Parent</h3>
+                        <p>Milk donor or recipient</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'shariah']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-book-quran"></i>
+                        </div>
+                        <h3>Shariah Committee</h3>
+                        <p>Islamic compliance expert</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'nurse']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-user-nurse"></i>
+                        </div>
+                        <h3>Nurse</h3>
+                        <p>Healthcare professional</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'clinician']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h3>Clinician</h3>
+                        <p>Medical practitioner</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'lab-tech']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h3>Lab Technician</h3>
+                        <p>Laboratory specialist</p>
+                    </div>
+                </a>
+            </div>
+
+            <button class="btn-cancel-modal" onclick="closeRoleModal()">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+
+        <script>
+        function openRoleModal() {
+            document.getElementById('roleModal').style.display = 'flex';
+        }
+
+        function closeRoleModal() {
+            document.getElementById('roleModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('roleModal');
+            if (event.target === modal) {
+                closeRoleModal();
+            }
+        }
+    </script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('milkVolumeChart');
+
+// gradient fill for blue line
+const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
+gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
+
+// gradient fill for green line
+const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientGreen.addColorStop(0, 'rgba(72, 187, 120, 0.4)');
+gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Registered Donor',
+                data: [12, 15, 17, 16, 19, 21, 24],
+                borderColor: '#4B9CD3',
+                backgroundColor: gradientBlue,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#4B9CD3',
+                pointHoverRadius: 7,
+            },
+            {
+                label: 'Active Donor',
+                data: [80, 120, 130, 140, 160, 180, 200],
+                borderColor: '#48BB78',
+                backgroundColor: gradientGreen,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#48BB78',
+                pointHoverRadius: 7,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#444',
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    padding: 15,
+                    font: { size: 13 }
+                }
+            },
+            tooltip: {
+                usePointStyle: true,
+                backgroundColor: '#fff',
+                titleColor: '#111',
+                bodyColor: '#333',
+                borderColor: '#E2E8F0',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: true,
+                boxPadding: 5,
+                callbacks: {
+                    label: function(context) {
+                        return `${context.dataset.label}: ${context.formattedValue} ml`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#555', stepSize: 500 }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#555' }
+            }
+        },
+        animations: {
+            tension: {
+                duration: 2000,
+                easing: 'easeOutElastic',
+                from: 0.5,
+                to: 0.4,
+                loop: false
+            }
+        }
+    }
+});
+</script>
 @endsection

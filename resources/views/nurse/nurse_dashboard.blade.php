@@ -3,16 +3,19 @@
 @section('title', 'Nurse Dashboard')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/nurse_dashboard.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hmmc_dashboard.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="main-content">
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, Nurse</h1>
+            <div>
+                <h1>Welcome, {{ auth()->user()->name ?? 'Nurse' }}</h1>
+                <p class="muted">Shariah-compliant Human Milk Bank • Nurse dashboard</p>
+            </div>
             <div class="header-actions">
-                <button class="btn-secondary">
+                <button class="btn-secondary" id="exportBtn">
                     <i class="fas fa-file-export"></i>
                     Export
                 </button>
@@ -28,77 +31,78 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Users</span>
-                <div class="stat-icon blue">
-                    <i class="fas fa-users"></i>
-                </div>
-            </div>
-            <div class="stat-value">248</div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                12% from last month
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
                 <span class="stat-label">Active Donors</span>
-                <div class="stat-icon green">
-                    <i class="fas fa-check"></i>
+                <div class="stat-icon blue">
+                    <i class="fas fa-user-check"></i>
                 </div>
             </div>
-            <div class="stat-value">195</div>
+            <div class="stat-value">{{ $activeDonors ?? 195 }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                8% from last month
+                {{ $donorsChange ?? '8%' }} from last month
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Total Donations</span>
-                <div class="stat-icon orange">
-                    <i class="fas fa-hand-holding-heart"></i>
+                <span class="stat-label">Collected Milk (ml)</span>
+                <div class="stat-icon green">
+                    <i class="fas fa-bottle-droplet"></i>
                 </div>
             </div>
-            <div class="stat-value">2,847</div>
-            <div class="stat-change negative">
-                <i class="fas fa-arrow-down"></i>
-                20% from last month
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">System Alerts</span>
-                <div class="stat-icon red">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-            </div>
-            <div class="stat-value">41</div>
-            <div class="stat-change warning">
+            <div class="stat-value">{{ number_format($milkCollected ?? 2847) }}</div>
+            <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                3 news today
+                {{ $milkChange ?? '6%' }} from last month
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-label">Pending Screenings</span>
+                <div class="stat-icon orange">
+                    <i class="fas fa-vials"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ $pendingScreenings ?? 12 }}</div>
+            <div class="stat-change warning">
+                <i class="fas fa-exclamation-circle"></i>
+                Please review
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-label">Storage Alerts</span>
+                <div class="stat-icon red">
+                    <i class="fas fa-thermometer-half"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ $storageAlerts ?? 4 }}</div>
+            <div class="stat-change negative">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ $alertsChange ?? '2 new' }}
             </div>
         </div>
     </div>
 
     <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Donations Statistics -->
-        <div class="card donations-card">
-            <div class="card-header">
-                <h2>Donations Statistics</h2>
-                <a href="#" class="view-report">
-                    View Report
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="chart-placeholder">
-                <i class="fas fa-chart-line"></i>
-                <p>Monthly Donation Volume Chart</p>
-            </div>
+    <!-- Milk Collection Statistics -->
+    <div class="card chart-card">
+        <div class="card-header">
+            <h2>Milk Collection Statistics</h2>
+            <a href="#" class="view-report">
+                View Report
+                <i class="fas fa-arrow-right"></i>
+            </a>
         </div>
+
+        <div class="chart-body" style="height: 400px; position: relative;">
+            <canvas id="milkVolumeChart"></canvas>
+        </div>
+    </div>
+
 
         <!-- Quick Stats -->
         <div class="card quick-stats-card">
@@ -106,31 +110,31 @@
             <div class="quick-stats-list">
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
+                        <div class="quick-stat-value">{{ $newDonorsThisWeek ?? 10 }}</div>
                         <div class="quick-stat-label">New Donors This Week</div>
                     </div>
-                    <span class="quick-stat-badge positive">+10</span>
+                    <span class="quick-stat-badge positive">+{{ $newDonorsChange ?? 10 }}</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">12</div>
+                        <div class="quick-stat-value">{{ $milkRequests ?? 12 }}</div>
                         <div class="quick-stat-label">Milk Requests</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge positive">+{{ $requestsChange ?? 12 }}</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
+                        <div class="quick-stat-value">{{ $pendingApprovals ?? 10 }}</div>
                         <div class="quick-stat-label">Pending Approvals</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge positive">+{{ $approvalsChange ?? 12 }}</span>
                 </div>
                 <div class="quick-stat-item">
                     <div class="quick-stat-info">
-                        <div class="quick-stat-value">10</div>
+                        <div class="quick-stat-value">{{ $activeCampaigns ?? 10 }}</div>
                         <div class="quick-stat-label">Active Campaigns</div>
                     </div>
-                    <span class="quick-stat-badge positive">+12</span>
+                    <span class="quick-stat-badge positive">+{{ $campaignsChange ?? 12 }}</span>
                 </div>
             </div>
         </div>
@@ -174,8 +178,7 @@
                             <td>May 15, 2024</td>
                             <td class="actions">
                                 <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                         <tr>
@@ -192,9 +195,8 @@
                             <td><span class="badge badge-active">Active</span></td>
                             <td>May 14, 2024</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                         <tr>
@@ -211,9 +213,8 @@
                             <td><span class="badge badge-pending">Pending</span></td>
                             <td>May 12, 2024</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                         <tr>
@@ -230,9 +231,8 @@
                             <td><span class="badge badge-inactive">Inactive</span></td>
                             <td>May 10, 2024</td>
                             <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
+                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -288,4 +288,109 @@
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('milkVolumeChart');
+
+// gradient fill for blue line
+const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
+gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
+
+// gradient fill for green line
+const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+gradientGreen.addColorStop(0, 'rgba(72, 187, 120, 0.4)');
+gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+            {
+                label: 'Collected Milk (ml)',
+                data: [1200, 1500, 1700, 1600, 1900, 2100, 2400],
+                borderColor: '#4B9CD3',
+                backgroundColor: gradientBlue,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#4B9CD3',
+                pointHoverRadius: 7,
+            },
+            {
+                label: 'Distributed Milk (ml)',
+                data: [800, 1200, 1300, 1400, 1600, 1800, 2000],
+                borderColor: '#48BB78',
+                backgroundColor: gradientGreen,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#48BB78',
+                pointHoverRadius: 7,
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    color: '#444',
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    padding: 15,
+                    font: { size: 13 }
+                }
+            },
+            tooltip: {
+                usePointStyle: true,
+                backgroundColor: '#fff',
+                titleColor: '#111',
+                bodyColor: '#333',
+                borderColor: '#E2E8F0',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: true,
+                boxPadding: 5,
+                callbacks: {
+                    label: function(context) {
+                        return `${context.dataset.label}: ${context.formattedValue} ml`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { color: '#555', stepSize: 500 }
+            },
+            x: {
+                grid: { display: false },
+                ticks: { color: '#555' }
+            }
+        },
+        animations: {
+            tension: {
+                duration: 2000,
+                easing: 'easeOutElastic',
+                from: 0.5,
+                to: 0.4,
+                loop: false
+            }
+        }
+    }
+});
+</script>
+
+
 @endsection
