@@ -1,0 +1,50 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            if (!Schema::hasColumn('users', 'username')) {
+                $table->string('username')->unique()->after('name');
+            }
+
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->enum('role', [
+                    'hmmc_admin',
+                    'nurse',
+                    'lab_technician',
+                    'doctor',
+                    'shariah_advisor',
+                    'parent',
+                    'donor'
+                ])->after('username');
+            }
+
+            if (Schema::hasColumn('users', 'email')) {
+                $table->string('email')->nullable()->change();
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            if (Schema::hasColumn('users', 'username')) {
+                $table->dropColumn('username');
+            }
+
+            if (Schema::hasColumn('users', 'role')) {
+                $table->dropColumn('role');
+            }
+
+            if (Schema::hasColumn('users', 'email')) {
+                $table->string('email')->nullable(false)->change();
+            }
+        });
+    }
+};
