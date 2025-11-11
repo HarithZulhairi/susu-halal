@@ -156,13 +156,6 @@
 
                 
                     <li>
-                        <a href="{{ url('/dashboard') }}" 
-                        style="text-decoration: none; color: var(--primary); font-weight: 600; padding: 8px 16px; border-radius: 4px; transition: var(--transition);">
-                        Dashboard
-                        </a>
-                    </li>
-                
-                    <li>
                         <a href="{{ route('register') }}" 
                         style="text-decoration: none; color: var(--secondary); font-weight: 600; padding: 8px 16px; border-radius: 4px; transition: var(--transition);">
                         Become A Donor
