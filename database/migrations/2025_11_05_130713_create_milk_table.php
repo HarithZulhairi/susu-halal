@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id('milk_ID'); // Primary Key
 
             // Foreign Keys
-            $table->unsignedBigInteger('donor_ID');
-            $table->unsignedBigInteger('parent_ID')->nullable();
+            $table->unsignedBigInteger('dn_ID');
+            $table->unsignedBigInteger('pr_ID')->nullable();
 
             // Milk attributes
             $table->double('milk_volume');
@@ -35,8 +35,8 @@ return new class extends Migration
             $table->timestamps();
 
             // Define Foreign Key Relationships
-            $table->foreign('donor_ID')->references('dn_ID')->on('donor')->onDelete('cascade');
-            $table->foreign('parent_ID')->references('pr_ID')->on('parent')->onDelete('set null');
+            $table->foreign('dn_ID')->references('dn_ID')->on('donor')->onDelete('cascade');
+            $table->foreign('pr_ID')->references('pr_ID')->on('parent')->onDelete('set null');
         });
     }
 
