@@ -57,6 +57,15 @@
       <li><a href="#"><i class="fa-solid fa-chart-simple"></i> Activity Monitor</a></li>
     </ul>
   </div>
+
+    <div class="logout-section">
+    <form method="POST" action="{{ route('logout') }}">
+      @csrf
+      <button type="submit" class="logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </form>
+  </div>
 </aside>
 
 

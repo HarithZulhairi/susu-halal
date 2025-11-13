@@ -72,3 +72,23 @@
     /* Adds 8 pixels of space to the right of every icon */
     margin-right: 8px; 
 }
+
+.logout-section {
+  margin-top: auto; /* pushes to bottom */
+  padding-top: 15px;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+  padding: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
