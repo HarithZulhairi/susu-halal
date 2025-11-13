@@ -10,7 +10,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, {{ auth()->user()->name ?? 'Shariah Advisor' }}</h1>
+            <h1>Welcome, {{ session('auth_user')->sc_Name ?? 'Shariah Advisor' }}</h1>
         </div>
     </div>
 

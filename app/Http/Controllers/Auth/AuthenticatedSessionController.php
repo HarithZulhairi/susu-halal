@@ -26,16 +26,16 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+        $role = session('auth_role');
 
-        $user = Auth::user();
-
-        // Redirect based on role
-        switch ($user->role) {
+        // Redirect user based on role
+        switch ($role) {
             case 'hmmc_admin':
                 return redirect()->route('hmmc.dashboard');
             case 'nurse':
                 return redirect()->route('nurse.dashboard');
+            case 'doctor':
+                return redirect()->route('doctor.dashboard');
             case 'lab_technician':
                 return redirect()->route('labTech.dashboard');
             case 'shariah_advisor':
@@ -45,10 +45,10 @@ class AuthenticatedSessionController extends Controller
             case 'donor':
                 return redirect()->route('donor.dashboard');
             default:
-                Auth::logout();
                 abort(403, 'Unauthorized role.');
         }
     }
+
 
     /**
      * Destroy an authenticated session.

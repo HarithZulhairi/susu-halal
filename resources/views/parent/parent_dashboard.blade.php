@@ -10,7 +10,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, {{ auth()->user()->name ?? 'Parent' }}</h1>
+            <h1>Welcome, {{ session('auth_user')->pr_Name ?? 'Parent' }}</h1>
             <div class="header-actions">
                 <button class="btn-secondary">
                     <i class="fas fa-file-export"></i>

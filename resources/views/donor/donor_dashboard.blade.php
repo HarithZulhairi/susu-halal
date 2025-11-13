@@ -10,7 +10,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, Donor</h1>
+            <h1>Welcome, {{ session('auth_user')->dn_Name ?? 'Donor' }}</h1>
         </div>
     </div>
 

@@ -63,4 +63,35 @@ class User extends Authenticatable
     {
         return $this->email;
     }
+
+    public function donor()
+    {
+        return $this->hasOne(Donor::class, 'user_id');
+    }
+
+    public function parentProfile()
+    {
+        return $this->hasOne(ParentProfile::class, 'user_id'); // use different model name if needed
+    }
+
+    public function nurse()
+    {
+        return $this->hasOne(Nurse::class, 'user_id');
+    }
+
+    public function clinician()
+    {
+        return $this->hasOne(Clinician::class, 'user_id');
+    }
+
+    public function hmmcAdmin()
+    {
+        return $this->hasOne(HmmcAdmin::class, 'user_id');
+    }
+
+    public function shariahCommittee()
+    {
+        return $this->hasOne(ShariahCommittee::class, 'user_id');
+    }
+
 }

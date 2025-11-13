@@ -23,13 +23,20 @@ class Donor extends Model
         'dn_Medication',
         'dn_RecentIllness',
         'dn_TobaccoAlcohol',
-        'dn_DietaryAlerts',
+        'dn_DietaryAlergy',
+        'dn_Password',
+        'dn_Username',
     ];
 
     // Accessor for formatted donor ID
     public function getFormattedIdAttribute()
     {
         return '#D' . $this->dn_ID;
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // Example Usage

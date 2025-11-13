@@ -4,10 +4,19 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
+
+// Import your role models
+use App\Models\User;
+use App\Models\Nurse;
+use App\Models\Doctor;
+use App\Models\LabTech;
+use App\Models\ShariahAdvisor;
+use App\Models\ParentModel;
+use App\Models\Donor;
 
 class LoginRequest extends FormRequest
 {
@@ -21,7 +30,7 @@ class LoginRequest extends FormRequest
         return [
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'string', 'in:hmmc_admin,nurse,doctor,lab_technician,shariah_advisor,parent,donor'],
+            'role' => ['required', 'string'],
         ];
     }
 
@@ -29,36 +38,71 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $credentials = $this->only('username', 'password');
         $role = $this->input('role');
+        $username = $this->input('username');
+        $password = $this->input('password');
 
-        $user = \App\Models\User::where('username', $credentials['username'])
-                    ->where('role', $role)
-                    ->first();
+        $user = null;
 
-        if (!$user || !Auth::attempt($credentials, $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        switch ($role) {
+            case 'hmmc_admin':
+                $user = User::where('username', $username)->where('role', 'hmmc_admin')->first();
+                $passwordField = 'password';
+                break;
 
-            throw ValidationException::withMessages([
-                'username' => trans('auth.failed'),
-            ]);
+            case 'nurse':
+                $user = Nurse::where('ns_Username', $username)->first();
+                $passwordField = 'ns_Password';
+                break;
+
+            case 'doctor':
+                $user = Doctor::where('dr_Username', $username)->first();
+                $passwordField = 'dr_Password';
+                break;
+
+            case 'lab_technician':
+                $user = LabTech::where('lt_Username', $username)->first();
+                $passwordField = 'lt_Password';
+                break;
+
+            case 'shariah_advisor':
+                $user = ShariahAdvisor::where('sa_Username', $username)->first();
+                $passwordField = 'sa_Password';
+                break;
+
+            case 'parent':
+                $user = ParentModel::where('pr_Email', $username)->first();
+                $passwordField = 'pr_Password';
+                break;
+
+            case 'donor':
+                $user = Donor::where('dn_Username', $username)->first();
+                $passwordField = 'dn_Password';
+                break;
+
+            default:
+                throw ValidationException::withMessages([
+                    'role' => 'Invalid role selected.',
+                ]);
         }
 
-        if ($user->role !== $role) {
-            Auth::logout();
+        if (! $user || ! Hash::check($password, $user->{$passwordField})) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'role' => 'Selected role does not match user account.',
+                'username' => __('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        // Store user in session manually
+        session(['auth_user' => $user, 'auth_role' => $role]);
     }
 
     public function ensureIsNotRateLimited(): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -76,8 +120,6 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::transliterate(
-            Str::lower($this->string('username')) . '|' . $this->ip() . '|' . $this->string('role')
-        );
+        return Str::lower($this->input('username')).'|'.$this->ip();
     }
 }

@@ -11,7 +11,7 @@
     <div class="page-header">
         <div class="header-content">
             <div>
-                <h1>Welcome, {{ auth()->user()->name ?? 'Doctor' }}</h1>
+                <h1>Welcome, {{ session('auth_user')->da_Name ?? 'Doctor' }}</h1>
                 <p class="muted">Shariah-compliant Human Milk Bank • Doctor dashboard</p>
             </div>
         </div>

@@ -11,7 +11,7 @@
     <div class="page-header">
         <div class="header-content">
             <div>
-                <h1>Welcome, {{ auth()->user()->name ?? 'Lab Technician' }}</h1>
+                <h1>Welcome, {{ session('auth_user')->lt_Name ?? 'Lab Technician' }}</h1>
                 <p class="muted">Shariah-compliant Human Milk Bank • Laboratory Dashboard</p>
             </div>
 
