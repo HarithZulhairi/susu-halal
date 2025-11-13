@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 
 // Import your role models
 use App\Models\User;
+use App\Models\HmmcAdmin;
 use App\Models\Nurse;
 use App\Models\Doctor;
 use App\Models\LabTech;
@@ -46,8 +47,8 @@ class LoginRequest extends FormRequest
 
         switch ($role) {
             case 'hmmc_admin':
-                $user = User::where('username', $username)->where('role', 'hmmc_admin')->first();
-                $passwordField = 'password';
+                $user = HmmcAdmin::where('ad_Username', $username)->first();
+                $passwordField = 'ad_Password';
                 break;
 
             case 'nurse':
@@ -56,8 +57,8 @@ class LoginRequest extends FormRequest
                 break;
 
             case 'doctor':
-                $user = Doctor::where('dr_Username', $username)->first();
-                $passwordField = 'dr_Password';
+                $user = Clinician::where('cn_Username', $username)->first();
+                $passwordField = 'cn_Password';
                 break;
 
             case 'lab_technician':

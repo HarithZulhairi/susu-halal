@@ -10,7 +10,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, {{ session('auth_user')->hmmc_Name ?? 'HMMC' }}</h1>
+            <h1>Welcome, {{ session('auth_user')->ad_Name ?? 'HMMC' }}</h1>
             <div class="header-actions">
                 <button class="btn-secondary">
                     <i class="fas fa-file-export"></i>
