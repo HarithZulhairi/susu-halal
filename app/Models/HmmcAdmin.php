@@ -21,9 +21,4 @@ class HmmcAdmin extends Model
         'ad_Password',
         'ad_Username',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
 }

@@ -57,8 +57,8 @@ class LoginRequest extends FormRequest
                 break;
 
             case 'doctor':
-                $user = Clinician::where('cn_Username', $username)->first();
-                $passwordField = 'cn_Password';
+                $user = Doctor::where('dr_Username', $username)->first();
+                $passwordField = 'dr_Password';
                 break;
 
             case 'lab_technician':

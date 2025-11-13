@@ -19,7 +19,7 @@ class Doctor extends Model
         'dr_Address', 
         'dr_Institution', 
         'dr_Qualification',
-        'dr_Cerification', 
+        'dr_Certification', 
         'dr_Specialization', 
         'dr_YearsOfExperience', 
         'dr_Password',

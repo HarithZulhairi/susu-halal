@@ -222,6 +222,16 @@
             <p class="modal-subtitle">Choose the type of user you want to create</p>
             
             <div class="role-cards">
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'admin']) }}" class="role-card">
+                    <div class="role-card-content">
+                        <div class="role-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3>Hmmc Admin</h3>
+                        <p>Manage User</p>
+                    </div>
+                </a>
+
                 <a href="{{ route('hmmc.create-new-user', ['role' => 'parent']) }}" class="role-card">
                     <div class="role-card-content">
                         <div class="role-icon">
@@ -252,17 +262,17 @@
                     </div>
                 </a>
 
-                <a href="{{ route('hmmc.create-new-user', ['role' => 'clinician']) }}" class="role-card">
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'doctor']) }}" class="role-card">
                     <div class="role-card-content">
                         <div class="role-icon">
                             <i class="fas fa-stethoscope"></i>
                         </div>
-                        <h3>Clinician</h3>
+                        <h3>Doctor</h3>
                         <p>Medical practitioner</p>
                     </div>
                 </a>
 
-                <a href="{{ route('hmmc.create-new-user', ['role' => 'lab-tech']) }}" class="role-card">
+                <a href="{{ route('hmmc.create-new-user', ['role' => 'labtech']) }}" class="role-card">
                     <div class="role-card-content">
                         <div class="role-icon">
                             <i class="fas fa-flask"></i>

@@ -28,10 +28,10 @@ Route::get('/hmmc/dashboard', function () {
     return view('hmmc.hmmc_dashboard');
 })->name('hmmc.dashboard');
 
-Route::middleware(['auth', 'role:hmmc_admin'])->group(function () {
-    Route::get('/hmmc/users/create/{role}', [UserController::class, 'create'])->name('hmmc.users.create');
-    Route::post('/hmmc/users/store', [UserController::class, 'store'])->name('hmmc.users.store');
-});
+Route::resource('users', UserController::class);
+// Create new user form
+Route::get('/hmmc/create-new-user/{role}', [UserController::class, 'create'])->name('hmmc.create-new-user');
+Route::post('/hmmc/users/store', [UserController::class, 'store'])->name('hmmc.users.store');
 
 Route::get('/donor/dashboard', function () {
     return view('donor.donor_dashboard');
