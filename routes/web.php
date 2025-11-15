@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use Illuminate\Support\Facades\Route;
 
+require __DIR__.'/auth.php';
 
 Route::get('/reset-password-test', function () {
     return app(\App\Http\Controllers\Auth\NewPasswordController::class)
@@ -248,4 +250,3 @@ Route::get('/nurse/donor-candidate-list', function () {
     return view('nurse.nurse_donor-candidate-list');
 })->name('nurse.donor-candidate-list');
 
-require __DIR__.'/auth.php';

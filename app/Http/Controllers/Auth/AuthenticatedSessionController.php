@@ -25,7 +25,6 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-        dd(session('auth_role'));
 
         $role = session('auth_role');
 
