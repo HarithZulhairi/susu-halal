@@ -1,14 +1,14 @@
 @extends('layouts.nurse')
 
-@section('title', 'Nurse Candidates')
+@section('title', 'Donor Candidates')
 
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/nurse_donor-candidates.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <div class="page-header">
-        <h1>Nurse Candidates</h1>
-        <p>Manage and review donor candidate applications</p>
+        <h1>Donor Candidates</h1>
+        <p>Manage and review applicants for becoming a donor.</p>
     </div>
 
     <div class="candidates-container">
@@ -29,7 +29,7 @@
 
             <div class="tabs">
                 <button class="tab active" data-tab="all">
-                    All Appointment
+                    All Candidates
                     <span class="badge">69</span>
                 </button>
                 <button class="tab" data-tab="month">
@@ -37,7 +37,7 @@
                     <span class="badge">13</span>
                 </button>
                 <button class="tab" data-tab="pending">
-                    Pending
+                    Pending Review
                     <span class="badge">11</span>
                 </button>
             </div>
@@ -49,6 +49,9 @@
                             <th>Candidate ID</th>
                             <th>Full Name</th>
                             <th>Email Address</th>
+                            {{-- NEW COLUMN ADDED --}}
+                            <th>Screening Status</th> 
+                            {{-- END NEW COLUMN --}}
                             <th>Eligible Status</th>
                             <th>Actions</th>
                         </tr>
@@ -63,13 +66,16 @@
                                 </div>
                             </td>
                             <td class="email">sarimah.boroburu@email.com</td>
+                            {{-- NEW SCREENING STATUS (Pending) --}}
+                            <td><span class="status-badge pending">Pending Blood Test</span></td>
+                            {{-- END NEW SCREENING STATUS --}}
                             <td>
                                 <span class="status-badge pending">Pending</span>
                             </td>
                             <td class="actions">
-                                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
-                                <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                                <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                                <button class="btn-view" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action btn-approve" title="Approve Screening"><i class="fas fa-check"></i></button>
+                                <button class="btn-action btn-reject" title="Reject Screening"><i class="fas fa-times"></i></button>
                             </td>
                         </tr>
                         <tr>
@@ -81,13 +87,16 @@
                                 </div>
                             </td>
                             <td class="email">fatimah.asi@email.com</td>
+                            {{-- NEW SCREENING STATUS (Approved) --}}
+                            <td><span class="status-badge approved">Cleared</span></td>
+                            {{-- END NEW SCREENING STATUS --}}
                             <td>
                                 <span class="status-badge pending">Pending</span>
                             </td>
                             <td class="actions">
-                                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
-                                <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                                <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                                <button class="btn-view" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action btn-approve" title="Approve Screening"><i class="fas fa-check"></i></button>
+                                <button class="btn-action btn-reject" title="Reject Screening"><i class="fas fa-times"></i></button>
                             </td>
                         </tr>
                         <tr>
@@ -99,13 +108,16 @@
                                 </div>
                             </td>
                             <td class="email">nurul.ain@email.com</td>
+                            {{-- NEW SCREENING STATUS (Rejected) --}}
+                            <td><span class="status-badge rejected">Failed</span></td>
+                            {{-- END NEW SCREENING STATUS --}}
                             <td>
                                 <span class="status-badge approved">Approved</span>
                             </td>
                             <td class="actions">
-                                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
-                                <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                                <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                                <button class="btn-view" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action btn-approve" title="Approve Screening" disabled><i class="fas fa-check"></i></button>
+                                <button class="btn-action btn-reject" title="Reject Screening"><i class="fas fa-times"></i></button>
                             </td>
                         </tr>
                         <tr>
@@ -117,13 +129,16 @@
                                 </div>
                             </td>
                             <td class="email">siti.hajar@email.com</td>
+                            {{-- NEW SCREENING STATUS (Approved) --}}
+                            <td><span class="status-badge approved">Cleared</span></td>
+                            {{-- END NEW SCREENING STATUS --}}
                             <td>
                                 <span class="status-badge rejected">Rejected</span>
                             </td>
                             <td class="actions">
-                                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
-                                <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                                <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                                <button class="btn-view" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action btn-approve" title="Approve Screening"><i class="fas fa-check"></i></button>
+                                <button class="btn-action btn-reject" title="Reject Screening" disabled><i class="fas fa-times"></i></button>
                             </td>
                         </tr>
                     </tbody>

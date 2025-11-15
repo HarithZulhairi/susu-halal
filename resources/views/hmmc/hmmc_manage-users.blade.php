@@ -19,7 +19,7 @@
                         <i class="fas fa-plus"></i> Add New User
                     </button>
                 </div>
-            </div>
+            </div> 
         </div>
 
         <div class="stats-grid">

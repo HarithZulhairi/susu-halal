@@ -8,14 +8,12 @@
 
 <div class="container">
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="appointments-page">
             <div class="page-header">
                 <h1>My Appointments</h1>
             </div>
 
-            <!-- Appointment Booking Cards -->
             <div class="appointment-cards">
                 <div class="appointment-card">
                     <h3>Milk Donation</h3>
@@ -27,7 +25,6 @@
                 </div>
             </div>
 
-            <!-- Current Appointments -->
             <div class="appointments-section">
                 <div class="section-header">
                     <h2>My Appointments</h2>
@@ -38,9 +35,10 @@
                 </div>
 
                 <div class="tabs">
-                    <button class="tab active">All Appointment <span class="badge">2</span></button>
+                    <button class="tab active">All Appointment <span class="badge">3</span></button>
                     <button class="tab">Confirmed <span class="badge">1</span></button>
                     <button class="tab">Pending <span class="badge">1</span></button>
+                    <button class="tab">Canceled <span class="badge">1</span></button>
                 </div>
 
                 <div class="table-container">
@@ -61,7 +59,7 @@
                                 <td><span class="ref-id">MDN-2025-015</span></td>
                                 <td>15.5.2025</td>
                                 <td>1000 ml</td>
-                                <td><span class="status verified">Verified</span></td>
+                                <td><span class="status confirmed">Confirmed</span></td>
                                 <td>MILK DROP OFF</td>
                                 <td>Main Foyer</td>
                                 <td class="actions">
@@ -71,7 +69,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td><span class="ref-id">MDN-2025-015</span></td>
+                                <td><span class="ref-id">MDN-2025-016</span></td>
                                 <td>21.5.2025</td>
                                 <td>1000 ml</td>
                                 <td><span class="status pending">Pending</span></td>
@@ -80,7 +78,20 @@
                                 <td class="actions">
                                     <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
                                     <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                                      <button class="btn-calendar" title="Calendar"><i class="fas fa-calendar-alt"></i></button>
+                                     <button class="btn-calendar" title="Calendar"><i class="fas fa-calendar-alt"></i></button>
+                                </td>
+                            </tr>
+                            {{-- NEW CANCELLED ENTRY --}}
+                            <tr>
+                                <td><span class="ref-id">MDN-2025-017</span></td>
+                                <td>25.5.2025</td>
+                                <td>Pumping Kit</td>
+                                <td><span class="status canceled">Canceled</span></td>
+                                <td>PUMP KIT RETURN</td>
+                                <td>Logistics Dept</td>
+                                <td class="actions">
+                                    <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -88,7 +99,6 @@
                 </div>
             </div>
 
-            <!-- Appointment History -->
             <div class="appointments-section">
                 <div class="section-header">
                     <h2>Appointment History</h2>
@@ -119,7 +129,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="6" style="text-align:center; padding:40px; color:#9ca3af;">
+                                <td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">
                                     No appointment history yet
                                 </td>
                             </tr>

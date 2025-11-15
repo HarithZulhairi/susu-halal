@@ -12,8 +12,7 @@
       <h1>Donor Appointment Record</h1>
     </div>
 
-    <!-- MILK DONATION APPOINTMENTS -->
-    <div class="appointment-section">
+        <div class="appointment-section">
       <div class="header-controls">
         <h2>Milk Donation Appointment</h2>
         <div class="actions-header">
@@ -49,7 +48,7 @@
               <td>Main Center</td>
               <td class="actions">
                 <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
-                <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                {{-- <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button> --}}
                 <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
               </td>
             </tr>
@@ -61,7 +60,7 @@
               <td>No.50 Kg Beruas</td>
               <td class="actions">
                 <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
-                <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                {{-- <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button> --}}
                 <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
               </td>
             </tr>
@@ -70,8 +69,7 @@
       </div>
     </div>
 
-    <!-- PUMPING KIT APPOINTMENTS -->
-    <div class="appointment-section">
+        <div class="appointment-section">
       <div class="header-controls">
         <h2>Pumping Kit Appointment</h2>
         <div class="actions-header">
@@ -150,3 +148,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

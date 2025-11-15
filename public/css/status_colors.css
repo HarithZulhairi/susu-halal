@@ -1,0 +1,58 @@
+/* =======================================
+   Standardized Status Colors
+   ======================================= */
+
+/* --- Core Color Definitions (Green, Amber, Red) --- */
+/* SUCCESS (Green) */
+.status-color-success-bg { background: #d1fae5; } /* Green 100 */
+.status-color-success-fg { color: #065f46; }     /* Green 900 */
+
+/* WARNING/PENDING (Amber) */
+.status-color-warning-bg { background: #fef3c7; } /* Amber 100 */
+.status-color-warning-fg { color: #92400e; }     /* Amber 900 */
+
+/* DANGER/REJECTED (Red) */
+.status-color-danger-bg { background: #fee2e2; } /* Red 100 */
+.status-color-danger-fg { color: #991b1b; }     /* Red 900 */
+
+
+/* --- Reusable Badge Styles (Use these classes) --- */
+
+.status {
+    /* Base style for all status badges in Donor Appointments */
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Confirmed / Approved / Active / Completed / Passed */
+.status.confirmed,
+.status.completed,
+.status.approved,
+.status.active,
+.status.passed {
+    /* Green */
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Pending / Screening */
+.status.pending,
+.status.screening {
+    /* Amber */
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Canceled / Rejected / Failed / Inactive */
+.status.canceled,
+.status.rejected,
+.status.failed,
+.status.inactive {
+    /* Red */
+    background: #fee2e2;
+    color: #991b1b;
+}

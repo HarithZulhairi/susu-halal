@@ -57,12 +57,27 @@ body {
   margin: 0 0 12px 0;
 }
 
-.confirmation-header p {
-  font-size: 14px;
-  color: #64748b;
+/* NEW STYLES: Instruction box with green background and border */
+.instruction-box {
+  background: #f0fdfa; /* Light Green/Teal Background */
+  border-left: 4px solid #0d9488; /* Strong Teal Border */
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-top: 15px; /* Separate visually from H2 */
+}
+
+.instruction-box p {
   margin: 0;
+  font-size: 14px;
+  color: #374151; /* Darker text for readability */
   line-height: 1.6;
 }
+
+.instruction-box p:first-child {
+  margin-bottom: 8px;
+}
+/* END NEW STYLES */
+
 
 /* Details Grid Layout */
 .details-grid {
@@ -279,4 +294,3 @@ body {
     transform: rotate(360deg);
   }
 }
-
