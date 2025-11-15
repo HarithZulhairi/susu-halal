@@ -715,3 +715,34 @@ body {
         transform: none !important;
     }
 }
+
+.form-group.success .form-control {
+  border-color: #10b981;
+}
+
+.form-group.success .form-control:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Disabled Section Styling */
+.form-section[style*="display: none"] {
+  display: none !important;
+}
+
+.toast-success {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}

@@ -11,13 +11,13 @@
             <!-- Left Sidebar -->
             <div class="profile-sidebar-card">
                 <div class="profile-avatar-section">
-                    <div class="profile-avatar">SA</div>
+                    <div class="profile-avatar">{{ strtoupper(substr($profile->name ?? 'D', 0, 2)) }}</div>
                     <button class="avatar-edit-btn" title="Edit Avatar">
                         <i class="fas fa-camera"></i>
                     </button>
                 </div>
                 
-                <h2 class="profile-name">Sarah Ahmad</h2>
+                <h2 class="profile-name">{{ $profile->name ?? 'Donor' }}</h2>
                 <span class="profile-badge">Active Donor</span>
                 <p class="profile-member">Member since January 2024</p>
                 

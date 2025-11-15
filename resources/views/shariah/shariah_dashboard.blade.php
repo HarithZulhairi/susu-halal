@@ -114,7 +114,7 @@
                     </div>
                     <span class="quick-stat-badge primary">Audit</span>
                 </a>
-                <a href="{{ route('shariah.edit-profile') }}" class="quick-stat-item">
+                <a href="{{ route('profile.edit') }}" class="quick-stat-item">
                     <div class="quick-stat-info">
                         <div class="quick-stat-value"><i class="fas fa-user-edit"></i></div>
                         <div class="quick-stat-label">Update Profile</div>

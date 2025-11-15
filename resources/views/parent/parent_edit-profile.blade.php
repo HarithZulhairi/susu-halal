@@ -1,12 +1,12 @@
 
 
-@extends('layouts.' . ($role ?? 'app'))
+@extends('layouts.shariah')
 
 @section('title', 'Edit Profile')
 
 @section('content')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/doctor_edit-profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/shariah_edit-profile.css') }}">
 
 <div class="main-content">
         <div class="edit-profile-layout">

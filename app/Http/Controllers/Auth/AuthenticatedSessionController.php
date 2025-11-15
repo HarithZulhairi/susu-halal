@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
             case 'lab_technician':
                 return redirect()->route('labtech.dashboard');
             case 'shariah_advisor':
-                return redirect()->route('advisor.dashboard');
+                return redirect()->route('shariah.dashboard');
             case 'parent':
                 return redirect()->route('parent.dashboard');
             case 'donor':

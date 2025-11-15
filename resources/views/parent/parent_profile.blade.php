@@ -1,10 +1,32 @@
-@extends('layouts.donor')
+@extends('layouts.parent')
 
-@section('title', 'Donor Profile')
+@section('title', 'Parent Profile')
 
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/donor_profile.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    @if(session('success'))
+    <div id="success-toast" class="toast-success">
+        <i class="fas fa-check-circle"></i> {{ session('success') }}
+    </div>
+    @endif
+
+    @if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
 
     <div class="main-content">
         <div class="page-header">
@@ -315,4 +337,28 @@
         background: #e5e7eb;
     }
     </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.getElementById('success-toast');
+        if(toast){
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        // Add real-time validation feedback
+        const inputs = document.querySelectorAll('input[required], select[required], textarea[required]');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.classList.add('error-input');
+                } else {
+                    this.classList.remove('error-input');
+                }
+            });
+        });
+    });
+</script>
 @endsection

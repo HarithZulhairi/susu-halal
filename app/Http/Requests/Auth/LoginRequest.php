@@ -16,7 +16,7 @@ use App\Models\HmmcAdmin;
 use App\Models\Nurse;
 use App\Models\Doctor;
 use App\Models\LabTech;
-use App\Models\ShariahAdvisor;
+use App\Models\ShariahCommittee;
 use App\Models\ParentModel;
 use App\Models\Donor;
 
@@ -68,8 +68,8 @@ class LoginRequest extends FormRequest
                 break;
 
             case 'shariah_advisor':
-                $user = ShariahAdvisor::where('sa_Username', $username)->first();
-                $passwordField = 'sa_Password';
+                $user = ShariahCommittee::where('sc_Username', $username)->first();
+                $passwordField = 'sc_Password';
                 break;
 
             case 'parent':
@@ -148,7 +148,7 @@ class LoginRequest extends FormRequest
             case 'lab_technician':
                 return $user->lt_Email;
             case 'shariah_advisor':
-                return $user->sa_Email;
+                return $user->sc_Email;
             case 'parent':
                 return $user->pr_Email;
             case 'donor':
@@ -170,7 +170,7 @@ class LoginRequest extends FormRequest
             case 'lab_technician':
                 return $user->lt_Name;
             case 'shariah_advisor':
-                return $user->sa_Name;
+                return $user->sc_Name;
             case 'parent':
                 return $user->pr_Name;
             case 'donor':
@@ -192,7 +192,7 @@ class LoginRequest extends FormRequest
             case 'lab_technician':
                 return $user->lt_ID;
             case 'shariah_advisor':
-                return $user->sa_ID;
+                return $user->sc_ID;
             case 'parent':
                 return $user->pr_ID;
             case 'donor':

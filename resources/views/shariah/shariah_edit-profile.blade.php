@@ -1,6 +1,6 @@
 
 
-@extends('layouts.' . ($role ?? 'app'))
+@extends('layouts.shariah')
 
 @section('title', 'Edit Profile')
 
