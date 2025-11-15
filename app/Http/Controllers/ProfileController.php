@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ParentModel;
+use App\Models\LabTech;
+use App\Models\Doctor;
+use App\Models\ShariahCommittee;
+use App\Models\Nurse;
+use App\Models\HmmcAdmin;
+use App\Models\Donor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
