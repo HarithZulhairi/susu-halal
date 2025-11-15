@@ -121,10 +121,6 @@
                             <p>{{ $profile->contact ?? 'Not provided' }}</p>
                         </div>
                         <div class="info-item">
-                            <label>DATE OF BIRTH</label>
-                            <p>{{ $profile->dob ? \Carbon\Carbon::parse($profile->dob)->format('F d, Y') : 'Not provided' }}</p>
-                        </div>
-                        <div class="info-item">
                             <label>ADDRESS</label>
                             <p>{{ $profile->address ?? 'Not provided' }}</p>
                         </div>

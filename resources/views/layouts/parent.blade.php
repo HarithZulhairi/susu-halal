@@ -28,7 +28,7 @@
     <h4>PARENT</h4>
     <ul>
       <li><a href="{{ route('parent.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-      <li><a href="{{ route('profile.name') }}"><i class="fa-solid fa-user"></i> Profile</a></li>
+      <li><a href="{{ route('profile.show') }}"><i class="fa-solid fa-user"></i> Profile</a></li>
       <li class="{{ request()->routeIs('doctor.milk-request-form') ? 'active' : '' }}">
         <a href="#"><i class="fa-solid fa-droplet"></i> Request Milk Form</a>
       </li>
