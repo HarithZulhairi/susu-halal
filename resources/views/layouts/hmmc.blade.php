@@ -28,7 +28,6 @@
       <li>
         <a href="{{ route('hmmc.manage-users') }}"><i class="fa-solid fa-droplet"></i> User Management</a>
       </li>
-      <li><a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a></li>
     </ul>
   </div>
 
@@ -36,11 +35,7 @@
     <h4>Management</h4>
     <ul>
       <li><a href="{{ route('hmmc.manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records</a></li>
-      <li><a href="{{ route('hmmc.list-of-infants') }}"><i class="fa-solid fa-baby"></i> Recipient</a></li>
-      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
-      <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
-        <a href="#"><i class="fa-solid fa-list"></i> Request List</a>
-      </li>
+      <li><a href="{{ route('hmmc.list-of-infants') }}"><i class="fa-solid fa-baby"></i> Infant Recipients</a></li>
     </ul>
   </div>
 

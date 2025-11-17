@@ -29,22 +29,14 @@
     <ul>
       <li><a href="{{ route('parent.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a></li>
       <li><a href="{{ route('profile.show') }}"><i class="fa-solid fa-user"></i> Profile</a></li>
-      <li class="{{ request()->routeIs('doctor.milk-request-form') ? 'active' : '' }}">
-        <a href="#"><i class="fa-solid fa-droplet"></i> Request Milk Form</a>
-      </li>
-      <li><a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a></li>
+
     </ul>
   </div>
 
   <div class="sidebar-section">
     <h4>Management</h4>
     <ul>
-      <li><a href="{{ route('parent.my-infant-request') }}"><i class="fa-solid fa-file-lines"></i> Milk Records</a></li>
-      <li><a href="#"><i class="fa-solid fa-baby"></i> Recipient</a></li>
-      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
-      <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
-        <a href="#"><i class="fa-solid fa-list"></i> Request List</a>
-      </li>
+      <li><a href="{{ route('parent.my-infant-request') }}"><i class="fa-solid fa-file-lines"></i> Infant Milk Records</a></li>
     </ul>
   </div>
 

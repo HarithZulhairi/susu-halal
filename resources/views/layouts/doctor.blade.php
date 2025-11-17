@@ -32,18 +32,15 @@
       <li>
         <a href="{{ route('doctor.donor-candidate-list') }}"><i class="fa-solid fa-droplet"></i> Donor Candidates</a>
       </li>
-      <li><a href="#"><i class="fa-solid fa-chart-line"></i> Reports</a></li>
     </ul>
   </div>
 
   <div class="sidebar-section">
     <h4>Management</h4>
     <ul>
-      <li><a href="{{ route('doctor.milk-request-form') }}"><i class="fa-solid fa-file-lines"></i> New Request</a></li>
-      <li><a href="#"><i class="fa-solid fa-baby"></i> Recipient</a></li>
-      <li><a href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li><a href="{{ route('doctor.milk-request-form') }}"><i class="fa-solid fa-file-lines"></i> Create Request</a></li>
       <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
-        <a href="{{ route('doctor.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request List</a>
+        <a href="{{ route('doctor.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request Records</a>
       </li>
     </ul>
   </div>

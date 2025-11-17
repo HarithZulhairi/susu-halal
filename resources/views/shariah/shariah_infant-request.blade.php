@@ -11,7 +11,7 @@
         <div class="main-content">
             
             <div class="page-header">
-                <h1>My Infant Milk Requests</h1>
+                <h1>Infant Milk Requests</h1>
             </div>
 
             <div class="card">
