@@ -20,11 +20,6 @@
                 <div class="actions-header">
                     <button class="btn btn-search"><i class="fas fa-search"></i> Search</button>
                     <button class="btn btn-filter"><i class="fas fa-filter"></i> Filter</button>
-
-                    <!-- OPEN MODAL BTN -->
-                    <button class="btn btn-add-records" id="openAddRecord">
-                        <i class="fas fa-plus"></i> Add Records
-                    </button>
                 </div>
             </div>
 
@@ -68,86 +63,5 @@
     </div>
 </div>
 
-
-{{-- ===========================
-      ADD RECORD MODAL
-=========================== --}}
-<div id="addRecordModal" class="modal-overlay">
-    <div class="modal-box">
-
-        <div class="modal-header">
-            <h3>Add Milk Record</h3>
-            <button class="modal-close">&times;</button>
-        </div>
-
-        <form id="addRecordForm">
-
-            <div class="modal-body">
-
-                <!-- Donor ID (Dropdown) -->
-                <div class="modal-section mb-3">
-                    <label class="form-label"><strong>Donor ID</strong> <span class="text-danger">*</span></label>
-                    <select class="form-select" name="donor_id" required>
-                        <option value="" selected disabled>-- Select Donor ID --</option>
-                        <option value="D001">D001 - Sarah Ahmad</option>
-                        <option value="D002">D002 - Maryam Othman</option>
-                        <option value="D003">D003 - Fatimah Az-zahra</option>
-                        <option value="D004">D004 - Aishah Radhi</option>
-                        <option value="D005">D005 - Nor Atiqah</option>
-                    </select>
-                </div>
-
-                <!-- Milk Volume -->
-                <div class="modal-section mb-3">
-                    <label class="form-label"><strong>Milk Volume (ml)</strong> <span class="text-danger">*</span></label>
-                    <input type="number" name="milk_volume" class="form-control" placeholder="Enter volume in ml" required min="1">
-                </div>
-
-                <!-- Milk Expiry Date -->
-                <div class="modal-section mb-3">
-                    <label class="form-label"><strong>Expiry Date</strong> <span class="text-danger">*</span></label>
-                    <input type="date" name="expiry_date" class="form-control" required>
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-                <button type="submit" class="save-btn">Submit</button>
-                <button type="button" class="modal-close cancel-btn">Cancel</button>
-            </div>
-
-        </form>
-
-    </div>
-</div>
-
-
-
-
-
-<!-- ===========================
-      POPUP SCRIPT
-=========================== -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    const addBtn = document.getElementById("openAddRecord");
-    const modal = document.getElementById("addRecordModal");
-    const closeBtns = document.querySelectorAll(".modal-close");
-
-    // Open popup
-    addBtn.addEventListener("click", () => {
-        modal.style.display = "flex";
-    });
-
-    // Close popup
-    closeBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
-    });
-
-});
-</script>
 
 @endsection
