@@ -89,77 +89,81 @@
 
         </div>
     </div>
+    
     <!-- ========================== VIEW MODAL ============================= -->
-<div id="viewModal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Infant Milk Request Details</h2>
-
-        <div class="modal-body">
-            <p><strong>Request ID:</strong> <span id="modal-request-id"></span></p>
-            <p><strong>Donor ID:</strong> <span id="modal-donor-id"></span></p>
-            <p><strong>Patient ID:</strong> <span id="modal-patient-id"></span></p>
-
-            <hr>
-
-            <h3>Doctor Prescription</h3>
-            <p><strong>Doctor ID:</strong> <span id="modal-doctor-id"></span></p>
-            <p><strong>Doctor Name:</strong> <span id="modal-doctor-name"></span></p>
-            <p><strong>Recommended Volume:</strong> <span id="modal-recommended"></span></p>
-
-            <hr>
-
-            <h3>Milk Allocation</h3>
-            <ul id="modal-milk-list"></ul>
-
-            <hr>
-
-            <h3>Feeding History</h3>
-            <div id="modal-fed-history"></div>
+    <div id="viewModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h2>Infant Milk Request Details</h2>
+            <button class="modal-close-btn" onclick="closeModal()">Close</button>
         </div>
 
-        <button class="modal-close-btn" onclick="closeModal()">Close</button>
+            <div class="modal-body">
+                <p><strong>Request ID:</strong> <span id="modal-request-id"></span></p>
+                <p><strong>Donor ID:</strong> <span id="modal-donor-id"></span></p>
+                <p><strong>Patient ID:</strong> <span id="modal-patient-id"></span></p>
+
+                <hr>
+
+                <h3>Doctor Prescription</h3>
+                <p><strong>Doctor ID:</strong> <span id="modal-doctor-id"></span></p>
+                <p><strong>Doctor Name:</strong> <span id="modal-doctor-name"></span></p>
+                <p><strong>Recommended Volume:</strong> <span id="modal-recommended"></span></p>
+
+                <hr>
+
+                <h3>Milk Allocation</h3>
+                <ul id="modal-milk-list"></ul>
+
+                <hr>
+
+                <h3>Feeding History</h3>
+                <div id="modal-fed-history"></div>
+            </div>
+
+        </div>
     </div>
-</div>
-<script>
-function openModal(data) {
-    document.getElementById("modal-request-id").textContent = data.request_id;
-    document.getElementById("modal-donor-id").textContent = data.donor_id;
-    document.getElementById("modal-patient-id").textContent = data.patient_id;
+    
+    <script>
+    function openModal(data) {
+        document.getElementById("modal-request-id").textContent = data.request_id;
+        document.getElementById("modal-donor-id").textContent = data.donor_id;
+        document.getElementById("modal-patient-id").textContent = data.patient_id;
 
-    document.getElementById("modal-doctor-id").textContent = data.doctor_id;
-    document.getElementById("modal-doctor-name").textContent = data.doctor_name;
-    document.getElementById("modal-recommended").textContent = data.recommended;
+        document.getElementById("modal-doctor-id").textContent = data.doctor_id;
+        document.getElementById("modal-doctor-name").textContent = data.doctor_name;
+        document.getElementById("modal-recommended").textContent = data.recommended;
 
-    // Display milk list
-    let milkList = document.getElementById("modal-milk-list");
-    milkList.innerHTML = "";
-    data.milk_list.forEach(m => {
-        milkList.innerHTML += `<li>${m.volume} - ${m.expiry}</li>`;
-    });
+        // Display milk list
+        let milkList = document.getElementById("modal-milk-list");
+        milkList.innerHTML = "";
+        data.milk_list.forEach(m => {
+            milkList.innerHTML += `<li>${m.volume} - ${m.expiry}</li>`;
+        });
 
-    // Display feeding history
-    let history = document.getElementById("modal-fed-history");
-    history.innerHTML = "";
-    data.feeding_history.forEach(h => {
-        history.innerHTML += `
-            <p><strong>${h.datetime}</strong> — Fed by Nurse ${h.nurse_id}</p>
-        `;
-    });
+        // Display feeding history
+        let history = document.getElementById("modal-fed-history");
+        history.innerHTML = "";
+        data.feeding_history.forEach(h => {
+            history.innerHTML += `
+                <p><strong>${h.datetime}</strong> — Fed by Nurse ${h.nurse_id}</p>
+            `;
+        });
 
-    document.getElementById("viewModal").style.display = "flex";
-}
-
-function closeModal() {
-    document.getElementById("viewModal").style.display = "none";
-}
-
-window.onclick = function(e) {
-    let modal = document.getElementById("viewModal");
-    if (e.target === modal) {
-        modal.style.display = "none";
+        document.getElementById("viewModal").style.display = "flex";
     }
-}
 
-</script>
+    function closeModal() {
+        document.getElementById("viewModal").style.display = "none";
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(e) {
+        let modal = document.getElementById("viewModal");
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+    </script>
 
 @endsection

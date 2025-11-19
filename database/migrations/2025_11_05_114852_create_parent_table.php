@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('pr_BabyName');
             $table->date('pr_BabyDOB');
             $table->string('pr_BabyGender');
+            $table->string('pr_NICU');
             $table->float('pr_BabyBirthWeight');
             $table->float('pr_BabyCurrentWeight');
             $table->foreignId('user_id')->nullable();

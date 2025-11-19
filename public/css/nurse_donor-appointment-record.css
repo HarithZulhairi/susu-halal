@@ -1,4 +1,6 @@
 @import url("base_layout.css");
+@import url("modal.css");
+
 /* Section Styling */
 .appointment-section {
   background: #fff;

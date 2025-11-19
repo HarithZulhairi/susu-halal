@@ -19,10 +19,9 @@ return new class extends Migration
             $table->unsignedBigInteger('pr_ID')->nullable();
 
             // Milk attributes
-            $table->double('milk_volume');
-            $table->boolean('milk_eligibility');
-            $table->boolean('milk_shariahApproval')->nullable();
+            $table->integer('milk_volume');
             $table->date('milk_expiryDate')->nullable();
+            $table->boolean('milk_shariahApproval')->nullable();
             $table->string('milk_screeningStatus')->nullable();
             $table->string('milk_screeningResult')->nullable();
             $table->string('milk_homogenizeStatus')->nullable();

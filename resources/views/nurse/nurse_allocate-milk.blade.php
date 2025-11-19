@@ -3,9 +3,7 @@
 @section('title', 'Milk Request Records')
 
 @section('content')
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <link rel="stylesheet" href="{{ asset('css/nurse_allocate-milk.css') }}">
 
 <div class="container">
@@ -59,7 +57,10 @@
             <td><span class="status {{ $patient['status'] }}">{{ ucfirst($patient['status']) }}</span></td>
             <td class="actions">
               <button class="btn-done" title="Done"><i class="fas fa-check"></i></button>
-                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                <button class="btn-view" title="View" 
+                    onclick="openViewModal('{{ $patient['id'] }}', '{{ $patient['name'] }}', '{{ $patient['nicu'] }}', '{{ $patient['date'] }}')">
+                    <i class="fas fa-eye"></i>
+                </button>
             </td>
 
           </tr>
@@ -68,112 +69,86 @@
       </table>
     </div>
 
-    <!-- ==========================
-      VIEW DETAILS POPUP MODAL
-=========================== -->
-<div id="viewModal" class="modal-overlay" style="display:none;">
-  <div class="modal-box">
-    
-    <div class="modal-header">
-      <h3>Milk Request Details</h3>
-      <button class="modal-close">&times;</button>
-    </div>
-
-    <div class="modal-body">
-
-      <!-- Patient Details -->
-      <div class="modal-section">
-        <h4>Patient Information</h4>
-        <p><strong>ID:</strong> <span id="modalPatientId"></span></p>
-        <p><strong>Name:</strong> <span id="modalPatientName"></span></p>
-        <p><strong>NICU:</strong> <span id="modalPatientNicu"></span></p>
-        <p><strong>Date Requested:</strong> <span id="modalPatientDate"></span></p>
-      </div>
-
-      <hr>
-
-      <!-- Allocated Milk IDs -->
-      <div class="modal-section">
-        <h4>Allocated Milk</h4>
-
-        <div id="milkListContainer">
-          <!-- Dynamic rows added via JS -->
+    <div id="viewModal" class="modal-overlay" style="display:none;">
+      <div class="modal-content">
+        
+        <div class="modal-header">
+          <h2>Request Details</h2>
+          <button class="modal-close-btn" onclick="closeViewModal()">Close</button>
         </div>
+
+        <div class="modal-body">
+          <p><strong>Patient ID:</strong> <span id="modalPatientId"></span></p>
+          <p><strong>Name:</strong> <span id="modalPatientName"></span></p>
+          <p><strong>NICU:</strong> <span id="modalPatientNicu"></span></p>
+          <p><strong>Date:</strong> <span id="modalPatientDate"></span></p>
+
+          <hr>
+
+          <h3><i class="fas fa-clipboard-list"></i> Allocate Milk</h3>
+          <div id="milkListContainer">
+             </div>
+
+          <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+            <button onclick="closeViewModal()" style="padding: 10px 20px; border: 1px solid #ccc; background: white; border-radius: 8px; cursor:pointer;">Cancel</button>
+             <button class="modal-close-btn" style="margin:0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Save Allocation</button>
+          </div>
+
+        </div>
+
       </div>
-
     </div>
-
-    <div class="modal-footer">
-      <button class="save-btn">Save Changes</button>
-      <button class="modal-close cancel-btn">Cancel</button>
-    </div>
-
-  </div>
-</div>
-
 
   </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+    function openViewModal(id, name, nicu, date) {
+        // 1. Populate Basic Info
+        document.getElementById("modalPatientId").textContent = id;
+        document.getElementById("modalPatientName").textContent = name;
+        document.getElementById("modalPatientNicu").textContent = nicu;
+        document.getElementById("modalPatientDate").textContent = date;
 
-    const viewButtons = document.querySelectorAll(".btn-view");
-    const modal = document.getElementById("viewModal");
-    const closeButtons = document.querySelectorAll(".modal-close");
+        // 2. Generate Mock Milk Data (Replace with AJAX later)
+        const milkIds = ["MILK-001", "MILK-002", "MILK-003", "MILK-004"];
+        const container = document.getElementById("milkListContainer");
+        container.innerHTML = "";
 
-    viewButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-
-            // Example data — replace with your actual DB data later
-            const patient = {
-                id: "P001",
-                name: "Sarah Ahmad Binti Fauzi",
-                nicu: "3B",
-                date: "Jan 12, 2024",
-                milk_ids: ["MILK001", "MILK002", "MILK003"]
-            };
-
-            // Insert patient info
-            document.getElementById("modalPatientId").textContent = patient.id;
-            document.getElementById("modalPatientName").textContent = patient.name;
-            document.getElementById("modalPatientNicu").textContent = patient.nicu;
-            document.getElementById("modalPatientDate").textContent = patient.date;
-
-            // Generate milk rows
-            const container = document.getElementById("milkListContainer");
-            container.innerHTML = "";
-
-            patient.milk_ids.forEach(id => {
-                const row = document.createElement("div");
-                row.className = "milk-row";
-                row.innerHTML = `
-                    <input type="checkbox" class="milk-check" data-id="${id}">
-                    <span><strong>${id}</strong></span>
-                    <input type="datetime-local" class="milk-datetime">
-                `;
-                container.appendChild(row);
-            });
-
-            // Show date/time input only when ticked
-            container.querySelectorAll(".milk-check").forEach(check => {
-                check.addEventListener("change", function() {
-                    const dt = this.parentElement.querySelector(".milk-datetime");
-                    dt.style.display = this.checked ? "block" : "none";
-                });
-            });
-
-            modal.style.display = "flex";
+        milkIds.forEach(milkId => {
+            const row = document.createElement("div");
+            row.className = "milk-row"; // Uses existing milk-row style
+            row.innerHTML = `
+                <input type="checkbox" class="milk-check" id="check-${milkId}">
+                <label for="check-${milkId}" style="flex:1; font-weight:500;">${milkId}</label>
+                <input type="datetime-local" class="milk-datetime">
+            `;
+            container.appendChild(row);
         });
-    });
 
-    closeButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            modal.style.display = "none";
+        // 3. Add Event Listeners for toggling date input
+        container.querySelectorAll(".milk-check").forEach(check => {
+            check.addEventListener("change", function() {
+                const dt = this.parentElement.querySelector(".milk-datetime");
+                dt.style.display = this.checked ? "block" : "none";
+            });
         });
-    });
 
-});
+        // 4. Show Modal
+        document.getElementById("viewModal").style.display = "flex";
+    }
+
+    function closeViewModal() {
+        document.getElementById("viewModal").style.display = "none";
+    }
+
+    // Close on outside click
+    window.addEventListener("click", function(e) {
+        const modal = document.getElementById("viewModal");
+        if (e.target === modal) {
+            closeViewModal();
+        }
+    });
 </script>
 
 @endsection

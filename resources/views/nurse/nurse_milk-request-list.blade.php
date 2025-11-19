@@ -5,7 +5,6 @@
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/nurse_milk-request-list.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="{{ asset('css/nurse_milk-modal.css') }}">
 
   <div class="container">
     <div class="main-content">
@@ -58,7 +57,9 @@
                 <td>
                   <span class="status {{ strtolower($milk['status']) }}">{{ $milk['status'] }}</span>
                 </td>
-                <td><button type="button" class="select-text">SELECT MILK</button></td>
+                <td>
+                    <button type="button" class="select-text" onclick="openMilkModal()">SELECT MILK</button>
+                </td>
                 <td class="actions">
                   <button class="btn-edit" title="Edit"><i class="fas fa-pen"></i></button>
                   <button class="btn-view" title="View"><i class="fas fa-list"></i></button>
@@ -72,106 +73,83 @@
     </div>
   </div>
 
-  {{-- Add this modal HTML before @endsection in your blade file --}}
-
-<!-- Milk Selection Modal -->
-<div id="milkModal" class="modal">
-  <div class="modal-overlay"></div>
+<div id="milkModal" class="modal-overlay" style="display: none;">
   <div class="modal-content">
+    
     <div class="modal-header">
       <h2>Milk Request Records</h2>
-      <button class="modal-close" onclick="closeMilkModal()">
-        <i class="fas fa-times"></i>
-      </button>
+      <button class="modal-close-btn" onclick="closeMilkModal()">Close</button>
     </div>
 
     <div class="modal-body">
-      <div class="patient-profile">
-        <div class="profile-icon">
-          <i class="fas fa-user"></i>
+      
+      <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 12px; border: 1px solid #bae6fd;">
+        <div style="background: white; padding: 10px; border-radius: 50%; color: #0ea5e9;">
+             <i class="fas fa-user fa-lg"></i>
         </div>
-        <div class="profile-id">P001</div>
+        <div>
+            <h3 style="margin: 0; color: #0c4a6e; font-size: 16px;">Patient: P001</h3>
+            <span style="font-size: 13px; color: #64748b;">Sarah Ahmad Binti Fauzi</span>
+        </div>
       </div>
 
       <form id="milkAllocationForm">
-        <div class="form-group">
-          <label>Patient Name</label>
-          <input type="text" value="Sarah Ahmad Binti Fauzi" readonly>
+        
+        <div class="modal-section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label>Medical Record Number</label>
+                    <input type="text" class="form-control" value="MRN-2024-001" readonly>
+                </div>
+                <div>
+                    <label>Date of Birth</label>
+                    <input type="text" class="form-control" value="2024-01-01" readonly>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label>Patient ID</label>
-          <input type="text" value="P001" readonly>
+        <div class="modal-section">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label>Ward</label>
+                    <input type="text" class="form-control" value="NICU - A101" readonly>
+                </div>
+                 <div>
+                    <label>Prescribed Volume (ml)</label>
+                    <input type="text" class="form-control" value="43.1 ml" readonly>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label>Medical Record Number</label>
-          <input type="text" value="MRN-2024-001" readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Date of Birth</label>
-          <input type="text" value="2024-01-01" readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Diagnosis</label>
-          <input type="text" value="Premature Birth - 32 weeks" readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Ward</label>
-          <input type="text" value="NICU - A101" readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Patient Weight (kg)</label>
-          <input type="text" value="2.3" readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Prescribed Volume (ml)</label>
-          <input type="text" value="43.1 ml per feeding" readonly>
-        </div>
-
-        <div class="form-group">
+        <div class="modal-section">
           <label>Milk Unit ID (Select Multiple)</label>
 
           <div id="milkList" class="milk-list">
-            <!-- Example items (you can load dynamically later) -->
             <div class="milk-item" data-id="MU-2024-001" data-volume="50">
-              MU-2024-001 — 50ml (Expires Jan 20, 2024)
+              <strong>MU-2024-001</strong> — 50ml <br> <span style="font-size: 12px; color: #666;">Expires Jan 20, 2024</span>
             </div>
             <div class="milk-item" data-id="MU-2024-002" data-volume="45">
-              MU-2024-002 — 45ml (Expires Jan 21, 2024)
+               <strong>MU-2024-002</strong> — 45ml <br> <span style="font-size: 12px; color: #666;">Expires Jan 21, 2024</span>
             </div>
             <div class="milk-item" data-id="MU-2024-003" data-volume="60">
-              MU-2024-003 — 60ml (Expires Jan 22, 2024)
+               <strong>MU-2024-003</strong> — 60ml <br> <span style="font-size: 12px; color: #666;">Expires Jan 22, 2024</span>
             </div>
-            <div class="milk-item" data-id="MU-2024-001" data-volume="50">
-              MU-2024-001 — 50ml (Expires Jan 20, 2024)
-            </div>
-            <div class="milk-item" data-id="MU-2024-002" data-volume="45">
-              MU-2024-002 — 45ml (Expires Jan 21, 2024)
-            </div>
-            <div class="milk-item" data-id="MU-2024-003" data-volume="60">
-              MU-2024-003 — 60ml (Expires Jan 22, 2024)
+             <div class="milk-item" data-id="MU-2024-004" data-volume="50">
+               <strong>MU-2024-004</strong> — 50ml <br> <span style="font-size: 12px; color: #666;">Expires Jan 20, 2024</span>
             </div>
           </div>
 
-          <p class="total-volume-display">
-            <strong>Total Selected Milk:</strong> <span id="totalVolume">0</span> ml
+          <p class="total-volume-display" style="text-align: right; margin-top: 10px; font-size: 14px;">
+            <strong>Total Selected:</strong> <span id="totalVolume" style="color: #2563eb; font-size: 16px;">0</span> ml
           </p>
         </div>
 
-
-        <div class="form-group">
+        <div class="modal-section">
           <label>Storage Location</label>
-          <input type="text" id="storageLocation" value="NICU Storage Room A" readonly>
+          <input type="text" class="form-control" id="storageLocation" value="NICU Storage Room A" readonly>
         </div>
 
-
-        <button type="submit" class="btn-allocate">ALLOCATE MILK UNIT</button>
+        <button type="submit" class="modal-close-btn">ALLOCATE MILK UNIT</button>
       </form>
     </div>
   </div>
@@ -208,28 +186,22 @@ document.querySelectorAll(".milk-item").forEach(item => {
   });
 });
 
-// Open modal when SELECT is clicked
-document.addEventListener('DOMContentLoaded', function() {
-  const selectButtons = document.querySelectorAll('.select-text');
-  selectButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      document.getElementById('milkModal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-});
+function openMilkModal() {
+    document.getElementById('milkModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
 
-// Close modal
 function closeMilkModal() {
-  document.getElementById('milkModal').classList.remove('active');
-  document.body.style.overflow = 'auto';
+    document.getElementById('milkModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
 }
 
 // Close on overlay click
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('modal-overlay')) {
-    closeMilkModal();
-  }
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('milkModal');
+    if (e.target === modal) {
+        closeMilkModal();
+    }
 });
 
 // Handle form submission
@@ -240,13 +212,10 @@ document.getElementById('milkAllocationForm').addEventListener('submit', functio
     alert('Please select at least one Milk Unit.');
     return;
   }
-
   console.log("Selected Milk Units:", selectedMilkUnits);
-
   alert('Milk units allocated successfully!');
   closeMilkModal();
 });
-
 </script>
 
 @endsection

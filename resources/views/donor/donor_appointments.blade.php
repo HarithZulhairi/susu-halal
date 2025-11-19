@@ -63,7 +63,21 @@
                                 <td>MILK DROP OFF</td>
                                 <td>Main Foyer</td>
                                 <td class="actions">
-                                    <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-view" title="View" 
+                                        onclick="openAppointmentModal({
+                                            referenceId: 'MDN-2025-015',
+                                            date: '15.5.2025',
+                                            time: '10:00 AM',
+                                            amount: '1000 ml',
+                                            status: 'Confirmed',
+                                            type: 'MILK DROP OFF',
+                                            location: 'Main Foyer',
+                                            contactPerson: 'Nurse Fatimah',
+                                            contactPhone: '+60 12-345 6789',
+                                            notes: 'Please bring your donor ID and ensure milk is properly labeled'
+                                        })">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
                                     <button class="btn-calendar" title="Calendar"><i class="fas fa-calendar-alt"></i></button>
                                 </td>
@@ -76,12 +90,25 @@
                                 <td>MILK DROP OFF</td>
                                 <td>Front Counter</td>
                                 <td class="actions">
-                                    <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-view" title="View"
+                                        onclick="openAppointmentModal({
+                                            referenceId: 'MDN-2025-016',
+                                            date: '21.5.2025',
+                                            time: '02:30 PM',
+                                            amount: '1000 ml',
+                                            status: 'Pending',
+                                            type: 'MILK DROP OFF',
+                                            location: 'Front Counter',
+                                            contactPerson: 'Nurse Sarah',
+                                            contactPhone: '+60 12-987 6543',
+                                            notes: 'Awaiting confirmation. You will receive an SMS once confirmed.'
+                                        })">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
                                      <button class="btn-calendar" title="Calendar"><i class="fas fa-calendar-alt"></i></button>
                                 </td>
                             </tr>
-                            {{-- NEW CANCELLED ENTRY --}}
                             <tr>
                                 <td><span class="ref-id">MDN-2025-017</span></td>
                                 <td>25.5.2025</td>
@@ -90,7 +117,21 @@
                                 <td>PUMP KIT RETURN</td>
                                 <td>Logistics Dept</td>
                                 <td class="actions">
-                                    <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-view" title="View"
+                                        onclick="openAppointmentModal({
+                                            referenceId: 'MDN-2025-017',
+                                            date: '25.5.2025',
+                                            time: '11:00 AM',
+                                            amount: 'Pumping Kit',
+                                            status: 'Canceled',
+                                            type: 'PUMP KIT RETURN',
+                                            location: 'Logistics Dept',
+                                            contactPerson: 'Staff Ahmad',
+                                            contactPhone: '+60 11-234 5678',
+                                            notes: 'Appointment canceled by donor. Please rebook if you wish to return the kit.'
+                                        })">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
@@ -140,4 +181,69 @@
         </div>
     </div>
 </div>
+
+<!-- ========================== APPOINTMENT DETAILS MODAL ============================= -->
+<div id="appointmentModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Appointment Details</h2>
+            <button class="modal-close-btn" onclick="closeAppointmentModal()">Close</button>
+        </div>
+
+        <div class="modal-body">
+            <p><strong>Reference ID:</strong> <span id="modal-reference-id"></span></p>
+            <p><strong>Date:</strong> <span id="modal-date"></span></p>
+            <p><strong>Time:</strong> <span id="modal-time"></span></p>
+            <p><strong>Status:</strong> <span id="modal-status"></span></p>
+
+            <hr>
+
+            <h3>Appointment Details</h3>
+            <p><strong>Type:</strong> <span id="modal-type"></span></p>
+            <p><strong>Amount:</strong> <span id="modal-amount"></span></p>
+            <p><strong>Location:</strong> <span id="modal-location"></span></p>
+
+            <hr>
+
+            <h3>Contact Information</h3>
+            <p><strong>Contact Person:</strong> <span id="modal-contact-person"></span></p>
+            <p><strong>Contact Phone:</strong> <span id="modal-contact-phone"></span></p>
+
+            <hr>
+
+            <h3>Additional Notes</h3>
+            <p><strong>Notes:</strong> <span id="modal-notes"></span></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAppointmentModal(data) {
+        document.getElementById("modal-reference-id").textContent = data.referenceId;
+        document.getElementById("modal-date").textContent = data.date;
+        document.getElementById("modal-time").textContent = data.time;
+        document.getElementById("modal-status").textContent = data.status;
+        document.getElementById("modal-type").textContent = data.type;
+        document.getElementById("modal-amount").textContent = data.amount;
+        document.getElementById("modal-location").textContent = data.location;
+        document.getElementById("modal-contact-person").textContent = data.contactPerson;
+        document.getElementById("modal-contact-phone").textContent = data.contactPhone;
+        document.getElementById("modal-notes").textContent = data.notes;
+
+        document.getElementById("appointmentModal").style.display = "flex";
+    }
+
+    function closeAppointmentModal() {
+        document.getElementById("appointmentModal").style.display = "none";
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(e) {
+        let modal = document.getElementById("appointmentModal");
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
 @endsection

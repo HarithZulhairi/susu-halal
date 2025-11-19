@@ -47,7 +47,18 @@
               <td>MILK DROP OFF</td>
               <td>Main Center</td>
               <td class="actions">
-                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                <button class="btn-view" 
+                  title="View"
+                  onclick="openDonorModal({
+                    date: '15.5.2024',
+                    amount: '1000ml',
+                    status: 'Pending',
+                    type: 'MILK DROP OFF',
+                    location: 'Main Center'
+                  })">
+                  <i class="fas fa-eye"></i>
+                </button>
+
                 {{-- <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button> --}}
                 <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
               </td>
@@ -59,7 +70,18 @@
               <td>COLLECTION</td>
               <td>No.50 Kg Beruas</td>
               <td class="actions">
-                <button class="btn-view" title="View"><i class="fas fa-eye"></i></button>
+                <button class="btn-view" 
+                  title="View"
+                  onclick="openDonorModal({
+                    date: '24.4.2024',
+                    amount: '1000ml',
+                    status: 'Confirmed',
+                    type: 'COLLECTION',
+                    location: 'No.50 Kg Beruas'
+                  })">
+                  <i class="fas fa-eye"></i>
+                </button>
+
                 {{-- <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button> --}}
                 <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
               </td>
@@ -116,11 +138,48 @@
           </tbody>
         </table>
       </div>
+
     </div>
+    <!-- ================== REUSABLE MODAL ================== -->
+    <div id="donorModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h2>Appointment Details</h2>
+            <button class="modal-close-btn" onclick="closeDonorModal()">Close</button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Date</strong> <span id="modal-date"></span></p>
+          <p><strong>Amount</strong> <span id="modal-amount"></span></p>
+          <p><strong>Status</strong> <span id="modal-status"></span></p>
+          <p><strong>Type</strong> <span id="modal-type"></span></p>
+          <p><strong>Location</strong> <span id="modal-location"></span></p>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
+
+// -------- OPEN MODAL ----------
+function openDonorModal(data) {
+    document.getElementById("modal-date").innerText = data.date;
+    document.getElementById("modal-amount").innerText = data.amount;
+    document.getElementById("modal-status").innerText = data.status;
+    document.getElementById("modal-type").innerText = data.type;
+    document.getElementById("modal-location").innerText = data.location;
+
+    document.getElementById("donorModal").style.display = "flex";
+}
+
+// -------- CLOSE MODAL ----------
+function closeDonorModal() {
+    document.getElementById("donorModal").style.display = "none";
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const tabSections = document.querySelectorAll('.appointment-section');
 

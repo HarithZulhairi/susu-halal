@@ -20,7 +20,6 @@ class Milk extends Model
         'dn_ID',
         'pr_ID',
         'milk_volume',
-        'milk_eligibility',
         'milk_shariahApproval',
         'milk_expiryDate',
         'milk_screeningStatus',

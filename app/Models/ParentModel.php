@@ -20,6 +20,7 @@ class ParentModel extends Model
         'pr_Email',
         'pr_BabyName',
         'pr_BabyDOB',
+        'pr_NICU',
         'pr_BabyGender',
         'pr_BabyBirthWeight',
         'pr_BabyCurrentWeight',

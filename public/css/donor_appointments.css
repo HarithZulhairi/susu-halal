@@ -1,6 +1,7 @@
 /* Import standardized status colors */
 @import url("status_colors.css");
 @import url("base_layout.css");
+@import url("modal.css");
 
 .page-header p {
     /* Overriding the default #6b7280 in base_layout to match the original blue */
