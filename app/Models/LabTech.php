@@ -25,7 +25,11 @@ class LabTech extends Model
         'lt_YearsOfExperience',
         'lt_Password',
         'lt_Username',
+        'user_id',
     ];
 
-    // Add any relationships if needed in future
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

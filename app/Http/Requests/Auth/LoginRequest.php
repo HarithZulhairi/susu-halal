@@ -73,12 +73,12 @@ class LoginRequest extends FormRequest
                 break;
 
             case 'parent':
-                $user = ParentModel::where('pr_Email', $username)->first();
+                $user = ParentModel::where('pr_NRIC', $username)->first();
                 $passwordField = 'pr_Password';
                 break;
 
             case 'donor':
-                $user = Donor::where('dn_Username', $username)->first();
+                $user = Donor::where('dn_NRIC', $username)->first();
                 $passwordField = 'dn_Password';
                 break;
 
@@ -98,7 +98,22 @@ class LoginRequest extends FormRequest
 
         RateLimiter::clear($this->throttleKey());
 
-        // Create a User model instance for Laravel's auth system
+        // ✅ Check if donor needs to reset password (first-time login)
+        if ($role === 'donor' && $this->isFirstTimeDonorLogin($user)) {
+            // Store donor info in session for password reset - use NRIC for donors
+            session([
+                'first_time_donor' => true,
+                'donor_nric' => $user->dn_NRIC,
+                'donor_email' => $user->dn_Email,
+                'donor_id' => $user->dn_ID,
+                'donor_name' => $user->dn_FullName
+            ]);
+            
+            // Don't log in yet - redirect to first-time password reset
+            return; // ← This is correct - we return without logging in
+        }
+
+        // Only create and log in user if NOT a first-time donor
         $authUser = $this->createAuthUser($user, $role);
         
         // Properly log in the user using Laravel's Auth
@@ -109,6 +124,18 @@ class LoginRequest extends FormRequest
         
         // Regenerate session to prevent fixation attacks
         request()->session()->regenerate();
+    }
+
+    /**
+     * Check if this is a donor's first login (needs password reset)
+     */
+    private function isFirstTimeDonorLogin($donor): bool
+    {
+        // Reset password only when first_login = 1 (true)
+        if ($donor->first_login == 1) {
+            return true;
+        }
+        return false;
     }
 
     /**

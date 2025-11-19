@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('dr_Institution');
             $table->string('dr_Specialization');
             $table->integer('dr_YearsOfExperience');
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
 

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('pr_BabyGender');
             $table->float('pr_BabyBirthWeight');
             $table->float('pr_BabyCurrentWeight');
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
 

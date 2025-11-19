@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('ad_Contact');
             $table->string('ad_Email')->unique();
             $table->string('ad_Gender');
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
 

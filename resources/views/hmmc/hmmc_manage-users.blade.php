@@ -3,7 +3,7 @@
 @section('title', 'User Management')
 
 @section('content')
-    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- IMPORTANT: Added CSRF token for DELETE --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/hmmc_manage-users.css') }}">
 
@@ -122,171 +122,30 @@
                             <th>CONTACT</th>
                             <th>STATUS</th>
                             <th>SCREENING STATUS</th> 
-                            <th onclick="sortTable(4)">REGISTRATION DATE <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(5)">REGISTRATION DATE <i class="fas fa-sort"></i></th>
                             <th>ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
                     
-                    {{-- DEMO ENTRY 1: PASSED SCREENING --}}
-                    <tr data-role="donor" data-screening-status="passed">
-                        <td>
-                            <div class="user-info">
-                                <div class="user-avatar green">SA</div>
-                                <div>
-                                    <div class="user-name">Sarah Al-Ghazali</div>
-                                    <div class="user-email">sarah.a@example.com</div>
-                                    <div class="user-username">@sarahG</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="role-badge role-donor">
-                                <i class="fas fa-hand-holding-heart"></i> Donor
-                            </span>
-                        </td>
-                        <td>
-                            <span class="contact-info">
-                                <i class="fas fa-phone"></i> +6012-345 6789
-                            </span>
-                        </td>
-                        <td>
-                            <span class="status-badge status-approved">Active</span>
-                        </td>
-                        <td class="screening-cell">
-                            <span class="screening-badge screening-passed" title="All medical screening requirements met.">
-                                Passed
-                            </span>
-                        </td>
-                        <td>
-                            <span class="date-info">
-                                <i class="far fa-calendar-alt"></i> Nov 15, 2025
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <div class="action-buttons">
-                                <button class="icon-btn view-btn" title="View Details" onclick="viewUser('1000', 'donor')"><i class="fas fa-eye"></i></button>
-                                <button class="icon-btn edit-btn" title="Edit" onclick="editUser('1000', 'donor')"><i class="fas fa-edit"></i></button>
-                                <button class="icon-btn delete-btn" title="Delete" onclick="confirmDelete('1000', 'donor', 'Sarah Al-Ghazali')"><i class="fas fa-trash"></i></button>
-                                <button class="icon-btn more-btn" title="More Options"><i class="fas fa-ellipsis-v"></i></button>
-                            </div>
-                        </td> 
-                    </tr>
-                    {{-- DEMO ENTRY 2: FAILED SCREENING --}}
-                    <tr data-role="donor" data-screening-status="failed">
-                        <td>
-                            <div class="user-info">
-                                <div class="user-avatar red">AA</div>
-                                <div>
-                                    <div class="user-name">Aisha Binti Abu</div>
-                                    <div class="user-email">aisha.abu@example.com</div>
-                                    <div class="user-username">@aishaAbu</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="role-badge role-donor">
-                                <i class="fas fa-hand-holding-heart"></i> Donor
-                            </span>
-                        </td>
-                        <td>
-                            <span class="contact-info">
-                                <i class="fas fa-phone"></i> +6019-987 6543
-                            </span>
-                        </td>
-                        <td>
-                            <span class="status-badge status-rejected">Inactive</span>
-                        </td>
-                        <td class="screening-cell">
-                            <span class="screening-badge screening-failed" title="Screening failed due to blood test anomaly.">
-                                Failed
-                            </span>
-                            {{-- Explicitly showing the remark/note for failed status --}}
-                            <div class="screening-remark-short">
-                                <i class="fas fa-exclamation-circle"></i> Incomplete blood work, retest required.
-                            </div>
-                        </td>
-                        <td>
-                            <span class="date-info">
-                                <i class="far fa-calendar-alt"></i> Oct 28, 2025
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <div class="action-buttons">
-                                <button class="icon-btn view-btn" title="View Details" onclick="viewUser('1001', 'donor')"><i class="fas fa-eye"></i></button>
-                                <button class="icon-btn edit-btn" title="Edit" onclick="editUser('1001', 'donor')"><i class="fas fa-edit"></i></button>
-                                <button class="icon-btn delete-btn" title="Delete" onclick="confirmDelete('1001', 'donor', 'Aisha Binti Abu')"><i class="fas fa-trash"></i></button>
-                                <button class="icon-btn more-btn" title="More Options"><i class="fas fa-ellipsis-v"></i></button>
-                            </div>
-                        </td> 
-                    </tr>
-                    {{-- DEMO ENTRY 3: PENDING SCREENING --}}
-                    <tr data-role="donor" data-screening-status="pending">
-                        <td>
-                            <div class="user-info">
-                                <div class="user-avatar purple">NM</div>
-                                <div>
-                                    <div class="user-name">Nurul Malik</div>
-                                    <div class="user-email">nurul.m@example.com</div>
-                                    <div class="user-username">@nurulM</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="role-badge role-donor">
-                                <i class="fas fa-hand-holding-heart"></i> Donor
-                            </span>
-                        </td>
-                        <td>
-                            <span class="contact-info">
-                                <i class="fas fa-phone"></i> +6013-112 3456
-                            </span>
-                        </td>
-                        <td>
-                            <span class="status-badge status-pending">Pending</span>
-                        </td>
-                        <td class="screening-cell">
-                            <span class="screening-badge screening-pending" title="Awaiting blood test results.">
-                                Pending
-                            </span>
-                        </td>
-                        <td>
-                            <span class="date-info">
-                                <i class="far fa-calendar-alt"></i> Nov 10, 2025
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <div class="action-buttons">
-                                <button class="icon-btn view-btn" title="View Details" onclick="viewUser('1002', 'donor')"><i class="fas fa-eye"></i></button>
-                                <button class="icon-btn edit-btn" title="Edit" onclick="editUser('1002', 'donor')"><i class="fas fa-edit"></i></button>
-                                <button class="icon-btn delete-btn" title="Delete" onclick="confirmDelete('1002', 'donor', 'Nurul Malik')"><i class="fas fa-trash"></i></button>
-                                <button class="icon-btn more-btn" title="More Options"><i class="fas fa-ellipsis-v"></i></button>
-                            </div>
-                        </td> 
-                    </tr>
-                    {{-- END DEMO ENTRIES --}}
-                    
                     @if($allUsers->count() > 0)
                         @foreach ($allUsers as $user)
                             @php
-                                $status = $user->status;
-                                // --- Placeholder Data Start (Replace with actual backend fields) ---
-                                // Adjusting placeholder logic to skip the first 3 iterations as they are static now
-                                $i = $loop->iteration + 3; 
-                                $screeningStatus = $user->role == 'donor' ? (($i % 3 == 0 ? 'passed' : ($i % 3 == 1 ? 'failed' : 'pending'))) : 'na';
-                                $screeningRemark = 'Incomplete documentation required.';
-                                // --- Placeholder Data End ---
+                                $status = $user->status ?? 'active';
+                                // Use actual screening data instead of placeholder
+                                $screeningStatus = $user->role == 'donor' ? ($user->screening_status ?? 'pending') : 'na';
+                                $screeningRemark = $user->screening_remark ?? null;
                             @endphp
                             <tr data-role="{{ $user->role }}" data-screening-status="{{ $screeningStatus }}">
                                 <td>
                                     <div class="user-info">
-                                        <div class="user-avatar {{ ['teal', 'blue', 'green', 'purple', 'orange'][array_rand(['teal', 'blue', 'green', 'purple', 'orange'])] }}">
-                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                        <div class="user-avatar {{ ['teal', 'blue', 'green', 'purple', 'orange'][$loop->index % 5] }}">
+                                            {{ strtoupper(substr($user->name ?? 'NA', 0, 2)) }}
                                         </div>
                                         <div>
-                                            <div class="user-name">{{ $user->name }}</div>
-                                            <div class="user-email">{{ $user->email }}</div>
-                                            <div class="user-username">{{ '@' . $user->username }}</div>
+                                            <div class="user-name">{{ $user->name ?? 'N/A' }}</div>
+                                            <div class="user-email">{{ $user->email ?? 'N/A' }}</div>
+                                            <div class="user-username">@{{ $user->username ?? 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -312,7 +171,7 @@
                                 </td>
                                 <td>
                                     <span class="contact-info">
-                                        <i class="fas fa-phone"></i> {{ $user->contact }}
+                                        <i class="fas fa-phone"></i> {{ $user->contact ?? 'N/A' }}
                                     </span>
                                 </td>
                                 <td>
@@ -324,12 +183,14 @@
                                 <td class="screening-cell">
                                     @if ($user->role == 'donor')
                                         <span class="screening-badge screening-{{ $screeningStatus }}" 
-                                                @if($screeningStatus == 'failed') title="{{ $screeningRemark }}" @endif>
+                                            @if($screeningStatus == 'failed' && $screeningRemark) title="{{ $screeningRemark }}" @endif>
                                             {{ ucfirst($screeningStatus) }}
                                         </span>
+                                        
                                         @if($screeningStatus == 'failed' && $screeningRemark)
                                             <div class="screening-remark-short">
-                                                <i class="fas fa-exclamation-circle"></i> {{ $screeningRemark }}
+                                                <i class="fas fa-exclamation-circle"></i> 
+                                                {{ \Illuminate\Support\Str::limit($screeningRemark, 50) }}
                                             </div>
                                         @endif
                                     @else
@@ -340,30 +201,63 @@
                                 <td>
                                     <span class="date-info">
                                         <i class="far fa-calendar-alt"></i>
-                                        {{ \Carbon\Carbon::parse($user->created_at)->format('M d, Y') }}
+                                        {{ isset($user->created_at) ? \Carbon\Carbon::parse($user->created_at)->format('M d, Y') : 'N/A' }}
                                     </span>
                                 </td>
                                 <td class="actions">
                                     <div class="action-buttons">
-                                        <button class="icon-btn view-btn" title="View Details"
-                                            onclick="viewUser('{{ $user->original_id }}', '{{ $user->original_table }}')">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
+                                        @if($user->role == 'donor' && ($user->screening_status === 'passed'))
+                                            {{-- For approved donors: Show Send Credentials + all other buttons --}}
+                                            <button class="icon-btn send-credential-btn" title="Send Credentials"
+                                                    onclick="sendCredentials('{{ $user->original_id }}', '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->contact }}')">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
 
-                                        <button class="icon-btn edit-btn" title="Edit"
-                                            onclick="editUser('{{ $user->original_id }}', '{{ $user->original_table }}')">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                            <button class="icon-btn view-btn" title="View Details"
+                                                onclick="window.location.href='{{ route('hmmc.users.show', ['role' => $user->original_table, 'id' => $user->original_id]) }}'">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
 
-                                        <button class="icon-btn delete-btn" title="Delete"
-                                            onclick="confirmDelete('{{ $user->original_id }}', '{{ $user->original_table }}', '{{ $user->name }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                        <button class="icon-btn more-btn" title="More Options">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
+                                            <button class="icon-btn edit-btn" title="Edit"
+                                                onclick="window.location.href='{{ route('hmmc.users.edit', ['role' => $user->original_table, 'id' => $user->original_id]) }}'">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            <button class="icon-btn delete-btn" title="Delete"
+                                                onclick="confirmDelete('{{ $user->original_id }}', '{{ $user->original_table }}', '{{ addslashes($user->name) }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @elseif($user->role == 'donor' && ($user->screening_status === 'pending'))
+
+                                            <button class="icon-btn view-btn" title="View Details"
+                                                onclick="window.location.href='{{ route('hmmc.users.show', ['role' => $user->original_table, 'id' => $user->original_id]) }}'">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <button class="icon-btn delete-btn" title="Delete"
+                                                onclick="confirmDelete('{{ $user->original_id }}', '{{ $user->original_table }}', '{{ addslashes($user->name) }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            
+                                        @else
+                                            {{-- For ALL other users (non-donors AND donors who haven't passed screening) --}}
+                                            <button class="icon-btn view-btn" title="View Details"
+                                                onclick="window.location.href='{{ route('hmmc.users.show', ['role' => $user->original_table, 'id' => $user->original_id]) }}'">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <button class="icon-btn edit-btn" title="Edit"
+                                                onclick="window.location.href='{{ route('hmmc.users.edit', ['role' => $user->original_table, 'id' => $user->original_id]) }}'">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+
+                                            <button class="icon-btn delete-btn" title="Delete"
+                                                onclick="confirmDelete('{{ $user->original_id }}', '{{ $user->original_table }}', '{{ addslashes($user->name) }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endif
                                     </div>
-                                </td> 
+                                </td>
                             </tr>
                         @endforeach
                     @else
@@ -382,6 +276,7 @@
         </div>
     </div>
 
+    <!-- Role Selection Modal -->
     <div id="roleModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-title">Select User Role</h2>
@@ -455,6 +350,7 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
         <div class="modal-content modal-small">
             <div class="modal-icon-warning">
@@ -478,9 +374,103 @@
         </div>
     </div>
 
+    <!-- Credential Sending Modal -->
+    <div id="credentialModal" class="modal">
+        <div class="modal-content modal-credential">
+            
+            <div id="donorInfo" class="donor-info-celebrate">
+                <!-- Donor info will be inserted here -->
+            </div>
+
+            <div class="delivery-methods">
+                <div class="method-card">
+                    <div class="method-icon email">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="method-info">
+                        <h4>Email Delivery</h4>
+                    </div>
+                    <div class="method-status" id="emailStatus">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                
+                <div class="method-card">
+                    <div class="method-icon whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <div class="method-info">
+                        <h4>WhatsApp Message</h4>
+                    </div>
+                    <div class="method-status" id="whatsappStatus">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="credential-loading-celebrate" id="credentialLoading" style="display: none;">
+                <div class="loading-animation">
+                    <div class="spinner"></div>
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <h3>Spreading the Joy! ✨</h3>
+                <p>We're sending a warm welcome to our new donor...</p>
+            </div>
+            
+            <div class="credential-success-celebrate" id="credentialSuccess" style="display: none;">
+                <div class="success-animation">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="confetti">
+                        <div class="confetti-piece"></div>
+                        <div class="confetti-piece"></div>
+                        <div class="confetti-piece"></div>
+                        <div class="confetti-piece"></div>
+                        <div class="confetti-piece"></div>
+                    </div>
+                </div>
+                <h3>Success! 🎊</h3>
+                <p id="successMessage"></p>
+                <div class="success-details" id="successDetails"></div>
+            </div>
+            
+            <div class="credential-error-celebrate" id="credentialError" style="display: none;">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Oops! Let's Try Again</h3>
+                <p id="errorMessage"></p>
+                <div class="error-suggestions">
+                    <p><strong>Quick fixes:</strong></p>
+                    <ul>
+                        <li>Check internet connection</li>
+                        <li>Verify email configuration</li>
+                        <li>Ensure donor contact details are correct</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="modal-actions-celebrate">
+                <button class="btn-cancel-celebrate" onclick="cancelSendCredentials()">
+                    <i class="fas fa-times"></i> Maybe Later
+                </button>
+                <button class="btn-confirm-celebrate" onclick="confirmSendCredentials()">
+                    <i class="fas fa-paper-plane"></i> Send Welcome!
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <script>
         let deleteUserId, deleteUserTable;
+        let currentDonorId = null;
+        let currentDonorData = null;
 
+        // Modal Functions
         function openRoleModal() {
             document.getElementById('roleModal').style.display = 'flex';
         }
@@ -497,12 +487,11 @@
         window.onclick = function(event) {
             const roleModal = document.getElementById('roleModal');
             const deleteModal = document.getElementById('deleteModal');
-            if (event.target === roleModal) {
-                closeRoleModal();
-            }
-            if (event.target === deleteModal) {
-                closeDeleteModal();
-            }
+            const credentialModal = document.getElementById('credentialModal');
+            
+            if (event.target === roleModal) closeRoleModal();
+            if (event.target === deleteModal) closeDeleteModal();
+            if (event.target === credentialModal) cancelSendCredentials();
         }
 
         // Search functionality
@@ -519,7 +508,7 @@
                 const text = row.textContent.toLowerCase();
                 const isMatch = text.includes(input);
                 
-                // Also apply current filter to prevent showing unmatched roles
+                // Also apply current filter
                 const currentRoleFilter = document.getElementById('roleFilter').value;
                 const rowRole = row.getAttribute('data-role');
                 const staffRoles = ['admin', 'doctor', 'nurse', 'labtech', 'shariah'];
@@ -533,7 +522,6 @@
                     isFiltered = currentRoleFilter === rowRole;
                 }
 
-
                 if (isMatch && isFiltered) {
                     row.style.display = '';
                     found = true;
@@ -541,7 +529,11 @@
                     row.style.display = 'none';
                 }
             }
-            document.getElementById('noResults').style.display = found ? 'none' : 'table-row';
+            
+            const noResults = document.getElementById('noResults');
+            if (noResults) {
+                noResults.style.display = found ? 'none' : 'table-row';
+            }
         }
 
         // Filter by role (Dropdown)
@@ -553,19 +545,23 @@
             const tabs = document.querySelectorAll('.tabs .tab');
             tabs.forEach(tab => tab.classList.remove('active'));
 
-            const targetTab = document.querySelector(`.tabs .tab[data-tab="${role === 'admin' || role === 'doctor' || role === 'nurse' || role === 'labtech' || role === 'shariah' ? 'staff' : role}"]`);
+            let targetTab;
+            if (role === 'all') {
+                targetTab = document.querySelector('.tabs .tab[data-tab="all"]');
+            } else if (['admin', 'doctor', 'nurse', 'labtech', 'shariah'].includes(role)) {
+                targetTab = document.querySelector('.tabs .tab[data-tab="staff"]');
+            } else {
+                targetTab = document.querySelector(`.tabs .tab[data-tab="${role}"]`);
+            }
+            
             if (targetTab) {
                 targetTab.classList.add('active');
-            } else if (role === 'all') {
-                document.querySelector('.tabs .tab[data-tab="all"]').classList.add('active');
             }
-
 
             const table = document.getElementById('usersTable');
             const rows = table.getElementsByTagName('tr');
             const staffRoles = ['admin', 'doctor', 'nurse', 'labtech', 'shariah'];
             let found = false;
-
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
@@ -576,7 +572,7 @@
                 
                 if (role === 'all') {
                     isVisible = true;
-                } else if (role === 'staff') { // This case should theoretically not happen via dropdown, but handled for safety
+                } else if (role === 'staff') {
                     isVisible = staffRoles.includes(rowRole);
                 } else {
                     isVisible = rowRole === role;
@@ -598,14 +594,18 @@
                     row.style.display = 'none';
                 }
             }
-             document.getElementById('noResults').style.display = found ? 'none' : 'table-row';
+            
+            const noResults = document.getElementById('noResults');
+            if (noResults) {
+                noResults.style.display = found ? 'none' : 'table-row';
+            }
         }
 
         // Tab filtering
         function filterTab(type) {
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
-            event.currentTarget.classList.add('active'); // Use currentTarget to target the button itself
+            event.currentTarget.classList.add('active');
 
             const table = document.getElementById('usersTable');
             const rows = table.getElementsByTagName('tr');
@@ -614,7 +614,13 @@
 
             // Sync with dropdown
             const roleDropdown = document.getElementById('roleFilter');
-            roleDropdown.value = (type === 'donors' ? 'donor' : (type === 'parents' ? 'parent' : (type === 'staff' ? 'all' : type))); // Tabs don't match dropdown exactly, use 'all' for staff
+            if (type === 'all') {
+                roleDropdown.value = 'all';
+            } else if (type === 'staff') {
+                roleDropdown.value = 'staff';
+            } else {
+                roleDropdown.value = type;
+            }
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
@@ -631,10 +637,8 @@
                     isVisible = true;
                 } else if (type === 'staff') {
                     isVisible = staffRoles.includes(rowRole);
-                } else if (type === 'donor') {
-                    isVisible = rowRole === 'donor';
-                } else if (type === 'parent') {
-                    isVisible = rowRole === 'parent';
+                } else {
+                    isVisible = rowRole === type;
                 }
                 
                 if (isVisible && isMatch) {
@@ -644,15 +648,17 @@
                     row.style.display = 'none';
                 }
             }
-            document.getElementById('noResults').style.display = found ? 'none' : 'table-row';
+            
+            const noResults = document.getElementById('noResults');
+            if (noResults) {
+                noResults.style.display = found ? 'none' : 'table-row';
+            }
         }
 
-
-        // Sort table (Keep the implementation)
+        // Sort table
         function sortTable(columnIndex) {
             const table = document.getElementById('usersTable');
             let switching = true;
-            let shouldSwitch, i;
             let dir = 'asc';
             let switchcount = 0;
 
@@ -660,42 +666,41 @@
                 switching = false;
                 const rows = table.rows;
 
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
+                for (let i = 1; i < (rows.length - 1); i++) {
+                    const shouldSwitch = false;
                     const x = rows[i].getElementsByTagName('TD')[columnIndex];
                     const y = rows[i + 1].getElementsByTagName('TD')[columnIndex];
 
                     if (dir === 'asc') {
-                        if (x.textContent.toLowerCase() > y.textContent.toLowerCase()) {
-                            shouldSwitch = true;
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
                             break;
                         }
                     } else if (dir === 'desc') {
-                        if (x.textContent.toLowerCase() < y.textContent.toLowerCase()) {
-                            shouldSwitch = true;
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                            switching = true;
                             break;
                         }
                     }
                 }
-
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                
+                if (!switching && dir === 'asc') {
+                    dir = 'desc';
                     switching = true;
-                    switchcount++;
-                } else {
-                    if (switchcount === 0 && dir === 'asc') {
-                        dir = 'desc';
-                        switching = true;
-                        switchcount++;
-                    }
                 }
             }
         }
 
+       // User Actions 
         function editUser(userId, userTable) {
-            window.location.href = `/admin/users/${userTable}/${userId}/edit`;
+            window.location.href = `/hmmc/users/${userTable}/${userId}/edit`;
         }
 
+        function viewUser(userId, userTable) {
+            window.location.href = `/hmmc/users/${userTable}/${userId}`;
+        }
 
         function confirmDelete(userId, userTable, userName) {
             deleteUserId = userId;
@@ -705,43 +710,309 @@
         }
 
         function executeDelete() {
-            fetch(`/admin/users/${deleteUserTable}/${deleteUserId}`, {
+            // Construct the correct URL
+            const deleteUrl = `/hmmc/users/${deleteUserTable}/${deleteUserId}`;
+            
+            fetch(deleteUrl, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
-            }).then(response => response.json())
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     closeDeleteModal();
-                    // Show success message
-                    const successMsg = document.createElement('div');
-                    successMsg.className = 'alert alert-success';
-                    successMsg.style.cssText = 'position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:16px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:9999;';
-                    successMsg.innerHTML = '<i class="fas fa-check-circle"></i> User deleted successfully!';
-                    document.body.appendChild(successMsg);
+                    showNotification('User deleted successfully!', 'success');
                     setTimeout(() => {
-                        successMsg.remove();
                         location.reload();
                     }, 2000);
                 } else {
-                    alert('Error deleting user. Please try again.');
+                    throw new Error(data.error || 'Error deleting user');
                 }
-            }).catch(error => {
+            })
+            .catch(error => {
                 console.error('Error:', error);
-                alert('Error deleting user. Please try again.');
+                showNotification('Error deleting user. Please try again.', 'error');
+            });
+        }
+    
+        // Credential sending functionality
+        function sendCredentials(donorId, donorName, donorEmail, donorContact) {
+            currentDonorId = donorId;
+            currentDonorData = {
+                name: donorName,
+                email: donorEmail,
+                contact: donorContact
+            };
+
+            // Show confirmation modal
+            const modal = document.getElementById('credentialModal');
+            const donorInfo = document.getElementById('donorInfo');
+            
+            let infoHtml = `
+                <div class="donor-info">
+                    <strong>${donorName}</strong><br>
+                    <small class="text-muted">ID: ${donorId}</small>
+            `;
+            
+            if (donorEmail && donorEmail !== 'N/A') {
+                infoHtml += `<br>📧 ${donorEmail}`;
+            }
+            
+            if (donorContact && donorContact !== 'N/A') {
+                infoHtml += `<br>📱 ${donorContact}`;
+            }
+            
+            infoHtml += `</div>`;
+            donorInfo.innerHTML = infoHtml;
+            
+            // Reset states
+            document.getElementById('credentialLoading').style.display = 'none';
+            document.getElementById('credentialSuccess').style.display = 'none';
+            document.getElementById('credentialError').style.display = 'none';
+            
+            modal.style.display = 'flex';
+        }
+
+        function confirmSendCredentials() {
+            const modal = document.getElementById('credentialModal');
+            const loading = document.getElementById('credentialLoading');
+            const success = document.getElementById('credentialSuccess');
+            const error = document.getElementById('credentialError');
+            
+            // Show loading, hide others
+            loading.style.display = 'block';
+            success.style.display = 'none';
+            error.style.display = 'none';
+            
+            // Send AJAX request
+            fetch('{{ route("hmmc.send-credentials") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    donor_id: currentDonorId,
+                    donor_name: currentDonorData.name,
+                    donor_email: currentDonorData.email,
+                    donor_contact: currentDonorData.contact
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        let errorMessage = `HTTP ${response.status}`;
+                        try {
+                            const errorData = JSON.parse(text);
+                            errorMessage = errorData.message || errorMessage;
+                        } catch (e) {
+                            errorMessage = text || errorMessage;
+                        }
+                        throw new Error(errorMessage);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                loading.style.display = 'none';
+                
+                if (data.success) {
+                    success.style.display = 'block';
+                    document.getElementById('successMessage').textContent = data.message;
+                    
+                    // Update status indicators
+                    if (data.email_sent) {
+                        document.getElementById('emailStatus').innerHTML = '<i class="fas fa-check" style="color: #10b981;"></i>';
+                    }
+                    if (data.whatsapp_sent) {
+                        document.getElementById('whatsappStatus').innerHTML = '<i class="fas fa-check" style="color: #10b981;"></i>';
+                    }
+                    
+                    // Close modal after 4 seconds
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        success.style.display = 'none';
+                        // Reset status indicators
+                        document.getElementById('emailStatus').innerHTML = '<i class="fas fa-clock"></i>';
+                        document.getElementById('whatsappStatus').innerHTML = '<i class="fas fa-clock"></i>';
+                    }, 4000);
+                } else {
+                    throw new Error(data.message || 'Failed to send credentials');
+                }
+            })
+            .catch(err => {
+                console.error('Full error:', err);
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                
+                let errorMessage = err.message;
+                if (err.message.includes('Network response was not ok')) {
+                    errorMessage = 'Server error. Please check your email configuration.';
+                }
+                
+                document.getElementById('errorMessage').textContent = errorMessage;
             });
         }
 
-        function viewUser(userId, userTable) {
-            window.location.href = `/admin/users/${userTable}/${userId}`;
+        function sendCredentials(donorId, donorName, donorEmail, donorContact) {
+            currentDonorId = donorId;
+            currentDonorData = {
+                name: donorName,
+                email: donorEmail,
+                contact: donorContact
+            };
+
+            // Show confirmation modal
+            const modal = document.getElementById('credentialModal');
+            const donorInfo = document.getElementById('donorInfo');
+            
+            let infoHtml = `
+                <div class="donor-avatar-large">
+                    <div class="avatar-initials">${donorName.charAt(0).toUpperCase()}</div>
+                </div>
+                <div class="donor-details">
+                    <h3>${donorName}</h3>
+                    <div class="donor-contact-info">
+            `;
+            
+            if (donorEmail && donorEmail !== 'N/A') {
+                infoHtml += `<div class="contact-item"><i class="fas fa-envelope"></i> ${donorEmail}</div>`;
+            }
+            
+            if (donorContact && donorContact !== 'N/A') {
+                infoHtml += `<div class="contact-item"><i class="fas fa-phone"></i> ${donorContact}</div>`;
+            }
+            
+            infoHtml += `</div></div>`;
+            donorInfo.innerHTML = infoHtml;
+            
+            // Reset states
+            document.getElementById('credentialLoading').style.display = 'none';
+            document.getElementById('credentialSuccess').style.display = 'none';
+            document.getElementById('credentialError').style.display = 'none';
+            
+            modal.style.display = 'flex';
+        }
+
+        function cancelSendCredentials() {
+            const modal = document.getElementById('credentialModal');
+            modal.style.display = 'none';
+            
+            // Reset states
+            document.getElementById('credentialLoading').style.display = 'none';
+            document.getElementById('credentialSuccess').style.display = 'none';
+            document.getElementById('credentialError').style.display = 'none';
         }
 
         function exportUsers() {
             // Add export functionality here
-            alert('Export functionality coming soon!');
+            showNotification('Export functionality coming soon!', 'info');
         }
+
+        // Utility Functions
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 9999;
+                color: white;
+                font-weight: 500;
+                max-width: 300px;
+            `;
+            
+            const bgColors = {
+                success: '#10b981',
+                error: '#ef4444',
+                info: '#3b82f6',
+                warning: '#f59e0b'
+            };
+            
+            notification.style.background = bgColors[type] || bgColors.info;
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${message}`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add any initialization code here
+        });
     </script>
+
+    <style>
+        .notification {
+            transition: all 0.3s ease;
+        }
+        
+        .donor-info-container {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            z-index: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .dropdown-content a {
+            color: #374151;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .modal-icon-success {
+            font-size: 48px;
+            color: #10b981;
+            margin-bottom: 15px;
+        }
+    </style>
 @endsection

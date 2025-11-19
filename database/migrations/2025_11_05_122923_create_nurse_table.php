@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('ns_Institution');
             $table->string('ns_Specialization');
             $table->integer('ns_YearsOfExperience');
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
 

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('lt_Certification')->nullable();
             $table->string('lt_Specialization')->nullable();
             $table->integer('lt_YearsOfExperience')->nullable();
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
     }

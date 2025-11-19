@@ -15,17 +15,29 @@ class Donor extends Model
     protected $fillable = [
         'dn_NRIC',
         'dn_FullName',
+        'dn_Username',
+        'dn_Password',
+        'first_login',
         'dn_DOB',
         'dn_Contact',
         'dn_Email',
         'dn_Address',
+        'dn_Parity',
+        'dn_DeliveryDetails',
+        'dn_Availability',
         'dn_InfectionDeseaseRisk',
         'dn_Medication',
         'dn_RecentIllness',
         'dn_TobaccoAlcohol',
-        'dn_DietaryAlergy',
-        'dn_Password',
-        'dn_Username',
+        'dn_DietaryAlerts',
+        'user_id',
+    ];
+
+    protected $casts = [
+        'dn_TobaccoAlcohol' => 'boolean',
+        'dn_DOB' => 'date',
+        'dn_DeliveryDetails' => 'array',
+        'dn_Availability' => 'array',
     ];
 
     // Accessor for formatted donor ID
@@ -39,9 +51,13 @@ class Donor extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Example Usage
-    // <p>Donor ID: {{ $donor->formatted_id }}</p>
+    public function screening()
+    {
+        return $this->hasOne(DonorToBe::class, 'dn_ID', 'dn_ID');
+    }
 
-    // Output
-    // Donor ID: #D1
+    public function getIsActiveAttribute()
+    {
+        return $this->screening && $this->screening->dtb_ScreeningStatus === 'passed';
+    }
 }

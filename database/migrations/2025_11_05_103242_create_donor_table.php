@@ -17,15 +17,20 @@ return new class extends Migration
             $table->string('dn_FullName');
             $table->string('dn_Username')->unique();
             $table->string('dn_Password');
+            $table->boolean('first_login')->default(true);
             $table->date('dn_DOB');
             $table->string('dn_Contact');
-            $table->string('dn_Email')->unique();
+            $table->string('dn_Email')->nullable();
             $table->string('dn_Address');
+            $table->integer('dn_Parity')->default(0);
+            $table->json('dn_DeliveryDetails')->nullable();
             $table->string('dn_InfectionDeseaseRisk')->nullable();
             $table->string('dn_Medication')->nullable();
             $table->string('dn_RecentIllness')->nullable();
             $table->boolean('dn_TobaccoAlcohol')->default(false);
             $table->string('dn_DietaryAlerts')->nullable();
+            $table->json('dn_Availability')->nullable();
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
 

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Register - HALIMATUSSAADIA Mother's Milk Centre</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -294,7 +295,7 @@
             </div>
             <p class="text-xs text-gray-500 ml-1">We will send your login credentials here (if provided).</p>
         </div>
-
+        {{--  
         <div class="space-y-2">
             <label for="contact" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                 <i class="fas fa-phone text-orange-500 text-sm"></i>
@@ -312,7 +313,7 @@
                 <i class="fas fa-phone absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
             <p class="text-xs text-gray-500 ml-1">Your primary contact phone number</p>
-        </div>
+        </div>--}}
 
         <div class="space-y-2">
             <label for="address" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
@@ -796,81 +797,121 @@
         </div>
     </div>
 
+    <!-- Add this hidden form at the bottom of your blade -->
+<form id="finalRegistrationForm" method="POST" action="{{ route('register.donor.store') }}" class="hidden">
+    @csrf
+    <!-- Step 1 Data -->
+    <input type="hidden" name="contact_number" id="final_contact_number">
+    <input type="hidden" name="terms" id="final_terms" value="accepted">
+    
+    <!-- Step 2 Data -->
+    <input type="hidden" name="nric" id="final_nric">
+    <input type="hidden" name="fullname" id="final_fullname">
+    <input type="hidden" name="dob" id="final_dob">
+    <input type="hidden" name="email" id="final_email">
+    <input type="hidden" name="contact" id="final_contact">
+    <input type="hidden" name="address" id="final_address">
+    <input type="hidden" name="parity" id="final_parity">
+    <!-- Delivery details as JSON -->
+    <input type="hidden" name="deliveryDate" id="final_deliveryDate">
+    <input type="hidden" name="gestationWeek" id="final_gestationWeek">
+    
+    <!-- Step 3 Data -->
+    <input type="hidden" name="infectiousRiskOption" id="final_infectiousRiskOption">
+    <input type="hidden" name="infectiousRiskDetailText" id="final_infectiousRiskDetailText">
+    <input type="hidden" name="medicationOption" id="final_medicationOption">
+    <input type="hidden" name="medicationDetailText" id="final_medicationDetailText">
+    <input type="hidden" name="recentIllnessOption" id="final_recentIllnessOption">
+    <input type="hidden" name="recentIllnessDetailText" id="final_recentIllnessDetailText">
+    <input type="hidden" name="tobaccoAlcoholOption" id="final_tobaccoAlcoholOption">
+    <input type="hidden" name="dietaryAlertsOption" id="final_dietaryAlertsOption">
+    <input type="hidden" name="dietaryAlertsDetailText" id="final_dietaryAlertsDetailText">
+    
+    <!-- Step 4 Data -->
+    <input type="hidden" name="availableDays" id="final_availableDays">
+    <input type="hidden" name="timeSlots" id="final_timeSlots">
+</form>
 
-    <script>
-        // Function to toggle textareas for Health & Lifestyle Page (Step 3)
-        function toggleDetail(detailId, isVisible) {
-            const detailElement = document.getElementById(detailId);
+
+<script>
+    // Function to toggle textareas for Health & Lifestyle Page (Step 3)
+    function toggleDetail(detailId, isVisible) {
+        const detailElement = document.getElementById(detailId);
+        if (detailElement) {
             const textarea = detailElement.querySelector('textarea');
             if (isVisible) {
                 detailElement.classList.remove('hidden');
-                textarea.setAttribute('required', 'required');
+                if (textarea) textarea.setAttribute('required', 'required');
             } else {
                 detailElement.classList.add('hidden');
-                textarea.removeAttribute('required');
-                textarea.value = ''; 
+                if (textarea) {
+                    textarea.removeAttribute('required');
+                    textarea.value = ''; 
+                }
             }
         }
+    }
+    
+    // Function to generate dynamic fields based on Parity value
+    function generateDeliveryFields(parityValue) {
+        const container = document.getElementById('delivery-info-container');
+        if (!container) return;
         
-        // Function to generate dynamic fields based on Parity value
-        function generateDeliveryFields(parityValue) {
-            const container = document.getElementById('delivery-info-container');
-            const count = parseInt(parityValue) || 0;
-            container.innerHTML = '<p class="font-semibold text-gray-700">Delivery Details:</p>';
+        const count = parseInt(parityValue) || 0;
+        container.innerHTML = '<p class="font-semibold text-gray-700">Delivery Details:</p>';
 
-            if (count > 0) {
-                container.classList.remove('hidden');
-                for (let i = 1; i <= count; i++) {
-                    const isLastChild = (i === count);
-                    const sectionHtml = `
-                        <div class="p-3 border border-blue-200 rounded-xl bg-white space-y-3 shadow-sm">
-                            <h4 class="font-bold text-sm text-blue-600">Child ${i} Details ${isLastChild ? '(Most Recent)' : ''}</h4>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <label for="deliveryDate_${i}" class="text-xs font-medium text-gray-700 flex items-center">
-                                        <i class="fas fa-calendar-check text-teal-500 mr-2"></i>
-                                        Delivery Date <span class="text-red-500">*</span>
-                                    </label>
-                                    <input 
-                                        id="deliveryDate_${i}" 
-                                        name="deliveryDate[${i}]" 
-                                        type="date" 
-                                        required 
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 transition"
-                                    >
-                                </div>
-                                <div class="space-y-2">
-                                    <label for="gestationWeek_${i}" class="text-xs font-medium text-gray-700 flex items-center">
-                                        <i class="fas fa-clock text-pink-500 mr-2"></i>
-                                        Gestation Week <span class="text-red-500">*</span>
-                                    </label>
-                                    <input 
-                                        id="gestationWeek_${i}" 
-                                        name="gestationWeek[${i}]" 
-                                        type="number" 
-                                        min="1"
-                                        max="50"
-                                        required 
-                                        placeholder="e.g., 38"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 transition"
-                                    >
-                                </div>
+        if (count > 0) {
+            container.classList.remove('hidden');
+            for (let i = 1; i <= count; i++) {
+                const isLastChild = (i === count);
+                const sectionHtml = `
+                    <div class="p-3 border border-blue-200 rounded-xl bg-white space-y-3 shadow-sm">
+                        <h4 class="font-bold text-sm text-blue-600">Child ${i} Details ${isLastChild ? '(Most Recent)' : ''}</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="deliveryDate_${i}" class="text-xs font-medium text-gray-700 flex items-center">
+                                    <i class="fas fa-calendar-check text-teal-500 mr-2"></i>
+                                    Delivery Date <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    id="deliveryDate_${i}" 
+                                    name="deliveryDate[${i}]" 
+                                    type="date" 
+                                    required 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 transition"
+                                >
+                            </div>
+                            <div class="space-y-2">
+                                <label for="gestationWeek_${i}" class="text-xs font-medium text-gray-700 flex items-center">
+                                    <i class="fas fa-clock text-pink-500 mr-2"></i>
+                                    Gestation Week <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    id="gestationWeek_${i}" 
+                                    name="gestationWeek[${i}]" 
+                                    type="number" 
+                                    min="1"
+                                    max="50"
+                                    required 
+                                    placeholder="e.g., 38"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-500 transition"
+                                >
                             </div>
                         </div>
-                    `;
-                    container.insertAdjacentHTML('beforeend', sectionHtml);
-                }
-            } else {
-                container.classList.add('hidden');
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', sectionHtml);
             }
+        } else {
+            container.classList.add('hidden');
         }
-        
-        const AVAILABLE_SLOTS = [
+    }
+    
+    const AVAILABLE_SLOTS = [
         "8:00 AM - 9:00 AM",
         "9:00 AM - 10:00 AM",
         "10:00 AM - 11:00 AM",
         "11:00 AM - 12:00 PM",
-        // 12 PM - 2 PM is excluded (Lunch/Rest)
         "2:00 PM - 3:00 PM",
         "3:00 PM - 4:00 PM"
     ];
@@ -901,6 +942,8 @@
     // Function to show/hide time slots for a specific day
     function toggleTimeSlots(day, isChecked) {
         const container = document.getElementById('dynamicTimeSlotsContainer');
+        if (!container) return;
+        
         const dayId = `${day}TimeSlots`;
         let dayElement = document.getElementById(dayId);
 
@@ -926,9 +969,306 @@
         }
     }
 
+// Function to collect all data and submit via AJAX
+function submitAllData() {
+    console.log('Starting form submission...');
+    
+    const submitBtn = document.querySelector('#availabilityForm button[type="submit"]');
+    if (!submitBtn) {
+        console.error('Submit button not found');
+        return;
+    }
+    
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    submitBtn.disabled = true;
 
-    // Step 4 Validation and Navigation (Replaces previous availability logic)
-    document.getElementById('availabilityForm').addEventListener('submit', function(e) {
+    try {
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                        document.querySelector('input[name="_token"]')?.value;
+        
+        if (!csrfToken) {
+            throw new Error('CSRF token not found');
+        }
+
+        // Collect Step 1 data
+        const contactNumber = document.getElementById('contact_number_first')?.value;
+        const termsChecked = document.getElementById('terms')?.checked;
+        
+        if (!contactNumber) {
+            throw new Error('Contact number is required');
+        }
+        
+        if (!termsChecked) {
+            throw new Error('Please agree to the Terms of Service and Privacy Policy');
+        }
+        
+        // Collect Step 2 data
+        const nric = document.getElementById('nric')?.value;
+        const fullname = document.getElementById('fullname')?.value;
+        const dob = document.getElementById('dob')?.value;
+        const email = document.getElementById('email')?.value;
+        const address = document.getElementById('address')?.value;
+        const parity = document.getElementById('parity')?.value;
+        
+        if (!nric || !fullname || !dob || !address || !parity) {
+            throw new Error('Please fill all required personal information fields');
+        }
+        
+        // Collect delivery details as JSON arrays
+        const deliveryDates = [];
+        const gestationWeeks = [];
+        const parityValue = parseInt(parity) || 0;
+        
+        for (let i = 1; i <= parityValue; i++) {
+            const dateField = document.getElementById(`deliveryDate_${i}`);
+            const weekField = document.getElementById(`gestationWeek_${i}`);
+            if (dateField && weekField) {
+                if (!dateField.value || !weekField.value) {
+                    throw new Error(`Please fill all delivery details for Child ${i}`);
+                }
+                deliveryDates.push(dateField.value);
+                gestationWeeks.push(weekField.value);
+            }
+        }
+        
+        // Collect Step 3 data
+        const infectiousRiskOption = document.querySelector('input[name="infectiousRiskOption"]:checked')?.value;
+        const infectiousRiskDetailText = document.querySelector('textarea[name="infectiousRiskDetailText"]')?.value || '';
+        const medicationOption = document.querySelector('input[name="medicationOption"]:checked')?.value;
+        const medicationDetailText = document.querySelector('textarea[name="medicationDetailText"]')?.value || '';
+        const recentIllnessOption = document.querySelector('input[name="recentIllnessOption"]:checked')?.value;
+        const recentIllnessDetailText = document.querySelector('textarea[name="recentIllnessDetailText"]')?.value || '';
+        const tobaccoAlcoholOption = document.querySelector('input[name="tobaccoAlcoholOption"]:checked')?.value;
+        const dietaryAlertsOption = document.querySelector('input[name="dietaryAlertsOption"]:checked')?.value;
+        const dietaryAlertsDetailText = document.querySelector('textarea[name="dietaryAlertsDetailText"]')?.value || '';
+        
+        if (!infectiousRiskOption || !medicationOption || !recentIllnessOption || !tobaccoAlcoholOption || !dietaryAlertsOption) {
+            throw new Error('Please fill all health and lifestyle information');
+        }
+        
+        // Collect Step 4 data
+        const availableDays = Array.from(document.querySelectorAll('input[name="availableDays[]"]:checked')).map(cb => cb.value);
+        const timeSlots = {};
+        
+        if (availableDays.length === 0) {
+            throw new Error('Please select at least one available day');
+        }
+        
+        availableDays.forEach(day => {
+            const daySlots = Array.from(document.querySelectorAll(`input[name="timeSlots[${day}][]"]:checked`)).map(cb => cb.value);
+            if (daySlots.length > 0) {
+                timeSlots[day] = daySlots;
+            }
+        });
+        
+        // Check if at least one time slot is selected
+        const totalTimeSlots = Object.values(timeSlots).reduce((total, slots) => total + slots.length, 0);
+        if (totalTimeSlots === 0) {
+            throw new Error('Please select at least one time slot');
+        }
+        
+        if (!termsChecked) {
+            alert('You must accept the Terms of Service and Privacy Policy to continue.');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('_token', csrfToken);
+        formData.append('contact_number', contactNumber);
+        formData.append('terms', '1');  // or 'on' or 'true'
+        formData.append('nric', nric);
+        formData.append('fullname', fullname);
+        formData.append('dob', dob);
+        formData.append('email', email || '');
+        formData.append('address', address);
+        formData.append('parity', parity);
+        formData.append('deliveryDate', JSON.stringify(deliveryDates));
+        formData.append('gestationWeek', JSON.stringify(gestationWeeks));
+        formData.append('infectiousRiskOption', infectiousRiskOption);
+        formData.append('infectiousRiskDetailText', infectiousRiskDetailText);
+        formData.append('medicationOption', medicationOption);
+        formData.append('medicationDetailText', medicationDetailText);
+        formData.append('recentIllnessOption', recentIllnessOption);
+        formData.append('recentIllnessDetailText', recentIllnessDetailText);
+        formData.append('tobaccoAlcoholOption', tobaccoAlcoholOption);
+        formData.append('dietaryAlertsOption', dietaryAlertsOption);
+        formData.append('dietaryAlertsDetailText', dietaryAlertsDetailText);
+        formData.append('availableDays', JSON.stringify(availableDays));
+        formData.append('timeSlots', JSON.stringify(timeSlots));
+
+        console.log('Form data collected, making AJAX request...');
+        console.log('Terms accepted:', termsChecked);
+        console.log('Available days:', availableDays);
+        console.log('Time slots:', timeSlots);
+
+        // Add timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+        // Submit via AJAX
+        fetch("{{ route('register.donor.store') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: formData,
+            signal: controller.signal
+        })
+        .then(response => {
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Server error: ${response.status} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data);
+            
+            if (data.success) {
+                // Success - show completion page
+                document.getElementById('donorAvailabilityPage').classList.add('hidden');
+                document.getElementById('completePage').classList.remove('hidden');
+                window.scrollTo(0, 0);
+            } else {
+                throw new Error(data.message || 'Registration failed');
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);
+            console.error('Registration Error:', error);
+            
+            if (error.name === 'AbortError') {
+                alert('Request timed out. Please try again.');
+            } else {
+                alert('Registration failed: ' + error.message);
+            }
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+
+    } catch (error) {
+        console.error('Error in submitAllData:', error);
+        alert('Error: ' + error.message);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+    // NAVIGATION FUNCTIONS
+
+    // Step 1 -> Step 2
+    document.getElementById('emailForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validate contact number
+        const contactNumber = document.getElementById('contact_number_first')?.value;
+        const termsChecked = document.getElementById('terms')?.checked;
+        
+        if (!contactNumber) {
+            alert('Please enter your contact number');
+            return;
+        }
+        
+        if (!termsChecked) {
+            alert('Please agree to the Terms of Service and Privacy Policy');
+            return;
+        }
+        
+        document.getElementById('emailPage').classList.add('hidden');
+        document.getElementById('personalInfoPage').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    });
+
+    // Step 2 -> Step 1
+    function goBackToEmail() {
+        document.getElementById('personalInfoPage').classList.add('hidden');
+        document.getElementById('emailPage').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    // Step 2 -> Step 3
+    document.getElementById('personalInfoForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Basic validation
+        const nric = document.getElementById('nric')?.value;
+        const fullname = document.getElementById('fullname')?.value;
+        const dob = document.getElementById('dob')?.value;
+        const address = document.getElementById('address')?.value;
+        const parity = document.getElementById('parity')?.value;
+        
+        if (!nric || !fullname || !dob || !address || !parity) {
+            alert('Please fill all required fields');
+            return;
+        }
+        
+        // Basic validation for dynamic fields when parity > 0
+        const parityValue = parseInt(parity) || 0;
+        if (parityValue > 0) {
+            let valid = true;
+            for (let i = 1; i <= parityValue; i++) {
+                const deliveryDate = document.getElementById(`deliveryDate_${i}`);
+                const gestationWeek = document.getElementById(`gestationWeek_${i}`);
+                if (deliveryDate && gestationWeek && (!deliveryDate.value || !gestationWeek.value)) {
+                    alert(`Please fill out all details for Child ${i}.`);
+                    valid = false;
+                    break;
+                }
+            }
+            if (!valid) return;
+        }
+
+        document.getElementById('personalInfoPage').classList.add('hidden');
+        document.getElementById('healthLifestylePage').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    });
+
+    // Step 3 -> Step 2
+    function goBackToPersonalInfo() {
+        document.getElementById('healthLifestylePage').classList.add('hidden');
+        document.getElementById('personalInfoPage').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    // Step 3 -> Step 4 (Availability Page)
+    document.getElementById('healthLifestyleForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Basic validation
+        const infectiousRiskOption = document.querySelector('input[name="infectiousRiskOption"]:checked');
+        const medicationOption = document.querySelector('input[name="medicationOption"]:checked');
+        const recentIllnessOption = document.querySelector('input[name="recentIllnessOption"]:checked');
+        const tobaccoAlcoholOption = document.querySelector('input[name="tobaccoAlcoholOption"]:checked');
+        const dietaryAlertsOption = document.querySelector('input[name="dietaryAlertsOption"]:checked');
+        
+        if (!infectiousRiskOption || !medicationOption || !recentIllnessOption || !tobaccoAlcoholOption || !dietaryAlertsOption) {
+            alert('Please answer all health and lifestyle questions');
+            return;
+        }
+
+        document.getElementById('healthLifestylePage').classList.add('hidden');
+        document.getElementById('donorAvailabilityPage').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    });
+
+    // Step 4 -> Step 3
+    function goBackToHealthLifestyle() {
+        document.getElementById('donorAvailabilityPage').classList.add('hidden');
+        document.getElementById('healthLifestylePage').classList.remove('hidden');
+        window.scrollTo(0, 0);
+    }
+
+    // Step 4 -> Final Submission (AJAX)
+    document.getElementById('availabilityForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const selectedDays = document.querySelectorAll('.day-checkbox:checked').length;
@@ -943,121 +1283,26 @@
             return;
         }
 
-        document.getElementById('donorAvailabilityPage').classList.add('hidden');
-        document.getElementById('completePage').classList.remove('hidden');
-        window.scrollTo(0, 0);
+        // Submit data via AJAX and show completion page
+        submitAllData();
     });
 
-        // NAVIGATION FUNCTIONS
+    // Initialize any required elements on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Registration form loaded');
         
-        // Step 1 -> Step 2
-        document.getElementById('emailForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('emailPage').classList.add('hidden');
-            document.getElementById('personalInfoPage').classList.remove('hidden');
-            window.scrollTo(0, 0);
-        });
-
-        // Step 2 -> Step 1
-        function goBackToEmail() {
-            document.getElementById('personalInfoPage').classList.add('hidden');
-            document.getElementById('emailPage').classList.remove('hidden');
-            window.scrollTo(0, 0);
-        }
-
-        // Step 2 -> Step 3
-        document.getElementById('personalInfoForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Basic validation for dynamic fields when parity > 0
-            const parityValue = parseInt(document.getElementById('parity').value) || 0;
-            if (parityValue > 0) {
-                let valid = true;
-                for (let i = 1; i <= parityValue; i++) {
-                    const deliveryDate = document.getElementById(`deliveryDate_${i}`);
-                    const gestationWeek = document.getElementById(`gestationWeek_${i}`);
-                    if (!deliveryDate.value || !gestationWeek.value) {
-                        alert(`Please fill out all details for Child ${i}.`);
-                        valid = false;
-                        break;
-                    }
-                }
-                if (!valid) return;
-            }
-
-            document.getElementById('personalInfoPage').classList.add('hidden');
-            document.getElementById('healthLifestylePage').classList.remove('hidden');
-            window.scrollTo(0, 0);
-        });
-
-        // Step 3 -> Step 2
-        function goBackToPersonalInfo() {
-            document.getElementById('healthLifestylePage').classList.add('hidden');
-            document.getElementById('personalInfoPage').classList.remove('hidden');
-            window.scrollTo(0, 0);
-        }
-
-        // Step 3 -> Step 4 (Availability Page)
-        document.getElementById('healthLifestyleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('healthLifestylePage').classList.add('hidden');
-            document.getElementById('donorAvailabilityPage').classList.remove('hidden');
-            window.scrollTo(0, 0);
-        });
-
-        // Step 4 -> Step 3
-        function goBackToHealthLifestyle() {
-            document.getElementById('donorAvailabilityPage').classList.add('hidden');
-            document.getElementById('healthLifestylePage').classList.remove('hidden');
-            window.scrollTo(0, 0);
+        // Initialize delivery fields if parity has a value
+        const parityField = document.getElementById('parity');
+        if (parityField && parityField.value) {
+            generateDeliveryFields(parityField.value);
         }
         
-        // Step 4 -> Step 5 (Final Completion Page)
-        document.getElementById('availabilityForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Basic validation: Check if at least one day or time slot is selected
-            const dateSelected = document.getElementById("availableDate").value;
-            const selectedTimes = document.querySelectorAll('#timeSlotsContainer input[type="checkbox"]:checked').length;
-
-            if (!dateSelected) {
-            alert("Please select an available date.");
-            return;
-            }
-            if (selectedTimes === 0) {
-            alert("Please select at least one time slot.");
-            return;
-            }
-
-            document.getElementById('donorAvailabilityPage').classList.add('hidden');
-            document.getElementById('completePage').classList.remove('hidden');
-            window.scrollTo(0, 0);
-        });
-
-            const dateInput = document.getElementById("availableDate");
-            const dayDisplay = document.getElementById("dayDisplay");
-            const timeSlotsContainer = document.getElementById("timeSlotsContainer");
-            const selectedDayTitle = document.getElementById("selectedDayTitle");
-
-            dateInput.addEventListener("change", function () {
-                const dateValue = this.value;
-                if (dateValue) {
-                const selectedDate = new Date(dateValue + "T00:00:00");
-                const options = { weekday: "long" };
-                const dayName = selectedDate.toLocaleDateString("en-US", options);
-
-                // Show day name
-                dayDisplay.textContent = `You selected: ${dayName}`;
-                dayDisplay.classList.remove("hidden");
-
-                // Show corresponding time slots
-                timeSlotsContainer.classList.remove("hidden");
-                selectedDayTitle.textContent = `${dayName} Time Slots:`;
-                } else {
-                dayDisplay.classList.add("hidden");
-                timeSlotsContainer.classList.add("hidden");
-                }
-            });
-    </script>
+        // Make sure CSRF token is available
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (!csrfToken) {
+            console.warn('CSRF token meta tag not found');
+        }
+    });
+</script>
 </body>
 </html>

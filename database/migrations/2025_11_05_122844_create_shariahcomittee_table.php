@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('sc_Institution');
             $table->string('sc_Specialization');
             $table->integer('sc_YearsOfExperience');
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
     }

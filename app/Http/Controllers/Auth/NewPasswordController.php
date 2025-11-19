@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Donor;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,9 +37,6 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
@@ -48,15 +46,75 @@ class NewPasswordController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                auth()->login($user);
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        if ($status == Password::PASSWORD_RESET) {
+            $user = User::where('email', $request->email)->first();
+            if ($user && $user->role === 'donor') {
+                return redirect()->route('donor.dashboard')->with('status', __($status));
+            }
+            return redirect()->route('login')->with('status', __($status));
+        }
+
+        return back()->withInput($request->only('email'))
+                    ->withErrors(['email' => __($status)]);
+    }
+
+    /**
+     * Display the first-time password reset view for donors.
+     */
+    public function createFirstTime(Request $request): View
+    {
+        return view('auth.reset-password-firsttime', [
+            'nric' => session('donor_nric') ?? $request->old('nric')
+        ]);
+    }
+
+        /**
+     * Handle first-time password reset for donors.
+     */
+    public function storeFirstTime(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'nric' => ['required', 'string'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        // Find the donor by NRIC
+        $donor = Donor::where('dn_NRIC', $request->nric)->first();
+
+        if (!$donor) {
+            return back()->withInput($request->only('nric'))
+                        ->withErrors(['nric' => 'Donor not found with this NRIC.']);
+        }
+
+        // ✅ CRITICAL: Update password AND set first_login to false
+        $donor->update([
+            'dn_Password' => Hash::make($request->password),
+            'first_login' => 0 // This prevents future first-time login prompts
+        ]);
+
+        // Update or create user record using donor's email
+        $user = User::updateOrCreate(
+            ['email' => $donor->dn_Email],
+            [
+                'name' => $donor->dn_FullName,
+                'password' => Hash::make($request->password),
+                'role' => 'donor',
+                'role_id' => $donor->dn_ID
+            ]
+        );
+
+        // Log in the user
+        auth()->login($user);
+
+        // Clear first-time session data
+        session()->forget(['first_time_donor', 'donor_nric', 'donor_email', 'donor_id', 'donor_name']);
+
+        return redirect()->route('donor.dashboard')
+                    ->with('success', 'Password set successfully! Welcome to your dashboard.');
     }
 }

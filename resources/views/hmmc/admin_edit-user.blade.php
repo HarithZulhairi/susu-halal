@@ -33,13 +33,13 @@
         <h1>Edit {{ ucfirst($role) }} User</h1>
         <div class="breadcrumb">
             <a href="{{ route('hmmc.manage-users') }}"><i class="fas fa-users"></i> User Management</a> / 
-            <a href="{{ route('admin.users.show', ['role' => $role, 'id' => $user->id]) }}">View User</a> / 
+            <a href="{{ route('hmmc.users.show', ['role' => $role, 'id' => $user->id]) }}">View User</a> / 
             Edit User
         </div>
     </div>
 
     <div class="create-user-container">
-        <form class="create-user-form" method="POST" action="{{ route('admin.users.update', ['role' => $role, 'id' => $user->id]) }}">
+        <form class="create-user-form" method="POST" action="{{ route('hmmc.users.update', ['role' => $role, 'id' => $user->id]) }}">
             @csrf
             @method('PUT')
 
@@ -49,9 +49,9 @@
                     <i class="fas fa-{{ getRoleIcon($role) }}"></i>
                     <span>{{ ucfirst($role) }}</span>
                 </div>
-                <a href="{{ route('hmmc.manage-users') }}" class="btn-change-role" title="Back to Users">
+                <button type="button" class="btn-add-user" onclick="openRoleModal()">
                     <i class="fas fa-arrow-left"></i>
-                </a>
+                </button>
             </div>
 
             {{-- ====================== PERSONAL INFORMATION ====================== --}}
@@ -308,7 +308,6 @@
             {{-- ====================== SUBMIT ====================== --}}
             <div class="form-actions">
                 <a href="{{ url()->previous() }}" class="btn-cancel">
-
                     <i class="fas fa-times"></i> Cancel
                 </a>
                 <button type="submit" class="btn-create">
@@ -316,6 +315,80 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Role Selection Modal -->
+<div id="roleModal" class="modal">
+    <div class="modal-content">
+        <h2 class="modal-title">Select User Role</h2>
+        <p class="modal-subtitle">Choose the type of user you want to create</p>
+        
+        <div class="role-cards">
+            <a href="{{ route('hmmc.create-new-user', ['role' => 'admin']) }}" class="role-card">
+                <div class="role-card-content">
+                    <div class="role-icon blue">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>HMMC Admin</h3>
+                    <p>System administrator</p>
+                </div>
+            </a>
+
+            <a href="{{ route('hmmc.create-new-user', ['role' => 'doctor']) }}" class="role-card">
+                <div class="role-card-content">
+                    <div class="role-icon green">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h3>Doctor</h3>
+                    <p>Medical practitioner</p>
+                </div>
+            </a>
+
+            <a href="{{ route('hmmc.create-new-user', ['role' => 'nurse']) }}" class="role-card">
+                <div class="role-card-content">
+                    <div class="role-icon teal">
+                        <i class="fas fa-user-nurse"></i>
+                    </div>
+                    <h3>Nurse</h3>
+                    <p>Healthcare professional</p>
+                </div>
+            </a>
+
+            <a href="{{ route('hmmc.create-new-user', ['role' => 'labtech']) }}" class="role-card">
+                <div class="role-card-content">
+                    <div class="role-icon purple">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <h3>Lab Technician</h3>
+                    <p>Laboratory specialist</p>
+                </div>
+            </a>
+
+            <a href="{{ route('hmmc.create-new-user', ['role' => 'shariah']) }}" class="role-card">
+                <div class="role-card-content">
+                    <div class="role-icon orange">
+                        <i class="fas fa-book-quran"></i>
+                    </div>
+                    <h3>Shariah Committee</h3>
+                    <p>Islamic compliance expert</p>
+                </div>
+            </a>
+
+            <a href="{{ route('hmmc.create-new-user', ['role' => 'parent']) }}" class="role-card">
+                <div class="role-card-content">
+                    <div class="role-icon pink">
+                        <i class="fas fa-baby"></i>
+                    </div>
+                    <h3>Parent</h3>
+                    <p>Milk recipient</p>
+                </div>
+            </a>
+        </div>
+
+        <button class="btn-cancel-modal" onclick="closeRoleModal()">
+            <i class="fas fa-times"></i> Cancel
+        </button>
     </div>
 </div>
 
@@ -335,6 +408,21 @@ function getRoleIcon($role) {
 @endphp
 
 <script>
+    // Modal Functions
+    function openRoleModal() {
+        document.getElementById('roleModal').style.display = 'flex';
+    }
+
+    function closeRoleModal() {
+        document.getElementById('roleModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const roleModal = document.getElementById('roleModal');
+        if (event.target === roleModal) closeRoleModal();
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
         const toast = document.getElementById('success-toast');
         if(toast){
@@ -395,8 +483,8 @@ function getRoleIcon($role) {
         const form = document.querySelector('form');
         let formChanged = false;
         
-        const inputs = form.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
+        const formInputs = form.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
             const originalValue = input.value;
             input.addEventListener('input', () => {
                 formChanged = input.value !== originalValue;

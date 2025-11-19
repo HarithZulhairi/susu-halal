@@ -95,7 +95,7 @@
             <div class="profile-section">
                 <div class="section-header">
                     <h3>Personal Information</h3>
-                    <a href="{{ route('admin.users.edit', ['role' => $role, 'id' => $user->id]) }}" class="btn-edit">
+                    <a href="{{ route('hmmc.users.edit', ['role' => $role, 'id' => $user->id]) }}" class="btn-edit">
                         Edit Profile
                     </a>
                 </div>

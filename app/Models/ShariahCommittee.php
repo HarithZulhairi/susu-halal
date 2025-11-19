@@ -24,6 +24,7 @@ class ShariahCommittee extends Model
         'sc_YearsOfExperience',
         'sc_Password',
         'sc_Username',
+        'user_id',
     ];
 
     public function user()

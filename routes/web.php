@@ -4,18 +4,36 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\DonorScreeningController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
-Route::get('/reset-password-test', function () {
-    return app(\App\Http\Controllers\Auth\NewPasswordController::class)
-        ->create(request()->merge(['token' => 'testtoken']));
+// Add these routes for first-time password reset
+Route::middleware(['guest'])->group(function () {
+    // First-time password set for new donors
+    Route::get('/first-time-password', [NewPasswordController::class, 'createFirstTime'])->name('password.first-time');
+    Route::post('/first-time-password', [NewPasswordController::class, 'storeFirstTime'])->name('password.set.first-time');
 });
+
+// Keep existing password reset routes
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.reset');
+
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.store');
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('register', [RegisteredUserController::class, 'store'])->name('register.donor.store');
 });
 
 // Authentication routes
@@ -61,28 +79,45 @@ Route::get('/hmmc/dashboard', function () {
     return view('hmmc.hmmc_dashboard');
 })->name('hmmc.dashboard');
 
-Route::resource('users', UserController::class);
-// Create new user form
+// In your routes file
 Route::middleware(['auth'])->group(function () {
     Route::get('/hmmc/manage-users', [UserController::class, 'index'])->name('hmmc.manage-users');
     Route::get('/hmmc/create-new-user/{role}', [UserController::class, 'create'])->name('hmmc.create-new-user');
     Route::post('/hmmc/store-new-user', [UserController::class, 'store'])->name('hmmc.store-user');
     
-    // User CRUD routes - make sure these come after more specific routes
+    // User CRUD routes
     Route::get('/hmmc/users/{role}/{id}', [UserController::class, 'show'])->name('hmmc.users.show');
     Route::get('/hmmc/users/{role}/{id}/edit', [UserController::class, 'edit'])->name('hmmc.users.edit');
     Route::put('/hmmc/users/{role}/{id}', [UserController::class, 'update'])->name('hmmc.users.update');
     Route::delete('/hmmc/users/{role}/{id}', [UserController::class, 'destroy'])->name('hmmc.users.destroy');
+    
+    // Credential sending route
+    Route::post('/hmmc/send-credentials', [UserController::class, 'sendCredentials'])
+        ->name('hmmc.send-credentials')
+        ->middleware(['auth']); // Only auth middleware
 });
 
-// Admin User Management Routes
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::prefix('users')->name('users.')->group(function () {
-        Route::get('/{role}/{id}', [AdminUserController::class, 'show'])->name('show');
-        Route::get('/{role}/{id}/edit', [AdminUserController::class, 'edit'])->name('edit');
-        Route::put('/{role}/{id}', [AdminUserController::class, 'update'])->name('update');
-        Route::delete('/{role}/{id}', [AdminUserController::class, 'destroy'])->name('destroy');
-    });
+Route::post('/hmmc/validate-user-field', [UserController::class, 'validateField'])
+    ->name('hmmc.validate-user-field')
+    ->middleware('auth');
+
+// In your routes file
+Route::get('/test-email', function() {
+    try {
+        \Mail::send('hmmc.hmmc_donor-credential', [
+            'fullname' => 'Test Donor',
+            'username' => 'testuser',
+            'password' => 'testpass123',
+            'loginUrl' => route('login')
+        ], function ($message) {
+            $message->to('ariffnorjihan@gmail.com')
+                    ->subject('🎉 Test Email from HMMC');
+        });
+        
+        return "Email sent successfully!";
+    } catch (\Exception $e) {
+        return "Email failed: " . $e->getMessage();
+    }
 });
 
 Route::middleware(['auth'])->group(function () {

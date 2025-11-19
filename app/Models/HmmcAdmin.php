@@ -20,5 +20,11 @@ class HmmcAdmin extends Model
         'ad_Gender', 
         'ad_Password',
         'ad_Username',
+        'user_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

@@ -24,6 +24,7 @@ class Doctor extends Model
         'dr_YearsOfExperience', 
         'dr_Password',
         'dr_Username',
+        'user_id',
     ];
 
     public function user()

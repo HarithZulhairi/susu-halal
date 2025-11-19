@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Donor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +27,16 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $role = session('auth_role');
+        // Check if this is a first-time donor login (from session)
+        if (session('first_time_donor')) {
+            return redirect()->route('password.first-time')
+                ->with('nric', session('donor_nric'))
+                ->with('info', 'Welcome! Please set a permanent password for your account.');
+        }
+
+        $request->session()->regenerate();
+
+        $role = Auth::user()->role;
 
         // Redirect user based on role
         switch ($role) {
@@ -48,7 +58,6 @@ class AuthenticatedSessionController extends Controller
                 abort(403, 'Unauthorized role.');
         }
     }
-
 
     /**
      * Destroy an authenticated session.
