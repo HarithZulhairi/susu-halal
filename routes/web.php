@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\MilkController;
 use App\Http\Controllers\Auth\DonorScreeningController;
 use Illuminate\Support\Facades\Route;
 
@@ -234,13 +235,16 @@ Route::get('/nurse/manage-milk-records', function () {
     return view('nurse.nurse_manage-milk-records');
 })->name('nurse.manage-milk-records');
 
-Route::get('/labtech/manage-milk-records', function () {
-    return view('labtech.labtech_manage-milk-records');
-})->name('labtech.manage-milk-records');
+// Route::get('/labtech/manage-milk-records', function () {
+//     return view('labtech.labtech_manage-milk-records');
+// })->name('labtech.manage-milk-records');
+
+Route::get('/labtech/manage-milk-records', [MilkController::class, 'showDonorinForm'])->name('labtech.labtech_manage-milk-records');
+Route::post('/labtech/manage-milk-records/store', [MilkController::class, 'storeMilkRecord'])->name('labtech.labtech_store-manage-milk-records');
 
 Route::get('/labtech/process-milk', function () {
     return view('labtech.labtech_process-milk');
-})->name('labtech.process-milk');
+})->name('labtech.labtech_process-milk');
 
 Route::get('/shariah/view-milk-processing', function () {
     return view('shariah.shariah_view-milk-processing');
@@ -249,6 +253,7 @@ Route::get('/shariah/view-milk-processing', function () {
 Route::get('/nurse/view-milk-processing', function () {
     return view('nurse.nurse_view-milk-processing');
 })->name('nurse.view-milk-processing');
+
 
 // Appoinment Module
 

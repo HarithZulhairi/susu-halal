@@ -20,17 +20,25 @@ class Milk extends Model
         'dn_ID',
         'pr_ID',
         'milk_volume',
-        'milk_shariahApproval',
         'milk_expiryDate',
-        'milk_screeningStatus',
-        'milk_screeningResult',
-        'milk_homogenizeStatus',
-        'milk_homogenizeResult',
-        'milk_pasteurizeStatus',
-        'milk_pasteurizeResult',
-        'milk_labellingStatus',
-        'milk_collectingStatus',
-        'milk_storagingStatus',
+        'milk_shariahApproval',
+        'milk_Status',
+
+        'milk_stage1StartDate',
+        'milk_stage1EndDate',
+        'milk_stage1StartTime',
+        'milk_stage1EndTime',
+        'milk_stage1Result',
+
+        'milk_stage2StartDate',
+        'milk_stage2EndDate',
+        'milk_stage2StartTime',
+        'milk_stage2EndTime',
+
+        'milk_stage3StartDate',
+        'milk_stage3EndDate',
+        'milk_stage3EndTime',
+        'milk_stage3StartTime',
     ];
 
     // Accessor for custom display ID

@@ -187,7 +187,7 @@
 
       <div class="button-row">
         <button class="btn-back-stage" onclick="switchStage('second')"><i class="fas fa-arrow-left"></i> Previous</button>
-        <a href="{{ route('labtech.manage-milk-records') }}" class="btn-next">
+        <a href="{{ route('labtech.labtech_manage-milk-records') }}" class="btn-next">
           Submit <i class="fas fa-check"></i>
         </a>
       </div>
