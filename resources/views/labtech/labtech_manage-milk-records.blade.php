@@ -35,56 +35,69 @@
                     <span>CLINICAL STATUS</span>
                     <span>VOLUME</span>
                     <span>EXPIRATION DATE</span>
-                    <span>ELIGIBILITY</span>
+                    <span>SHARIAH APPROVAL</span> <!-- Changed! -->
                     <span>ACTIONS</span>
                 </div>
 
-                @foreach ([
-                    ['id' => 1, 'donor' => 'Sarah Ahmad Binti Fauzi', 'status' => 'Labelling', 'volume' => '5mL', 'expiry' => 'May 15, 2024', 'eligibility' => 'Passed'],
-                    ['id' => 2, 'donor' => 'Maryam Binti Othman', 'status' => 'Storaging', 'volume' => '5mL', 'expiry' => 'May 14, 2024', 'eligibility' => 'Passed'],
-                    ['id' => 3, 'donor' => 'Fatimah Az-zahra Binti Mohd Nor', 'status' => 'Screening', 'volume' => '5mL', 'expiry' => 'Jun 23, 2024', 'eligibility' => 'Passed'],
-                    ['id' => 4, 'donor' => 'Aishah Radhi Binti Izzuddin', 'status' => 'Labelling', 'volume' => '5mL', 'expiry' => 'May 15, 2024', 'eligibility' => 'Passed'],
-                    ['id' => 5, 'donor' => 'Nor Atiqah Humaira Binti Ishak', 'status' => 'Dispatching', 'volume' => '5mL', 'expiry' => 'Apr 28, 2024', 'eligibility' => 'Passed'],
-                ] as $record)
-                <div class="record-item">
-                    <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper">
-                            <i class="fas fa-bottle-droplet milk-icon"></i>
+                @forelse($milks as $milk)
+                    <div class="record-item">
+                        <div class="milk-donor-info">
+                            <div class="milk-icon-wrapper">
+                                <i class="fas fa-bottle-droplet milk-icon"></i>
+                            </div>
+                            <div>
+                                <span class="milk-id">{{ $milk->formatted_id }}</span>
+                                <span class="donor-name">{{ $milk->donor?->dn_FullName ?? 'Unknown Donor' }}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span class="milk-id">Milk ID #{{ $record['id'] }}</span>
-                            <span class="donor-name">{{ $record['donor'] }}</span>
+
+                        <div class="clinical-status">
+                            <span class="status-tag status-{{ strtolower($milk->milk_Status ?? 'pending') }}">
+                                {{ ucfirst($milk->milk_Status ?? 'Not Yet Started') }}
+                            </span>
+                        </div>
+
+                        <div class="volume-data">{{ $milk->milk_volume }} mL</div>
+
+                        <div class="expiry-date">
+                            {{ $milk->milk_expiryDate ? \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') : '-' }}
+                        </div>
+
+                        <!-- SHARIAH APPROVAL COLUMN -->
+                        <div class="shariah-status">
+                            @php
+                                $approval = $milk->milk_shariahApproval;
+                            @endphp
+                            <span class="status-tag
+                                {{ is_null($approval) ? 'status-pending' :
+                                ($approval ? 'status-approved' : 'status-rejected') }}">
+                                {{ is_null($approval) ? 'Not Yet Reviewed' :
+                                ($approval ? 'Approved' : 'Rejected') }}
+                            </span>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn-view" title="View"
+                                onclick="openViewMilkModal({
+                                    milkId: '{{ $milk->formatted_id }}',
+                                    donorName: '{{ $milk->donor?->dn_FullName ?? 'N/A' }}',
+                                    status: '{{ ucfirst($milk->milk_Status ?? 'Not Yet Started') }}',
+                                    volume: '{{ $milk->milk_volume }} mL',
+                                    expiry: '{{ $milk->milk_expiryDate ? \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') : 'Not set' }}',
+                                    shariah: '{{ is_null($milk->milk_shariahApproval) ? 'Not Yet Reviewed' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected') }}'
+                                })">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+                            <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
                         </div>
                     </div>
-
-                    <div class="clinical-status">
-                        <span class="status-tag status-{{ strtolower($record['status']) }}">{{ $record['status'] }}</span>
+                @empty
+                    <div class="record-item text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No milk records yet. Add one to begin!</p>
                     </div>
-
-                    <div class="volume-data">{{ $record['volume'] }}</div>
-                    <div class="expiry-date">{{ $record['expiry'] }}</div>
-
-                    <div class="eligibility-status">
-                        <span class="eligibility-tag eligibility-{{ strtolower($record['eligibility']) }}">{{ $record['eligibility'] }}</span>
-                    </div>
-
-                    <div class="actions">
-                        <button class="btn-view" title="View"
-                            onclick="openViewMilkModal({
-                                milkId: 'Milk ID #{{ $record['id'] }}',
-                                donorName: '{{ $record['donor'] }}',
-                                status: '{{ $record['status'] }}',
-                                volume: '{{ $record['volume'] }}',
-                                expiry: '{{ $record['expiry'] }}',
-                                eligibility: '{{ $record['eligibility'] }}'
-                            })">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-                        <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
-                    </div>
-                </div>
-                @endforeach
+                @endforelse
             </div>
         </div>
     </div>
@@ -98,21 +111,22 @@
         <h2>Add Milk Record</h2>
 
         <div class="modal-body">
-            <form id="addRecordForm">
-                
+            <form id="addRecordForm" method="POST" action="{{ route('labtech.labtech_store-manage-milk-records') }}">
+                @csrf
+
                 <!-- Donor ID -->
                 <div class="modal-section">
                     <label>
                         <i class="fas fa-user"></i> Donor ID 
                         <span class="text-danger">*</span>
                     </label>
-                    <select class="form-select" name="donor_id" required>
+                    <select class="form-select" name="dn_ID" required>
                         <option value="" selected disabled>-- Select Donor ID --</option>
-                        <option value="D001">D001 - Sarah Ahmad</option>
-                        <option value="D002">D002 - Maryam Othman</option>
-                        <option value="D003">D003 - Fatimah Az-zahra</option>
-                        <option value="D004">D004 - Aishah Radhi</option>
-                        <option value="D005">D005 - Nor Atiqah</option>
+                        @foreach($donors as $donor)
+                            <option value="{{ $donor->dn_ID }}">
+                                {{ $donor->formatted_id }} - {{ $donor->dn_FullName }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -132,7 +146,7 @@
                         <i class="fas fa-calendar-alt"></i> Expiry Date 
                         <span class="text-danger">*</span>
                     </label>
-                    <input type="date" name="expiry_date" class="form-control" required>
+                    <input type="date" name="milk_expiryDate" class="form-control" required>
                 </div>
 
                 <!-- Clinical Status -->
@@ -181,7 +195,9 @@
             <hr>
             
             <h3>Quality Control</h3>
-            <p><strong>Eligibility:</strong> <span id="view-eligibility"></span></p>
+            <p><strong>Shariah Approval:</strong> 
+                <span id="view-shariah"></span> <!-- Changed from eligibility -->
+            </p>
         </div>
     </div>
 </div>
@@ -190,59 +206,97 @@
 {{-- ===========================
       POPUP SCRIPT
 =========================== --}}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-// Open View Modal
-function openViewMilkModal(data) {
-    document.getElementById("view-milk-id").textContent = data.milkId;
-    document.getElementById("view-donor-name").textContent = data.donorName;
-    document.getElementById("view-status").textContent = data.status;
-    document.getElementById("view-volume").textContent = data.volume;
-    document.getElementById("view-expiry").textContent = data.expiry;
-    document.getElementById("view-eligibility").textContent = data.eligibility;
-    
-    document.getElementById("viewMilkModal").style.display = "flex";
-}
-
-// Close View Modal
-function closeViewMilkModal() {
-    document.getElementById("viewMilkModal").style.display = "none";
-}
-
-// Add Record Modal Controls
+// ============== MODAL OPEN / CLOSE ==============
 document.addEventListener("DOMContentLoaded", () => {
-    const openAdd = document.getElementById("openAddRecord");
-    const addModal = document.getElementById("addRecordModal");
+    const openAdd   = document.getElementById("openAddRecord");
+    const addModal  = document.getElementById("addRecordModal");
+    const viewModal = document.getElementById("viewMilkModal");
 
-    // Open Add Record modal
     openAdd.addEventListener("click", () => {
         addModal.style.display = "flex";
     });
 
-    // Close modal when clicking outside
-    window.onclick = function(e) {
-        if (e.target === addModal) {
-            addModal.style.display = "none";
-        }
-        if (e.target === document.getElementById("viewMilkModal")) {
-            closeViewMilkModal();
-        }
-    }
+    window.addEventListener("click", (e) => {
+        if (e.target === addModal) addModal.style.display = "none";
+        if (e.target === viewModal) viewModal.style.display = "none";
+    });
+});
 
-    // Form submission
-    document.getElementById("addRecordForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-        
-        console.log("Form submitted:", data);
-        
-        // TODO: Send data to server
-        // After successful submission:
-        alert("Milk record added successfully!");
-        addModal.style.display = "none";
-        e.target.reset();
+function openViewMilkModal(data) {
+    document.getElementById("view-milk-id").textContent       = data.milkId;
+    document.getElementById("view-donor-name").textContent    = data.donorName;
+    document.getElementById("view-status").textContent        = data.status;
+    document.getElementById("view-volume").text
+
+Content = data.volume;
+    document.getElementById("view-expiry").textContent        = data.expiry;
+    document.getElementById("view-shariahy").textContent   = data.eligibility;
+    document.getElementById("viewMilkModal").style.display = "flex";
+}
+
+function closeViewMilkModal() {
+    document.getElementById("viewMilkModal").style.display = "none";
+}
+
+// ============== AJAX FORM SUBMISSION (FIXED: ERROR SHOWS IN FRONT!) ==============
+document.getElementById('addRecordForm')?.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err });
+        }
+        return response.json();
+    })
+    .then(data => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Milk Received!',
+            html: '<strong>Record saved successfully!</strong><br><small>Ready to begin process</small>',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            confirmButtonText: 'Great!',
+            confirmButtonColor: '#28a745'
+        });
+
+        document.getElementById('addRecordModal').style.display = 'none';
+        this.reset();
+        setTimeout(() => location.reload(), 2500);
+    })
+    .catch(error => {
+        // THIS IS THE FIX: Close modal BEFORE showing error
+        document.getElementById('addRecordModal').style.display = 'none';
+
+        let msg = 'Please correct the errors and try again.';
+        if (error.errors) {
+            msg = Object.values(error.errors).flat().join('<br>');
+        }
+
+        // Now error appears clearly in front
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Data',
+            html: msg,
+            confirmButtonColor: '#d33',
+            width: '500px',
+            allowOutsideClick: false
+        });
     });
 });
 </script>
