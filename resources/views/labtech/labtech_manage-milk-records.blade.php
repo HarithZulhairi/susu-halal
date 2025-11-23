@@ -31,40 +31,40 @@
 
             <!-- FILTER / SEARCH PANEL (inline, hidden by default) -->
             <div id="filterPanel" class="filter-panel" role="region" aria-label="Search and filters">
-                <form id="filterForm" autocomplete="off">
-                    <input id="searchInput" class="form-control" type="search" placeholder="Search by Donor name or Milk ID">
+                <form id="filterForm" method="GET" action="{{ url()->current() }}" autocomplete="off">
+                    <input id="searchInput" name="searchInput" value="{{ request('searchInput') }}" class="form-control" type="search" placeholder="Search by Donor name or Milk ID">
 
-                    <select id="filterStatus" class="form-control">
+                    <select id="filterStatus" name="filterStatus" class="form-control">
                         <option value="">All Clinical Status</option>
-                        <option>Not Yet Started</option>
-                        <option>Screening</option>
-                        <option>Screening Completed</option>
-                        <option>Labelling</option>
-                        <option>Labelling Completed</option>
-                        <option>Distributing</option>
-                        <option>Distributing Completed</option>
+                        <option value="Not Yet Started" {{ request('filterStatus') == 'Not Yet Started' ? 'selected' : '' }}>Not Yet Started</option>
+                        <option value="Screening" {{ request('filterStatus') == 'Screening' ? 'selected' : '' }}>Screening</option>
+                        <option value="Screening Completed" {{ request('filterStatus') == 'Screening Completed' ? 'selected' : '' }}>Screening Completed</option>
+                        <option value="Labelling" {{ request('filterStatus') == 'Labelling' ? 'selected' : '' }}>Labelling</option>
+                        <option value="Labelling Completed" {{ request('filterStatus') == 'Labelling Completed' ? 'selected' : '' }}>Labelling Completed</option>
+                        <option value="Distributing" {{ request('filterStatus') == 'Distributing' ? 'selected' : '' }}>Distributing</option>
+                        <option value="Distributing Completed" {{ request('filterStatus') == 'Distributing Completed' ? 'selected' : '' }}>Distributing Completed</option>
                     </select>
 
                     <div style="display:flex; gap:8px;">
-                        <input id="volumeMin" class="form-control" type="number" min="0" placeholder="Min mL">
-                        <input id="volumeMax" class="form-control" type="number" min="0" placeholder="Max mL">
+                        <input id="volumeMin" name="volumeMin" value="{{ request('volumeMin') }}" class="form-control" type="number" min="0" placeholder="Min mL">
+                        <input id="volumeMax" name="volumeMax" value="{{ request('volumeMax') }}" class="form-control" type="number" min="0" placeholder="Max mL">
                     </div>
 
                     <div style="display:flex; gap:8px;">
-                        <input id="expiryFrom" class="form-control" type="date">
-                        <input id="expiryTo" class="form-control" type="date">
+                        <input id="expiryFrom" name="expiryFrom" value="{{ request('expiryFrom') }}" class="form-control" type="date">
+                        <input id="expiryTo" name="expiryTo" value="{{ request('expiryTo') }}" class="form-control" type="date">
                     </div>
 
-                    <select id="filterShariah" class="form-control">
+                    <select id="filterShariah" name="filterShariah" class="form-control">
                         <option value="">All Shariah</option>
-                        <option>Not Yet Reviewed</option>
-                        <option>Approved</option>
-                        <option>Rejected</option>
+                        <option value="Not Yet Reviewed" {{ request('filterShariah') == 'Not Yet Reviewed' ? 'selected' : '' }}>Not Yet Reviewed</option>
+                        <option value="Approved" {{ request('filterShariah') == 'Approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="Rejected" {{ request('filterShariah') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
                     </select>
 
                     <div class="filter-actions">
                         <button id="applyFilters" class="btn" type="submit">Apply</button>
-                        <button id="clearFilters" class="btn" type="button">Clear</button>
+                        <button id="clearFilters" class="btn" type="button" onclick="window.location='{{ url()->current() }}'">Clear</button>
                     </div>
                 </form>
             </div>
@@ -92,7 +92,7 @@
                 @forelse($milks as $milk)
                     <div class="record-item" 
                             data-milk-id="{{ $milk->milk_ID }}"
-                            data-name="{{ strtolower($milk->donor->dn_FullName) }}"
+                            data-name="{{ strtolower($milk->donor?->dn_FullName ?? '') }}"
                             data-status="{{ strtolower($milk->milk_Status ?? 'not yet started') }}"
                             data-volume="{{ $milk->milk_volume }}"
                             data-expiry="{{ $milk->milk_expiryDate }}"
@@ -562,105 +562,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         btnSearch.addEventListener('click', togglePanel);
 
-        function clearFilters() {
-            searchInput.value = '';
-            filterStatus.value = '';
-            volumeMin.value = '';
-            volumeMax.value = '';
-            expiryFrom.value = '';
-            expiryTo.value = '';
-            filterShariah.value = '';
-            applyFilters();
-        }
-
-        function textContains(haystack, needle) {
-            return String(haystack || '').toLowerCase().indexOf(String(needle || '').toLowerCase()) !== -1;
-        }
-
-        function parseExpiry(text) {
-            const trimmed = (text || '').trim();
-            if (!trimmed || trimmed === '-') return null;
-            const dt = Date.parse(trimmed);
-            return isNaN(dt) ? null : dt;
-        }
-
-        function applyFilters() {
-            const q = (searchInput.value || '').trim().toLowerCase();
-            const statusFilter = (filterStatus.value || '').trim();
-            const minV = volumeMin.value ? parseFloat(volumeMin.value) : null;
-            const maxV = volumeMax.value ? parseFloat(volumeMax.value) : null;
-            const expFrom = expiryFrom.value ? Date.parse(expiryFrom.value) : null;
-            const expTo = expiryTo.value ? Date.parse(expiryTo.value) : null;
-            const shariahFilter = (filterShariah.value || '').trim();
-
-            const rows = Array.from(listContainer.querySelectorAll('.record-item'));
-            rows.forEach(row => {
-                let keep = true;
-
-                // Search: donor name or milk id (formatted_id visible in .milk-id)
-                if (q) {
-                    const donor = row.querySelector('.donor-name')?.textContent || '';
-                    const milkid = row.querySelector('.milk-id')?.textContent || '';
-                    if (!textContains(donor, q) && !textContains(milkid, q)) keep = false;
-                }
-
-                // Clinical status
-                if (keep && statusFilter) {
-                    const st = row.querySelector('.clinical-status .status-tag')?.textContent?.trim() || '';
-                    if (st.toLowerCase() !== statusFilter.toLowerCase()) keep = false;
-                }
-
-                // Volume range
-                if (keep && (minV !== null || maxV !== null)) {
-                    const vText = row.querySelector('.volume-data')?.textContent || '';
-                    const m = vText.match(/([0-9]+(\.[0-9]+)?)/);
-                    const v = m ? parseFloat(m[0]) : 0;
-                    if (minV !== null && v < minV) keep = false;
-                    if (maxV !== null && v > maxV) keep = false;
-                }
-
-                // Expiry range
-                if (keep && (expFrom !== null || expTo !== null)) {
-                    const expText = row.querySelector('.expiry-date')?.textContent || '';
-                    const d = parseExpiry(expText);
-                    if (expFrom !== null && (d === null || d < expFrom)) keep = false;
-                    if (expTo !== null && (d === null || d > expTo + 86400000 - 1)) keep = false; // inclusive end of day
-                }
-
-                // Shariah
-                if (keep && shariahFilter) {
-                    const sh = row.querySelector('.shariah-status .status-tag')?.textContent?.trim() || '';
-                    if (sh.toLowerCase() !== shariahFilter.toLowerCase()) keep = false;
-                }
-
-                // mark row with dataset.filtered flag
-                if (keep) {
-                    row.dataset.filtered = '1';
-                } else {
-                    row.dataset.filtered = '0';
-                }
-            });
-
-            // after filtering, rebuild pagination starting at page 1
-            if (window.__rebuildPagination) {
-                window.__rebuildPagination();
-            }
-        }
-
-        form.addEventListener('submit', function(e) { e.preventDefault(); applyFilters();
-            // after applying filters, reset to first page and close the panel for clarity
-            if (window.__rebuildPagination) window.__rebuildPagination(1);
+        // For server-side filtering: submit the form normally (GET) and let
+        // the controller return filtered results. Keep the panel toggle.
+        form.addEventListener('submit', function(e) {
+            // allow normal submission to server
+            // close the panel for clarity after submit
             panel.classList.remove('active');
         });
-        clearBtn.addEventListener('click', function(e) { e.preventDefault(); clearFilters(); });
 
-        // live search on Enter key or after typing (debounced)
-        let debounce;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(debounce);
-            debounce = setTimeout(() => applyFilters(), 400);
+        // Clear button simply reloads the current page without query params
+        clearBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '{{ url()->current() }}';
         });
-        searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyFilters(); } });
     })();
 
     window.addEventListener("click", (e) => {

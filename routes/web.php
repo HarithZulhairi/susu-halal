@@ -90,7 +90,7 @@ Route::middleware('auth')->group(function () {
     // ====================================================================
     // LAB TECH - MILK PROCESSING
     Route::prefix('labtech')->name('labtech.')->group(function () {
-        Route::get('/manage-milk-records', [MilkController::class, 'showDonorinForm'])
+        Route::get('/manage-milk-records', [MilkController::class, 'viewMilk'])
             ->name('labtech_manage-milk-records');
             
         Route::post('/manage-milk-records/store', [MilkController::class, 'storeMilkRecord'])
