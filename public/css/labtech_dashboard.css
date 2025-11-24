@@ -754,3 +754,30 @@
 .cancel-btn {
     background: #ccc;
 }
+
+/* Base styling for all status tags */
+.status-tag {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: #fff;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* Clickable effect */
+.status-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Example base colors */
+.status-pending { background-color: #f59e0b; }
+.status-processing { background-color: #3b82f6; }
+.status-completed { background-color: #10b981; }
+
+/* Optional: full status-specific class for finer control */
+.status-not-yet-started { background-color: #fbbf24; }
+.status-in-progress { background-color: #2563eb; }
+.status-done { background-color: #059669; }

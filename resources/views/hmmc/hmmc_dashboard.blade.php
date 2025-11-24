@@ -17,70 +17,63 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Total Users</span>
-                <div class="stat-icon blue">
-                    <i class="fas fa-users"></i>
-                </div>
-            </div>
-            <div class="stat-value">248</div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                12% from last month
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Total Users</span>
+            <div class="stat-icon blue">
+                <i class="fas fa-users"></i>
             </div>
         </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Active Donors</span>
-                <div class="stat-icon green">
-                    <i class="fas fa-check"></i>
-                </div>
-            </div>
-            <div class="stat-value">195</div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                8% from last month
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Total Donations</span>
-                <div class="stat-icon orange">
-                    <i class="fas fa-hand-holding-heart"></i>
-                </div>
-            </div>
-            <div class="stat-value">2,847</div>
-            <div class="stat-change negative">
-                <i class="fas fa-arrow-down"></i>
-                20% from last month
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">System Alerts</span>
-                <div class="stat-icon red">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-            </div>
-            <div class="stat-value">41</div>
-            <div class="stat-change warning">
-                <i class="fas fa-arrow-up"></i>
-                3 news today
-            </div>
+        <div class="stat-value">{{ $totalUsers }}</div>
+        <div class="stat-change positive">
         </div>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Active Donors</span>
+            <div class="stat-icon green">
+                <i class="fas fa-check"></i>
+            </div>
+        </div>
+        <div class="stat-value">{{ $activeDonors }}</div>
+        <div class="stat-change positive">
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Total Donations (ml)</span>
+            <div class="stat-icon orange">
+                <i class="fas fa-hand-holding-heart"></i>
+            </div>
+        </div>
+        <div class="stat-value">{{ $totalDonations }}</div>
+        <div class="stat-change negative">
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-label">Pending Screening</span>
+            <div class="stat-icon red">
+                <i class="fas fa-exclamation"></i>
+            </div>
+        </div>
+        <div class="stat-value">{{ $systemAlerts }}</div>
+        <div class="stat-change warning">
+        </div>
+    </div>
+</div>
+
 
     <!-- Main Content Grid -->
     <div class="content-grid">
         <!-- Donations Statistics -->
         <div class="card donations-card">
             <div class="card-header">
-                <h2>Donations Statistics</h2>
+                <h2>Donor Registration Statistics</h2>
                 <a href="#" class="view-report">
                     View Report
                     <i class="fas fa-arrow-right"></i>
@@ -133,7 +126,7 @@
         <!-- Recent User Registrations -->
         <div class="card users-card">
             <div class="card-header">
-                <h2>Recent User Registrations</h2>
+                <h2>Recent Donor Registrations</h2>
                 <a href="#" class="view-all">
                     View All Users
                     <i class="fas fa-arrow-right"></i>
@@ -143,91 +136,30 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>USER</th>
+                            <th>Name</th>
                             <th>ROLE</th>
                             <th>STATUS</th>
                             <th>REGISTRATION DATE</th>
-                            <th>ACTIONS</th>
                         </tr>
                     </thead>
-                    <tbody>
+                        <tbody>
+                        @foreach($recentDonors as $donor)
                         <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar teal">SA</div>
-                                    <div>
-                                        <div class="user-name">Sarah Ahmad</div>
-                                        <div class="user-email">sarah.ahmad2@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
+                            <!-- Name Column -->
+                            <td>{{ $donor->name }}</td>
+
+                            <!-- Role Column -->
                             <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
-                            <td>May 15, 2024</td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
 
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar blue">NJ</div>
-                                    <div>
-                                        <div class="user-name">Nurse Jamila</div>
-                                        <div class="user-email">n.jamila@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-nurse">Nurse</span></td>
-                            <td><span class="badge badge-active">Active</span></td>
-                            <td>May 14, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
+                            <!-- Screening Status Column -->
+                            <td><span class="badge badge-{{ strtolower($donor->screeningStatus) }}">{{ ucfirst($donor->screeningStatus) }}</span></td>
 
-                            </td>
+                            <!-- Registration Date Column -->
+                            <td>{{ $donor->created_at->format('M d, Y') }}</td>
                         </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal">AS</div>
-                                    <div>
-                                        <div class="user-name">Ahmed Al-Sayed</div>
-                                        <div class="user-email">a.alsayed@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-advisor">Shariah Advisor</span></td>
-                            <td><span class="badge badge-pending">Pending</span></td>
-                            <td>May 12, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
+                        @endforeach
+                        </tbody>
 
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar pink">FK</div>
-                                    <div>
-                                        <div class="user-name">Fatima Khan</div>
-                                        <div class="user-email">f.khan@email.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-donor">Donor</span></td>
-                            <td><span class="badge badge-inactive">Inactive</span></td>
-                            <td>May 10, 2024</td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-
-                            </td>
-                        </tr>
-                    </tbody>
                 </table>
             </div>
         </div>
@@ -253,11 +185,11 @@ gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: {!! json_encode($months) !!},
         datasets: [
             {
                 label: 'Registered Donor',
-                data: [12, 15, 17, 16, 19, 21, 24],
+                data: {!! json_encode($registeredDonors) !!},
                 borderColor: '#4B9CD3',
                 backgroundColor: gradientBlue,
                 fill: true,
@@ -268,7 +200,7 @@ new Chart(ctx, {
             },
             {
                 label: 'Active Donor',
-                data: [80, 120, 130, 140, 160, 180, 200],
+                data: {!! json_encode($activeDonorsMonthly) !!},
                 borderColor: '#48BB78',
                 backgroundColor: gradientGreen,
                 fill: true,
@@ -309,7 +241,7 @@ new Chart(ctx, {
                 boxPadding: 5,
                 callbacks: {
                     label: function(context) {
-                        return `${context.dataset.label}: ${context.formattedValue} ml`;
+                        return `${context.dataset.label}: ${context.formattedValue}`;
                     }
                 }
             }

@@ -173,37 +173,37 @@
                     </div>
 
                     <!-- Role Dropdown -->
-<div class="space-y-2">
-  <label for="role" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
-    <i class="fas fa-user-tag text-blue-500 text-sm"></i>
-    <span>Role</span>
-  </label>
-  <div class="relative">
-    <select 
-      id="role" 
-      name="role"
-      required
-      class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none"
-    >
-      <option value="" disabled selected>Select your role</option>
-      <option value="hmmc_admin">HMMC Admin</option>
-      <option value="nurse">Nurse</option>
-      <option value="doctor">Doctor</option>
-      <option value="lab_technician">Lab Technician</option>
-      <option value="shariah_advisor">Shariah Advisor</option>
-      <option value="parent">Parent</option>
-      <option value="donor">Donor</option>
-    </select>
-    <i class="fas fa-user-tag absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-    <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-  </div>
-  @error('role')
-    <div class="flex items-center space-x-2 text-red-600 text-sm mt-1">
-      <i class="fas fa-exclamation-circle"></i>
-      <span>{{ $message }}</span>
-    </div>
-  @enderror
-</div>
+                        <div class="space-y-2">
+                        <label for="role" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                            <i class="fas fa-user-tag text-blue-500 text-sm"></i>
+                            <span>Role</span>
+                        </label>
+                        <div class="relative">
+                            <select 
+                            id="role" 
+                            name="role"
+                            required
+                            class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none"
+                            >
+                                <option value="" disabled selected>Select your role</option>
+                                <option value="hmmc_admin">HMMC Admin</option>
+                                <option value="nurse">Nurse</option>
+                                <option value="doctor">Doctor</option>
+                                <option value="lab_technician">Lab Technician</option>
+                                <option value="shariah_advisor">Shariah Advisor</option>
+                                <option value="donor" {{ old('role') == 'donor' ? 'selected' : '' }}>Donor</option>
+                                <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
+                            </select>
+                            <i class="fas fa-user-tag absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        </div>
+                        @error('role')
+                            <div class="flex items-center space-x-2 text-red-600 text-sm mt-1">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                        </div>
 
 
                     <div class="flex items-center justify-between">

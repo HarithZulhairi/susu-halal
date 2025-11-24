@@ -27,6 +27,11 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
+  @if(session('info'))
+  <div class="text-green-600 font-medium mb-4">
+    {{ session('info') }}
+  </div>
+@endif
   <!-- Floating Background Elements -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none">
     <div class="absolute -top-10 -left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 float-animation"></div>
@@ -58,7 +63,7 @@
               id="nric"
               type="text"
               name="nric"
-              value="{{ old('nric', session('nric')) }}"
+              value="{{ old('nric', session('donor_nric')) }}"
               required
               readonly
               class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl bg-gray-100 backdrop-blur-sm cursor-not-allowed"

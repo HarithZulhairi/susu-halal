@@ -15,6 +15,8 @@ return new class extends Migration
             $table->string('password'); // Not used for actual auth
             $table->string('role'); // hmmc_admin, doctor, nurse, etc.
             $table->unsignedBigInteger('role_id'); // ID from role-specific table
+            $table->string('username')->nullable()->unique();
+            $table->string('ic_number')->nullable()->unique();
             $table->rememberToken();
             $table->timestamps();
         });

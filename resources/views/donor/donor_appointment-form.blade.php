@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <form id="milkDonationForm" method="POST" action="#">
+        <form id="milkDonationForm" method="POST">
             @csrf
 
             <div class="form-grid">
@@ -33,8 +33,6 @@
                         <select id="milk_amount_select" name="milk_amount_select" class="form-control" required onchange="toggleCustomAmount()">
                             <option value="">Select amount</option>
                             <option value="1000">1 L (1000 ml)</option>
-                            <option value="2000">2 L (2000 ml)</option>
-                            <option value="3000">3 L (3000 ml)</option>
                             <option value="other">Other (Specify below)</option>
                         </select>
                     </div>
@@ -42,7 +40,7 @@
                     <div class="form-group" id="custom_amount_group" style="display: none;">
                         <label for="milk_amount_custom">Custom Amount (ml)</label>
                         <div class="input-with-unit">
-                            <input type="number" id="milk_amount_custom" name="milk_amount_custom" class="form-control" min="1" placeholder="Enter amount">
+                            <input type="number" id="milk_amount_custom" max="1000" name="milk_amount_custom" class="form-control" min="1" placeholder="Enter amount">
                             <span class="unit-label">ml</span>
                         </div>
                     </div>
@@ -101,7 +99,7 @@
 
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="window.history.back()">Cancel</button>
-                <a href="{{ route('donor.confirm-appointment') }}" class="btn-submit">Continue</a>
+                <button type="button" class="btn-submit" onclick="storeFormData()">Continue</button>
             </div>
         </form>
     </div>
@@ -111,11 +109,74 @@
 
 
 <script>
+
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const input = document.getElementById("appointment_datetime");
+        
+        const updateMinTime = () => {
+            const now = new Date();
+            const minTime = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+            input.min = minTime.toISOString().slice(0, 16);
+        };
+
+        updateMinTime();
+
+        input.addEventListener("input", function() {
+            const selected = new Date(this.value);
+            const now = new Date();
+            const minTime = new Date(now.getTime() + 5 * 60 * 60 * 1000);
+
+            if (selected < minTime) {
+                alert("Appointment must be at least 5 hours from now.");
+                this.value = "";
+            }
+        });
+    });
+
+
     document.addEventListener('DOMContentLoaded', (event) => {
-        // Run on page load to set initial state
+        restoreFormData();// Run on page load to set initial state
         toggleLocationFields();
         toggleCustomAmount(); // Ensure custom amount is hidden/shown correctly on load
     });
+
+    function restoreFormData() {
+    const stored = sessionStorage.getItem('milkDonationAppointment');
+    if (!stored) return;
+
+    const data = JSON.parse(stored);
+
+    // Milk amount
+    document.getElementById('milk_amount_select').value = data.milk_amount_select;
+    if (data.milk_amount_select === 'other') {
+        document.getElementById('milk_amount_custom').value = data.milk_amount_custom;
+    }
+
+    // Datetime
+    document.getElementById('appointment_datetime').value = data.appointment_datetime;
+
+    // Delivery / Pick Up radio
+    if (data.delivery_method) {
+        const radio = document.querySelector(`input[name="delivery_method"][value="${data.delivery_method}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    //Re-run UI toggle AFTER setting radio
+    toggleLocationFields();
+
+    // Now fill location or address
+    if (data.delivery_method === "delivery") {
+        document.getElementById('location').value = data.location;
+    } else if (data.delivery_method === "pick_up") {
+        document.getElementById('collection_address').value = data.collection_address;
+    }
+
+    // Remarks
+    document.getElementById('remarks').value = data.remarks;
+}
+
 
     function toggleCustomAmount() {
         const select = document.getElementById('milk_amount_select');
@@ -173,6 +234,79 @@
             locationSelect.value = '';
             addressTextarea.value = '';
         }
+    }
+
+
+
+    function storeFormData() {
+
+    const milkSelect = document.getElementById('milk_amount_select').value;
+    const customInput = document.getElementById('milk_amount_custom').value.trim();
+    const appointmentTime = document.getElementById('appointment_datetime').value;
+    const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked')?.value;
+    const location = document.getElementById('location').value;
+    const collectionAddress = document.getElementById('collection_address').value;
+    const remarks = document.getElementById('remarks').value;
+
+    // VALIDATION CHECKS
+    let errors = [];
+
+    // MUST PICK AMOUNT
+    if (!milkSelect && !customInput) {
+        errors.push("Please select or enter milk amount.");
+    }
+
+    // If custom amount chosen, enforce rules
+    if (milkSelect === "other") {
+        if (!customInput) {
+            errors.push("Custom milk amount cannot be empty.");
+        } else if (parseInt(customInput) > 1000) {
+            errors.push("Milk amount cannot exceed 1000 ml.");
+        }
+    }
+
+    // Appointment time required
+    if (!appointmentTime) {
+        errors.push("Please select an appointment date & time.");
+    }
+
+    // Delivery method required
+    if (!deliveryMethod) {
+        errors.push("Please select a delivery method.");
+    }
+
+    // Delivery-specific fields
+    if (deliveryMethod === "delivery" && !location) {
+        errors.push("Please enter a delivery location.");
+    }
+    if (deliveryMethod === "pick_up" && !collectionAddress) {
+        errors.push("Please enter a pick-up address.");
+    }
+
+    //If there are errors, show alert and STOP redirecting
+    if (errors.length > 0) {
+        alert(errors.join("\n")); // You can replace alert() with your own popup later
+        return; // Stop execution
+    }
+
+    // SANITIZE amount before storing
+    let amount = milkSelect === "other" ? customInput : milkSelect;
+
+    const data = {
+        milk_amount_select: milkSelect,
+        milk_amount_custom: amount,
+        appointment_datetime: appointmentTime,
+        delivery_method: deliveryMethod,
+        location,
+        collection_address: collectionAddress,
+        remarks
+    };
+   
+    // Use sessionStorage so it only lasts for this session
+    sessionStorage.setItem('milkDonationAppointment', JSON.stringify(data));
+
+    // Redirect to confirmation page
+    window.location.href = "{{ route('donor.confirm-appointment') }}";
     }
 </script>
 @endsection

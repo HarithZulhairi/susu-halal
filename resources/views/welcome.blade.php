@@ -9,7 +9,7 @@
             <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
 
     <style>
         :root {
@@ -156,13 +156,13 @@
 
                 
                     <li>
-                        <a href="{{ route('register') }}" 
+                        <a href="/register" 
                         style="text-decoration: none; color: var(--secondary); font-weight: 600; padding: 8px 16px; border-radius: 4px; transition: var(--transition);">
                         Become A Donor
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('login') }}" 
+                        <a href="/login" 
                         style="text-decoration: none; color: var(--primary); font-weight: 600; padding: 8px 16px; border-radius: 4px; transition: var(--transition);">
                         Login
                         </a>

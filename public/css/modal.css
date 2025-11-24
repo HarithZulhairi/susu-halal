@@ -240,6 +240,36 @@
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
+.modal-edit-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  margin: 20px 28px 20px auto;
+  width: fit-content;
+}
+
+.modal-edit-btn::before {
+  content: '\f00d';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+}
+
+.modal-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
 /* ===================== FORM STYLES FOR MODALS ===================== */
 .modal-body form {
   display: flex;
@@ -374,6 +404,10 @@
     margin: 16px 20px 16px auto;
   }
   
+  .modal-edit-btn {
+    margin: 16px 20px 16px auto;
+  }
+
   .form-control,
   .form-select {
     font-size: 16px; /* Prevents zoom on iOS */

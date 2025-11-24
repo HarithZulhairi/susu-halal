@@ -82,4 +82,6 @@ class DonorToBe extends Model
     {
         return $query->whereIn('dtb_ScreeningStatus', ['passed', 'failed']);
     }
+
+    
 }

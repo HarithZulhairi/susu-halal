@@ -165,3 +165,32 @@
   padding-top: 30px;
   padding-bottom: 16px;
 }
+
+tr {
+    transition: opacity .2s ease;
+}
+
+.fade-out {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    transition: opacity .2s ease, height .2s ease;
+    display: none;
+}
+
+.search-box {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 260px;
+    transition: 0.2s ease;
+}
+
+.search-box:focus {
+    border-color: #0891b2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(8,145,178,0.15);
+}

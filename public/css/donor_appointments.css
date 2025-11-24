@@ -171,8 +171,73 @@
 }
 
 .actions .btn-view i { color: #2563eb; }
-.actions .btn-delete i { color: #dc2626; }
+.actions .btn-edit i { color: #576583; }
+.actions .btn-cancel i { color: #dc2626; }
 .actions .btn-calendar i { color: #0891b2; } 
+
+.modal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f7f7f7;
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.modal-label {
+    font-weight: bold;
+    color: #555;
+    flex: 1;
+}
+
+.modal-value {
+    text-align: right;
+    flex: 1;
+}
+
+.modal-row input,
+.modal-row textarea {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: right;
+    background: white;
+}
+
+
+tr {
+    transition: opacity .2s ease;
+}
+
+.fade-out {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    transition: opacity .2s ease, height .2s ease;
+    display: none;
+}
+
+.search-box {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 260px;
+    transition: 0.2s ease;
+}
+
+.search-box:focus {
+    border-color: #0891b2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(8,145,178,0.15);
+}
+
+
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -183,3 +248,4 @@
     .table-container { overflow-x: scroll; }
     .records-table th, .records-table td { padding: 10px; font-size: 13px; }
 }
+

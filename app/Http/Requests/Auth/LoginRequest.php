@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
@@ -32,223 +30,103 @@ class LoginRequest extends FormRequest
         return [
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'string'],
+            'role'     => ['required', 'string'],
         ];
     }
 
-    public function authenticate(): void
+    public function authenticate()
     {
         $this->ensureIsNotRateLimited();
 
-        $role = $this->input('role');
         $username = $this->input('username');
         $password = $this->input('password');
+        $role     = $this->input('role');
 
-        $user = null;
+        // 1️⃣ Get role-specific user
+        $roleUser = $this->getRoleUser($role, $username);
 
-        switch ($role) {
-            case 'hmmc_admin':
-                $user = HmmcAdmin::where('ad_Username', $username)->first();
-                $passwordField = 'ad_Password';
-                break;
-
-            case 'nurse':
-                $user = Nurse::where('ns_Username', $username)->first();
-                $passwordField = 'ns_Password';
-                break;
-
-            case 'doctor':
-                $user = Doctor::where('dr_Username', $username)->first();
-                $passwordField = 'dr_Password';
-                break;
-
-            case 'lab_technician':
-                $user = LabTech::where('lt_Username', $username)->first();
-                $passwordField = 'lt_Password';
-                break;
-
-            case 'shariah_advisor':
-                $user = ShariahCommittee::where('sc_Username', $username)->first();
-                $passwordField = 'sc_Password';
-                break;
-
-            case 'parent':
-                $user = ParentModel::where('pr_NRIC', $username)->first();
-                $passwordField = 'pr_Password';
-                break;
-
-            case 'donor':
-                $user = Donor::where('dn_NRIC', $username)->first();
-                $passwordField = 'dn_Password';
-                break;
-
-            default:
-                throw ValidationException::withMessages([
-                    'role' => 'Invalid role selected.',
-                ]);
-        }
-
-        if (! $user || ! Hash::check($password, $user->{$passwordField})) {
-            RateLimiter::hit($this->throttleKey());
-
+        if (!$roleUser) {
             throw ValidationException::withMessages([
-                'username' => __('auth.failed'),
+                'username' => 'Account not found for this role.',
             ]);
         }
 
-        RateLimiter::clear($this->throttleKey());
+        // 2️⃣ Check password
+        if (!Hash::check($password, $roleUser['password'])) {
+            throw ValidationException::withMessages([
+                'password' => 'Invalid password.',
+            ]);
+        }
 
-        // ✅ Check if donor needs to reset password (first-time login)
-        if ($role === 'donor' && $this->isFirstTimeDonorLogin($user)) {
-            // Store donor info in session for password reset - use NRIC for donors
+        // --- FIRST-TIME DONOR DETECTION ---
+        if ($role === 'donor' && $roleUser['first_login'] == 1) {
+            // Set session flags for AuthenticatedSessionController
             session([
                 'first_time_donor' => true,
-                'donor_nric' => $user->dn_NRIC,
-                'donor_email' => $user->dn_Email,
-                'donor_id' => $user->dn_ID,
-                'donor_name' => $user->dn_FullName
+                'donor_nric' => $roleUser['nric'],
             ]);
-            
-            // Don't log in yet - redirect to first-time password reset
-            return; // ← This is correct - we return without logging in
         }
 
-        // Only create and log in user if NOT a first-time donor
-        $authUser = $this->createAuthUser($user, $role);
-        
-        // Properly log in the user using Laravel's Auth
-        Auth::login($authUser, $this->boolean('remember'));
-        
-        // Store additional info in session
-        session(['auth_role' => $role]);
-        
-        // Regenerate session to prevent fixation attacks
-        request()->session()->regenerate();
-    }
-
-    /**
-     * Check if this is a donor's first login (needs password reset)
-     */
-    private function isFirstTimeDonorLogin($donor): bool
-    {
-        // Reset password only when first_login = 1 (true)
-        if ($donor->first_login == 1) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Create a User model instance for authentication
-     */
-    private function createAuthUser($roleUser, $role)
-    {
-        // Create or find a User model instance
-        // This maps your role-specific user to Laravel's User model
-        $email = $this->getUserEmail($roleUser, $role);
-        $name = $this->getUserName($roleUser, $role);
-        $userId = $this->getUserId($roleUser, $role);
-
-        // Find or create user in users table
-        $user = User::firstOrCreate(
-            ['email' => $email],
+        // 3️⃣ Create or update user in `users` table
+        $authUser = User::updateOrCreate(
             [
-                'name' => $name,
-                'password' => bcrypt('dummy'), // Not used for auth
-                'role' => $role,
-                'role_id' => $userId
+                'role'    => $role,
+                'role_id' => $roleUser['id'],
+            ],
+            [
+                'name'      => $roleUser['name'],
+                'email'     => $roleUser['email'],
+                'username'  => $role !== 'donor' && $role !== 'parent' ? $username : null,
+                'ic_number' => $role === 'donor' || $role === 'parent' ? $username : null,
+                'password'  => bcrypt('dummy'), // not used
             ]
         );
 
-        return $user;
+        // 4️⃣ Log in
+        Auth::login($authUser, $this->boolean('remember'));
+
+        $this->clearRateLimiter();
     }
 
-    private function getUserEmail($user, $role)
+    private function getRoleUser($role, $username)
     {
-        switch ($role) {
-            case 'hmmc_admin':
-                return $user->ad_Email;
-            case 'nurse':
-                return $user->ns_Email;
-            case 'doctor':
-                return $user->dr_Email;
-            case 'lab_technician':
-                return $user->lt_Email;
-            case 'shariah_advisor':
-                return $user->sc_Email;
-            case 'parent':
-                return $user->pr_Email;
-            case 'donor':
-                return $user->dn_Email;
-            default:
-                return '';
-        }
-    }
+        $modelMap = [
+            'hmmc_admin'     => ['model' => HmmcAdmin::class, 'field' => 'ad_Username', 'pass' => 'ad_Password', 'name' => 'ad_Name', 'email' => 'ad_Email', 'id' => 'ad_Admin'],
+            'nurse'          => ['model' => Nurse::class, 'field' => 'ns_Username', 'pass' => 'ns_Password', 'name' => 'ns_Name', 'email' => 'ns_Email', 'id' => 'ns_ID'],
+            'doctor'         => ['model' => Doctor::class, 'field' => 'dr_Username', 'pass' => 'dr_Password', 'name' => 'dr_Name', 'email' => 'dr_Email', 'id' => 'dr_ID'],
+            'lab_technician' => ['model' => LabTech::class, 'field' => 'lt_Username', 'pass' => 'lt_Password', 'name' => 'lt_Name', 'email' => 'lt_Email', 'id' => 'lt_ID'],
+            'shariah_advisor'=> ['model' => ShariahCommittee::class, 'field' => 'sc_Username', 'pass' => 'sc_Password', 'name' => 'sc_Name', 'email' => 'sc_Email', 'id' => 'sc_ID'],
+            'parent'         => ['model' => ParentModel::class, 'field' => 'pr_NRIC', 'pass' => 'pr_Password', 'name' => 'pr_Name', 'email' => 'pr_Email', 'id' => 'pr_ID'],
+            'donor'          => ['model' => Donor::class, 'field' => 'dn_NRIC', 'pass' => 'dn_Password', 'name' => 'dn_FullName', 'email' => 'dn_Email', 'id' => 'dn_ID'],
+        ];
 
-    private function getUserName($user, $role)
-    {
-        switch ($role) {
-            case 'hmmc_admin':
-                return $user->ad_Name;
-            case 'nurse':
-                return $user->ns_Name;
-            case 'doctor':
-                return $user->dr_Name;
-            case 'lab_technician':
-                return $user->lt_Name;
-            case 'shariah_advisor':
-                return $user->sc_Name;
-            case 'parent':
-                return $user->pr_Name;
-            case 'donor':
-                return $user->dn_FullName;
-            default:
-                return '';
-        }
-    }
-
-    private function getUserId($user, $role)
-    {
-        switch ($role) {
-            case 'hmmc_admin':
-                return $user->ad_Admin;
-            case 'nurse':
-                return $user->ns_ID;
-            case 'doctor':
-                return $user->dr_ID;
-            case 'lab_technician':
-                return $user->lt_ID;
-            case 'shariah_advisor':
-                return $user->sc_ID;
-            case 'parent':
-                return $user->pr_ID;
-            case 'donor':
-                return $user->dn_ID;
-            default:
-                return null;
-        }
-    }
-
-    public function ensureIsNotRateLimited(): void
-    {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        if (!isset($modelMap[$role])) {
+            throw ValidationException::withMessages(['role' => 'Invalid role']);
         }
 
-        event(new Lockout($this));
+        $map = $modelMap[$role];
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $record = $map['model']::where($map['field'], $username)->first();
 
-        throw ValidationException::withMessages([
-            'username' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
+        if (!$record) return null;
+
+        return [
+            'id'       => $record->{$map['id']},
+            'name'     => $record->{$map['name']},
+            'email'    => $record->{$map['email']},
+            'password' => $record->{$map['pass']},
+            'first_login' => $role === 'donor' ? $record->first_login : 0,
+            'nric'        => $role === 'donor' ? $record->{$map['field']} : null,
+        ];
     }
 
-    public function throttleKey(): string
+    private function ensureIsNotRateLimited()
     {
-        return Str::lower($this->input('username')).'|'.$this->ip();
+        // Optional: implement rate limiting if needed
+    }
+
+    private function clearRateLimiter()
+    {
+        // Optional: clear rate limiter
     }
 }

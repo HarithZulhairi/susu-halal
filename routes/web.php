@@ -1,23 +1,55 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\MilkController;
-use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 
 // Load Laravel Breeze/Fortify auth routes (login, logout, password reset, etc.)
+// Only guests can access login/register
+// Only guests can access login/register
+// Guest routes (login/register)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+});
+
+    Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
+    Route::post('/register-donor', [RegisteredUserController::class, 'store'])->name('register.donor.store');
+// home page
+Route::get('/', function () {
+    if(auth()->check()){
+        $role = auth()->user()->role;
+        return match($role) {
+            'hmmc_admin' => redirect()->route('hmmc.dashboard'),
+            'nurse' => redirect()->route('nurse.dashboard'),
+            'doctor' => redirect()->route('doctor.dashboard'),
+            'lab_technician' => redirect()->route('labtech.dashboard'),
+            'shariah_advisor' => redirect()->route('shariah.dashboard'),
+            'parent' => redirect()->route('parent.dashboard'),
+            'donor' => redirect()->route('donor.dashboard'),
+            default => redirect('/'),
+        };
+    }
+    return view('welcome');
+})->name('home');
+// Include the default auth routes provided by Laravel Breeze/Fortify
 require __DIR__.'/auth.php';
 
 // ====================================================================
 // CUSTOM GUEST ROUTES
 // ====================================================================
 
-Route::middleware('guest')->group(function () {
+
 
     // Custom: First-time password setup for new donors
     Route::get('/first-time-password', [NewPasswordController::class, 'createFirstTime'])
@@ -25,41 +57,56 @@ Route::middleware('guest')->group(function () {
     Route::post('/first-time-password', [NewPasswordController::class, 'storeFirstTime'])
         ->name('password.set.first-time');
 
-    // Custom Register Page
-    Route::get('/register', [RegisteredUserController::class, 'create'])
-        ->name('register');
-    Route::post('/register', [RegisteredUserController::class, 'store'])
-        ->name('register.donor.store');
-});
-
-// Override default login page (show your beautiful custom login)
-Route::get('/login', fn() => view('auth.login'))
-    ->middleware('guest')
-    ->name('login');
-
-// Home
-Route::get('/', fn() => view('welcome'))->name('home');
 
 // ====================================================================
 // AUTHENTICATED ROUTES
 // ====================================================================
 
+// Authenticated routes
 Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    // Profile
+    // Dashboard routes
+    Route::get('/donor/dashboard', [DashboardController::class, 'donor'])->name('donor.dashboard');
+    Route::get('/labtech/dashboard', [DashboardController::class, 'labtech'])->name('labtech.dashboard');
+    Route::get('/doctor/dashboard', [DashboardController::class, 'doctor'])->name('doctor.dashboard');
+    Route::get('/nurse/dashboard', [DashboardController::class, 'nurse'])->name('nurse.dashboard');
+    Route::get('/shariah/dashboard', [DashboardController::class, 'shariah'])->name('shariah.dashboard');
+    Route::get('/parent/dashboard', [DashboardController::class, 'parent'])->name('parent.dashboard');
+    Route::get('/hmmc/dashboard', [DashboardController::class, 'hmmc'])->name('hmmc.dashboard');
+});
+
+
+// In your routes file
+Route::middleware(['auth'])->group(function () {
+    Route::get('/hmmc/manage-users', [UserController::class, 'index'])->name('hmmc.manage-users');
+    Route::get('/hmmc/create-new-user/{role}', [UserController::class, 'create'])->name('hmmc.create-new-user');
+    Route::post('/hmmc/store-new-user', [UserController::class, 'store'])->name('hmmc.store-user');
+    
+    // User CRUD routes
+    Route::get('/hmmc/users/{role}/{id}', [UserController::class, 'show'])->name('hmmc.users.show');
+    Route::get('/hmmc/users/{role}/{id}/edit', [UserController::class, 'edit'])->name('hmmc.users.edit');
+    Route::put('/hmmc/users/{role}/{id}', [UserController::class, 'update'])->name('hmmc.users.update');
+    Route::delete('/hmmc/users/{role}/{id}', [UserController::class, 'destroy'])->name('hmmc.users.destroy');
+    
+    // Credential sending route
+    Route::post('/hmmc/send-credentials', [UserController::class, 'sendCredentials'])
+        ->name('hmmc.send-credentials')
+        ->middleware(['auth']); // Only auth middleware
+});
+
+Route::post('/hmmc/validate-user-field', [UserController::class, 'validateField'])
+    ->name('hmmc.validate-user-field')
+    ->middleware('auth');
+
+
+Route::middleware(['auth'])->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Role-based Dashboards (keep only ONE of each)
-    Route::view('/hmmc/dashboard', 'hmmc.hmmc_dashboard')->name('hmmc.dashboard');
-    Route::view('/nurse/dashboard', 'nurse.nurse_dashboard')->name('nurse.dashboard');
-    Route::view('/doctor/dashboard', 'doctor.doctor_dashboard')->name('doctor.dashboard');
-    Route::view('/labtech/dashboard', 'labtech.labtech_dashboard')->name('labtech.dashboard');
-    Route::view('/shariah/dashboard', 'shariah.shariah_dashboard')->name('shariah.dashboard');
-    Route::view('/parent/dashboard', 'parent.parent_dashboard')->name('parent.dashboard');
-    Route::view('/donor/dashboard', 'donor.donor_dashboard')->name('donor.dashboard');
 
     // Extra Profile Views
     Route::view('/donor/edit-profile', 'donor.donor_edit-profile')->name('donor.edit-profile');
@@ -183,8 +230,77 @@ Route::get('/test-email', function () {
                     ->subject('Test Email from HMMC – Your Login Credentials');
         });
 
+
         return "<h2 style='color:green'>Email sent successfully!</h2>";
     } catch (Exception $e) {
         return "<h2 style='color:red'>Email failed:</h2><pre>" . $e->getMessage() . "</pre>";
     }
 })->name('test.email');
+
+//Controller
+Route::post('/donor/milk/store', [DonorAppointmentController::class, 'storeMilkAppointment'])
+    ->name('donor.store-milk-appointment');
+
+Route::get('/donor/appointments', [DonorAppointmentController::class, 'showAppointment'])
+    ->name('donor.appointments');
+
+Route::put('/donor/appointments/update/milk/{id}', [DonorAppointmentController::class, 'updateMilkAppointment'])
+    ->name('donor.update-milk');
+
+Route::put('/donor/appointments/update/pk/{id}', [DonorAppointmentController::class, 'updatePumpingKitAppointment'])
+    ->name('donor.update-pumping');
+
+
+Route::post('/donor/pk/store', [DonorAppointmentController::class, 'storePumpingKitAppointment'])
+    ->name('donor.store-pk-appointment');
+
+Route::put('/donor/appointments/cancel/milk/{id}', [DonorAppointmentController::class, 'cancelMilk'])
+    ->name('donor.cancel-milk');
+
+Route::put('/donor/appointments/cancel/pk/{id}', [DonorAppointmentController::class, 'cancelPumpingKit'])
+    ->name('donor.cancel-pk');
+
+
+
+
+
+//Controller
+Route::post('/donor/milk/store', [DonorAppointmentController::class, 'storeMilkAppointment'])
+    ->name('donor.store-milk-appointment');
+
+Route::get('/donor/appointments', [DonorAppointmentController::class, 'showAppointment'])
+    ->name('donor.appointments');
+
+Route::put('/donor/appointments/update/milk/{id}', [DonorAppointmentController::class, 'updateMilkAppointment'])
+    ->name('donor.update-milk');
+
+Route::put('/donor/appointments/update/pk/{id}', [DonorAppointmentController::class, 'updatePumpingKitAppointment'])
+    ->name('donor.update-pumping');
+
+
+Route::post('/donor/pk/store', [DonorAppointmentController::class, 'storePumpingKitAppointment'])
+    ->name('donor.store-pk-appointment');
+
+Route::put('/donor/appointments/cancel/milk/{id}', [DonorAppointmentController::class, 'cancelMilk'])
+    ->name('donor.cancel-milk');
+
+Route::put('/donor/appointments/cancel/pk/{id}', [DonorAppointmentController::class, 'cancelPumpingKit'])
+    ->name('donor.cancel-pk');
+
+Route::get('/nurse/donor-appointment-record',[DonorAppointmentController::class, 'nurseViewAppointments'])
+    ->name('nurse.donor-appointment-record');
+
+Route::put('/nurse/appointments/confirm/milk/{reference}', 
+    [DonorAppointmentController::class, 'nurseConfirmMilkAppointment']);
+
+Route::put('/nurse/appointments/confirm/pk/{reference}', 
+    [DonorAppointmentController::class, 'nurseConfirmPumpingKitAppointment']);
+
+
+
+
+
+
+
+
+

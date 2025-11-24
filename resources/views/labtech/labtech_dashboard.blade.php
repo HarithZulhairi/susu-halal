@@ -114,8 +114,110 @@
                             <span class="quick-stat-badge primary">Edit</span>
                         </a>
                     </div>
-                    </div>
         </div>
+        <!-- Bottom Grid: Milk Records -->
+        <div class="quick-stats" style="grid-column: span 2;">
+            <div class="card milk-records-card ">
+                <div class="card-header">
+                    <h2>Milk Records</h2>
+                    <a href="{{ route('labtech.labtech_manage-milk-records') }}" class="view-all">
+                        View All Records
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>MILK DONOR</th>
+                                <th>CLINICAL STATUS</th>
+                                <th>VOLUME</th>
+                                <th>EXPIRATION DATE</th>
+                                <th>SHARIAH APPROVAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($milks as $milk)
+                            <tr data-milk-id="{{ $milk->milk_ID }}">
+                                <td>
+                                    <div class="milk-donor-info">
+                                        <div class="milk-icon-wrapper">
+                                            <i class="fas fa-bottle-droplet milk-icon"></i>
+                                        </div>
+                                        <div>
+                                            <span class="milk-id">{{ $milk->formatted_id }}</span>
+                                            <span class="donor-name">{{ $milk->donor?->dn_FullName ?? 'Unknown Donor' }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    @php
+                                        // Get the raw status or default
+                                        $rawStatus = $milk->milk_Status ?? 'Not Yet Started';
+
+                                        // Convert status to a safe CSS class: "Not Yet Started" -> "not-yet-started"
+                                        $statusClass = strtolower(str_replace(' ', '-', $rawStatus));
+
+                                        // Map general base class for styling (optional, e.g., "pending", "completed", "processing")
+                                        $statusBaseMap = [
+                                            'not' => 'pending',
+                                            'processing' => 'processing',
+                                            'completed' => 'completed',
+                                        ];
+                                        $firstWord = strtolower(explode(' ', $rawStatus)[0]);
+                                        $baseClass = $statusBaseMap[$firstWord] ?? 'pending';
+                                    @endphp
+
+                                    <a href="{{ route('labtech.labtech_process-milk', $milk->milk_ID) }}"
+                                    class="status-tag status-{{ $baseClass }} status-{{ $statusClass }} status-clickable"
+                                    title="Click to continue processing this milk">
+                                        {{ $rawStatus }}
+                                    </a>
+
+                                </td>
+
+                                <td>{{ $milk->milk_volume }} mL</td>
+
+                                <td>
+                                    @if($milk->milk_expiryDate)
+                                        {{ \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') }}
+                                        @if(\Carbon\Carbon::parse($milk->milk_expiryDate)->isPast())
+                                            <span class="expired-text">(expired)</span>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+
+                                <td>
+                                    @php
+                                        $approval = $milk->milk_shariahApproval;
+                                    @endphp
+                                    <span class="status-tag
+                                        {{ is_null($approval) ? 'status-pending' :
+                                        ($approval ? 'status-approved' : 'status-rejected') }}">
+                                        {{ is_null($approval) ? 'Not Yet Reviewed' :
+                                        ($approval ? 'Approved' : 'Rejected') }}
+                                    </span>
+                                </td>   
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    No milk records yet. Add one to begin!
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+</div>
+
+    </div>
 </div>
 </div>
 
@@ -134,11 +236,11 @@ gradientTeal.addColorStop(1, 'rgba(20, 184, 166, 0.05)');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: @json($months),
         datasets: [
             {
                 label: 'Processed Samples',
-                data: [40, 55, 60, 65, 75, 90, 110],
+                data: @json($processedMonthly),
                 borderColor: '#3B82F6',
                 backgroundColor: gradientBlue,
                 fill: true,
@@ -149,7 +251,7 @@ new Chart(ctx, {
             },
             {
                 label: 'Dispatched Milk',
-                data: [20, 35, 45, 50, 60, 80, 95],
+                data: @json($dispatchedMonthly),
                 borderColor: '#14B8A6',
                 backgroundColor: gradientTeal,
                 fill: true,

@@ -12,70 +12,47 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): View
-    {
-        // Clear all session data
-        session()->flush();
-        
-        // Regenerate session ID for security
-        session()->regenerate();
-        
-        return view('auth.login');
-    }
 
     /**
      * Handle an incoming authentication request.
      */
+    public function create()
+    {
+        return view('auth.login');
+    }
+
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->authenticate(); // LoginRequest handles role logic
 
-        // Check if this is a first-time donor login (from session)
         if (session('first_time_donor')) {
             return redirect()->route('password.first-time')
-                ->with('nric', session('donor_nric'))
-                ->with('info', 'Welcome! Please set a permanent password for your account.');
+                ->with('nric', session('donor_nric'));
         }
 
         $request->session()->regenerate();
 
-        $role = Auth::user()->role;
+        $user = Auth::user();
+        $role = $user->role;
 
-        // Redirect user based on role
-        switch ($role) {
-            case 'hmmc_admin':
-                return redirect()->route('hmmc.dashboard');
-            case 'nurse':
-                return redirect()->route('nurse.dashboard');
-            case 'doctor':
-                return redirect()->route('doctor.dashboard');
-            case 'lab_technician':
-                return redirect()->route('labtech.dashboard');
-            case 'shariah_advisor':
-                return redirect()->route('shariah.dashboard');
-            case 'parent':
-                return redirect()->route('parent.dashboard');
-            case 'donor':
-                return redirect()->route('donor.dashboard');
-            default:
-                abort(403, 'Unauthorized role.');
-        }
+        // Redirect by role
+        return match($role) {
+            'hmmc_admin' => redirect()->route('hmmc.dashboard'),
+            'nurse' => redirect()->route('nurse.dashboard'),
+            'doctor' => redirect()->route('doctor.dashboard'),
+            'lab_technician' => redirect()->route('labtech.dashboard'),
+            'shariah_advisor' => redirect()->route('shariah.dashboard'),
+            'parent' => redirect()->route('parent.dashboard'),
+            'donor' => redirect()->route('donor.dashboard'),
+            default => redirect('/'),
+        };
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy()
     {
         Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
+        session()->invalidate();
+        session()->regenerateToken();
         return redirect('/');
     }
 }
