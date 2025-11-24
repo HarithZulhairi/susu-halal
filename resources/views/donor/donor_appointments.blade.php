@@ -146,19 +146,28 @@
                 </div>
             </div>
 
-            <div class="appointments-section">
+            <div class="appointments-section filter-section">
                 <div class="section-header">
                     <h2>My Appointments</h2>
                     <div class="header-actions">
-                        <button class="btn-icon" title="Search"><i class="fas fa-search"></i> Search</button>
-                        <button class="btn-icon" title="Filter"><i class="fas fa-filter"></i> Filter</button>
+                        <input type="text" 
+                            class="search-box" 
+                            placeholder="Search appointments..."
+                            style="
+                                    padding: 8px 12px;
+                                    border: 1px solid #ccc;
+                                    border-radius: 6px;
+                                    width: 250px;
+                        ">
+
                     </div>
                 </div>
 
                 <div class="tabs">
-                    <button class="tab active">All Appointment <span class="badge">{{ $total }}</span></button>
-                    <button class="tab">Confirmed <span class="badge">{{ $confirmed }}</span></button>
-                    <button class="tab">Pending <span class="badge">{{ $pending }}</span></button>
+                    <button class="tab active" data-filter="all">All Appointment <span class="badge">{{ $confirmed + $pending }}</span></button>
+                    <button class="tab" data-filter="confirmed">Confirmed <span class="badge">{{ $confirmed }}</span></button>
+                    <button class="tab" data-filter="pending">Pending <span class="badge">{{ $pending }}</span></button>
+
                 </div>
 
                 <div class="table-container">
@@ -175,8 +184,19 @@
                             </tr>
                         </thead>
                         <tbody>
+                        <tr class="no-records" style="display:none;">
+                        <td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">
+                            No appointments yet.
+                        </td>
+                        </tr>
+
+                        <tr class="no-search-results" style="display:none;">
+                            <td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">
+                                No results found.
+                            </td>
+                        </tr>
                         @forelse($currentAppointments as $appointment)
-                            <tr>
+                            <tr data-status="{{ strtolower($appointment->status) }}">
                                 <td><span class="ref-id">{{ $appointment->reference_num }}</span></td>
 
                                 <td>{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('d.m.Y') }}</td>
@@ -216,10 +236,10 @@
 
                                     <button class="btn-edit"
                                         onclick="openEditModal({
-                                            id: '{{ $appointment->ma_ID }}',
+                                            id: '{{ $appointment->appointment_category == "Milk Donation" ? $appointment->ma_ID : $appointment->pk_ID }}',
+                                            type: '{{ $appointment->appointment_category }}',
                                             referenceId: '{{ $appointment->reference_num }}',
-                                            datetime: '{{ $appointment->datetime}}',
-                                            time: '{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('h:i A') }}'
+                                            datetime: '{{ $appointment->appointment_datetime }}',
                                         })">
                                         <i class="fas fa-edit"></i>
                                     </button>
@@ -249,19 +269,26 @@
                 </div>
             </div>
 
-            <div class="appointments-section">
+            <div class="appointments-section filter-section">
                 <div class="section-header">
                     <h2>Appointment History</h2>
                     <div class="header-actions">
-                        <button class="btn-icon" title="Search"><i class="fas fa-search"></i> Search</button>
-                        <button class="btn-show">Show</button>
+                        <input type="text" 
+                            class="search-box" 
+                            placeholder="Search appointments..."
+                            style="
+                                    padding: 8px 12px;
+                                    border: 1px solid #ccc;
+                                    border-radius: 6px;
+                                    width: 250px;
+                        ">
                     </div>
                 </div>
 
                 <div class="tabs">
-                    <button class="tab active">All Appointment <span class="badge">{{ $completed + $canceled }}</span></button>
-                    <button class="tab">Completed <span class="badge">{{ $completed }}</span></button>
-                    <button class="tab">Canceled <span class="badge">{{ $canceled }}</span></button>
+                    <button class="tab active" data-filter="all">All Appointment <span class="badge">{{ $completed + $canceled }}</span></button>
+                    <button class="tab" data-filter="completed">Completed <span class="badge">{{ $completed }}</span></button>
+                    <button class="tab" data-filter="canceled">Canceled <span class="badge">{{ $canceled }}</span></button>
                 </div>
 
                 <div class="table-container">
@@ -278,41 +305,53 @@
                             </tr>
                         </thead>
                         <tbody>
-                        @forelse($historyAppointments  as $appointment)
-                            <tr>
-                                <td><span class="ref-id">{{ $appointment->reference_num }}</span></td>
+                        <tr class="no-records" style="display:none;">
+                        <td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">
+                            No appointments yet.
+                        </td>
+                        </tr>
 
-                                <td>{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('d.m.Y') }}</td>
+                        <tr class="no-search-results" style="display:none;">
+                            <td colspan="7" style="text-align:center; padding:40px; color:#9ca3af;">
+                                No results found.
+                            </td>
+                        </tr>
+
+                        @forelse($historyAppointments  as $hisappointment)
+                            <tr data-status="{{ strtolower($hisappointment->status) }}">
+                                <td><span class="ref-id">{{ $hisappointment->reference_num }}</span></td>
+
+                                <td>{{ \Carbon\Carbon::parse($hisappointment->appointment_datetime)->format('d.m.Y') }}</td>
 
                                 <td>
-                                    {{ $appointment->milk_amount ? $appointment->milk_amount . ' ml' : '-' }}
+                                    {{ $hisappointment->milk_amount ? $hisappointment->milk_amount . ' ml' : '-' }}
                                 </td>
 
                                 <td>
-                                    <span class="status {{ strtolower($appointment->status) }}">
-                                        {{ ucfirst($appointment->status ?? 'Pending') }}
+                                    <span class="status {{ strtolower($hisappointment->status) }}">
+                                        {{ ucfirst($hisappointment->status ?? 'Pending') }}
                                     </span>
                                 </td>
 
-                                <td>{{ strtoupper(str_replace('_', ' ', $appointment->type) ?? 'PUMPING KIT') }}</td>
+                                <td>{{ strtoupper(str_replace('_', ' ', $hisappointment->type) ?? 'PUMPING KIT') }}</td>
 
 
-                                <td>{{ strtoupper(str_replace('_', ' ', $appointment->location ?? $appointment->collection_address ?? '-')) }}</td>
+                                <td>{{ strtoupper(str_replace('_', ' ', $hisappointment->location ?? $hisappointment->collection_address ?? '-')) }}</td>
 
 
                                 <td class="actions">
                                     <button class="btn-view"
                                         onclick="openAppointmentModal({
-                                            referenceId: '{{ $appointment->reference_num }}',
-                                            date: '{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('d.m.Y') }}',
-                                            time: '{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('h:i A') }}',
-                                            amount: '{{ $appointment->milk_amount ? $appointment->milk_amount . " ml" : "-" }}',
-                                            status: '{{ ucfirst($appointment->status ?? "Pending") }}',
-                                            type: '{{ strtoupper(str_replace('_', ' ', $appointment->type) ?? 'PUMPING KIT') }}',
-                                            location: '{{ strtoupper(str_replace('_', ' ', $appointment->location ?? $appointment->collection_address ?? '-')) }}',
+                                            referenceId: '{{ $hisappointment->reference_num }}',
+                                            date: '{{ \Carbon\Carbon::parse($hisappointment->appointment_datetime)->format('d.m.Y') }}',
+                                            time: '{{ \Carbon\Carbon::parse($hisappointment->appointment_datetime)->format('h:i A') }}',
+                                            amount: '{{ $hisappointment->milk_amount ? $hisappointment->milk_amount . " ml" : "-" }}',
+                                            status: '{{ ucfirst($hisappointment->status ?? "Pending") }}',
+                                            type: '{{ strtoupper(str_replace('_', ' ', $hisappointment->type) ?? 'PUMPING KIT') }}',
+                                            location: '{{ strtoupper(str_replace('_', ' ', $hisappointment->location ?? $hisappointment->collection_address ?? '-')) }}',
                                             contactPerson: 'Staff',
                                             contactPhone: '+60 12-345 6789',
-                                            notes: '{{ e($appointment->remarks ?? "No additional notes.") }}'
+                                            notes: '{{ e($hisappointment->remarks ?? "No additional notes.") }}'
                                         })">
                                         <i class="fas fa-eye"></i>
                                     </button>
@@ -484,8 +523,9 @@
     document.getElementById("edit_datetime").value = data.datetime;
 
     let url = data.type === "Milk Donation"
-            ? `/donor/appointments/update/milk/${data.id}`
-            : `/donor/appointments/update/pk/${data.id}`;
+        ? `/donor/appointments/update/milk/${data.id}`
+        : `/donor/appointments/update/pk/${data.id}`;
+
 
         document.getElementById("editForm").action = url;
    
@@ -531,6 +571,76 @@
             editModal.style.display = "none";
         }
     }
+
+document.querySelectorAll(".filter-section").forEach(section => {
+
+    let rows = Array.from(section.querySelectorAll("tbody tr"))
+        .filter(r => !r.classList.contains("no-records") &&
+                     !r.classList.contains("no-search-results"));
+
+    let emptyTabRow = section.querySelector(".no-records");
+    let emptySearchRow = section.querySelector(".no-search-results");
+
+    let tabs = section.querySelectorAll(".tabs .tab");
+    let searchBox = section.querySelector(".search-box");
+
+    let activeFilter = "all";
+    let searchTerm = "";
+
+    // TAB FILTER
+    tabs.forEach(tab => {
+        tab.addEventListener("click", function () {
+            tabs.forEach(t => t.classList.remove("active"));
+            this.classList.add("active");
+
+            activeFilter = this.getAttribute("data-filter");
+            applyFilters();
+        });
+    });
+
+    // LIVE SEARCH (always visible)
+    searchBox.addEventListener("input", function () {
+        searchTerm = this.value.toLowerCase().trim();
+        applyFilters();
+    });
+
+    function applyFilters() {
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            let status = row.getAttribute("data-status");
+
+            let matchesTab = (activeFilter === "all" || status === activeFilter);
+            let matchesSearch = (searchTerm === "" || text.includes(searchTerm));
+
+            if (matchesTab && matchesSearch) {
+                row.style.display = "table-row";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        // Show "no appointments" if the tab is empty
+        if (rows.filter(r => r.getAttribute("data-status") === activeFilter).length === 0
+            && activeFilter !== "all"
+            && searchTerm === "") {
+
+            emptyTabRow.style.display = "table-row";
+            emptySearchRow.style.display = "none";
+            return;
+        }
+
+        emptyTabRow.style.display = "none";
+
+        // Show "no search results"
+        emptySearchRow.style.display = (visibleCount === 0 ? "table-row" : "none");
+    }
+});
+
+
+
 </script>
 
 @endsection

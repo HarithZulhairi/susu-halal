@@ -297,6 +297,19 @@ Route::put('/donor/appointments/cancel/milk/{id}', [DonorAppointmentController::
 Route::put('/donor/appointments/cancel/pk/{id}', [DonorAppointmentController::class, 'cancelPumpingKit'])
     ->name('donor.cancel-pk');
 
+Route::get('/nurse/donor-appointment-record',[DonorAppointmentController::class, 'nurseViewAppointments'])
+    ->name('nurse.donor-appointment-record');
+
+Route::put('/nurse/appointments/confirm/milk/{reference}', 
+    [DonorAppointmentController::class, 'nurseConfirmMilkAppointment']);
+
+Route::put('/nurse/appointments/confirm/pk/{reference}', 
+    [DonorAppointmentController::class, 'nurseConfirmPumpingKitAppointment']);
+
+
+
+
+
 
 
 

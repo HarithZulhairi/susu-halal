@@ -12,25 +12,26 @@
       <h1>Donor Appointment Record</h1>
     </div>
 
-        <div class="appointment-section">
+      {{-- =============================== MILK APPOINTMENTS =============================== --}}
+    <div class="appointment-section">
       <div class="header-controls">
         <h2>Milk Donation Appointment</h2>
-        <div class="actions-header">
-          <button class="btn-icon"><i class="fas fa-search"></i> Search</button>
-          <button class="btn-icon"><i class="fas fa-filter"></i> Filter</button>
-        </div>
+
+        <input type="text" class="search-box" placeholder="Search appointments...">
       </div>
 
       <div class="tabs">
-        <button class="tab-button active" data-tab="all-milk">All Appointment <span class="count">(69)</span></button>
-        <button class="tab-button" data-tab="this-month-milk">This Month <span class="count">(13)</span></button>
-        <button class="tab-button" data-tab="pending-milk">Pending <span class="count">(11)</span></button>
+        <button class="tab-button active" data-filter="all">All</button>
+        <button class="tab-button" data-filter="this-month">This Month</button>
+        <button class="tab-button" data-filter="pending">Pending</button>
       </div>
 
       <div class="table-container">
-        <table class="records-table">
+        <table class="records-table milk-table">
           <thead>
             <tr>
+              <th>REFERENCE NUMBER</th>
+              <th>DONOR ID</th>
               <th>DATE</th>
               <th>AMOUNT</th>
               <th>STATUS</th>
@@ -40,77 +41,80 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>15.5.2024</td>
-              <td>1000ml</td>
-              <td><span class="status-tag pending">Pending</span></td>
-              <td>MILK DROP OFF</td>
-              <td>Main Center</td>
+            @foreach($milkAppointments as $app)
+            <tr 
+              data-status="{{ strtolower($app['status']) }}"
+              data-date="{{ \Carbon\Carbon::parse($app['date'])->format('Y-m') }}"
+            >
+              <td>{{ $app['reference'] }}</td>
+              <td>#{{ $app['donor_id'] }}</td>
+
+              <td>{{ \Carbon\Carbon::parse($app['date'])->format('d.m.Y') }}</td>
+
+              <td>{{ $app['amount'] ? $app['amount'].' ml' : '-' }}</td>
+
+              <td>
+                <span class="status-tag {{ strtolower($app['status']) }}">
+                  {{ $app['status'] }}
+                </span>
+              </td>
+
+              <td>{{ $app['type'] }}</td>
+
+              <td>{{ strtoupper(str_replace('_', ' ', $app['location'] ?? '-')) }}</td>
+
               <td class="actions">
-                <button class="btn-view" 
-                  title="View"
-                  onclick="openDonorModal({
-                    date: '15.5.2024',
-                    amount: '1000ml',
-                    status: 'Pending',
-                    type: 'MILK DROP OFF',
-                    location: 'Main Center'
+                <button class="btn-view"
+                  onclick="openViewModal({
+                    reference: '{{ $app['reference'] }}',
+                    donor_id: '{{ $app['donor_id'] }}',
+                    date: '{{ \Carbon\Carbon::parse($app['date'])->format('d.m.Y') }}',
+                    amount: '{{ $app['amount'] ?? '-' }}',
+                    status: '{{ $app['status'] }}',
+                    type: '{{ $app['type'] }}',
+                    location: '{{ strtoupper(str_replace('_', ' ', $app['location'] ?? '-')) }}'
                   })">
                   <i class="fas fa-eye"></i>
                 </button>
 
-                {{-- <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button> --}}
-                <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
-              </td>
-            </tr>
-            <tr>
-              <td>24.4.2024</td>
-              <td>1000ml</td>
-              <td><span class="status-tag confirmed">Confirmed</span></td>
-              <td>COLLECTION</td>
-              <td>No.50 Kg Beruas</td>
-              <td class="actions">
-                <button class="btn-view" 
-                  title="View"
-                  onclick="openDonorModal({
-                    date: '24.4.2024',
-                    amount: '1000ml',
-                    status: 'Confirmed',
-                    type: 'COLLECTION',
-                    location: 'No.50 Kg Beruas'
-                  })">
-                  <i class="fas fa-eye"></i>
+                @if($app['status'] == 'Pending')
+                <button class="btn-confirm"
+                  onclick="openConfirmModal('{{ $app['reference'] }}', 'milk')">
+                  Confirm
                 </button>
-
-                {{-- <button class="btn-delete" title="Delete"><i class="fas fa-trash"></i></button> --}}
-                <button class="btn-more" title="More"><i class="fas fa-ellipsis-v"></i></button>
+                @else
+                <button class="btn-confirm confirmed" disabled>Completed</button>
+                @endif
               </td>
             </tr>
+            @endforeach
           </tbody>
         </table>
       </div>
+
     </div>
 
-        <div class="appointment-section">
+
+
+    {{-- =============================== PUMPING KIT APPOINTMENTS =============================== --}}
+    <div class="appointment-section">
       <div class="header-controls">
         <h2>Pumping Kit Appointment</h2>
-        <div class="actions-header">
-          <button class="btn-icon"><i class="fas fa-search"></i> Search</button>
-          <button class="btn-icon"><i class="fas fa-filter"></i> Filter</button>
-        </div>
+
+        <input type="text" class="search-box" placeholder="Search appointments...">
       </div>
 
       <div class="tabs">
-        <button class="tab-button active" data-tab="all-kit">All Appointment <span class="count">(69)</span></button>
-        <button class="tab-button" data-tab="this-month-kit">This Month <span class="count">(13)</span></button>
-        <button class="tab-button" data-tab="pending-kit">Pending <span class="count">(11)</span></button>
+        <button class="tab-button active" data-filter="all">All</button>
+        <button class="tab-button" data-filter="this-month">This Month</button>
+        <button class="tab-button" data-filter="pending">Pending</button>
       </div>
 
       <div class="table-container">
-        <table class="records-table">
+        <table class="records-table kit-table">
           <thead>
             <tr>
-              <th>REFERENCE NO</th>
+              <th>REFERENCE NUMBER</th>
               <th>DONOR ID</th>
               <th>DATE</th>
               <th>STATUS</th>
@@ -119,92 +123,174 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>#MB-2025-0458</td>
-              <td>#243</td>
-              <td>15.5.2024</td>
-              <td><span class="status-tag pending">Pending</span></td>
-              <td>Main Center</td>
-              <td><button class="btn-confirm" data-id="#MB-2025-0458">Confirm</button></td>
+            @foreach($pumpingAppointments as $app)
+            <tr 
+              data-status="{{ strtolower($app['status']) }}"
+              data-date="{{ \Carbon\Carbon::parse($app['date'])->format('Y-m') }}"
+            >
+              <td>{{ $app['reference'] }}</td>
+              <td>#{{ $app['donor_id'] }}</td>
+              <td>{{ \Carbon\Carbon::parse($app['date'])->format('d.m.Y') }}</td>
+              
+              <td>
+                <span class="status-tag {{ strtolower($app['status']) }}">
+                  {{ $app['status'] }}
+                </span>
+              </td>
+
+              <td>{{ strtoupper(str_replace('_', ' ', $app['location'] ?? '-')) }}</td>
+
+              <td>
+                @if($app['status'] == 'Pending')
+                <button class="btn-confirm"
+                  onclick="openConfirmModal('{{ $app['reference'] }}', 'pk')">
+                  Confirm
+                </button>
+                @else
+                <button class="btn-confirm confirmed" disabled>Completed</button>
+                @endif
+              </td>
+
             </tr>
-            <tr>
-              <td>#MB-2025-0459</td>
-              <td>#456</td>
-              <td>8.5.2025</td>
-              <td><span class="status-tag confirmed">Confirmed</span></td>
-              <td>North Branch</td>
-              <td><button class="btn-confirm confirmed" disabled>Confirmed</button></td>
-            </tr>
+            @endforeach
+
           </tbody>
         </table>
       </div>
 
     </div>
-    <!-- ================== REUSABLE MODAL ================== -->
-    <div id="donorModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-            <h2>Appointment Details</h2>
-            <button class="modal-close-btn" onclick="closeDonorModal()">Close</button>
-        </div>
 
-        <div class="modal-body">
-          <p><strong>Date</strong> <span id="modal-date"></span></p>
-          <p><strong>Amount</strong> <span id="modal-amount"></span></p>
-          <p><strong>Status</strong> <span id="modal-status"></span></p>
-          <p><strong>Type</strong> <span id="modal-type"></span></p>
-          <p><strong>Location</strong> <span id="modal-location"></span></p>
-        </div>
+    {{-- =============================== VIEW MODAL =============================== --}}
+<div id="viewModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Appointment Details</h2>
 
-      </div>
-    </div>
+    <p><strong>Reference:</strong> <span id="v-reference"></span></p>
+    <p><strong>Donor ID:</strong> <span id="v-donor"></span></p>
+    <p><strong>Date:</strong> <span id="v-date"></span></p>
+    <p><strong>Amount:</strong> <span id="v-amount"></span></p>
+    <p><strong>Status:</strong> <span id="v-status"></span></p>
+    <p><strong>Type:</strong> <span id="v-type"></span></p>
+    <p><strong>Location:</strong> <span id="v-location"></span></p>
 
+    <button class="modal-close-btn" onclick="closeViewModal()">Close</button>
   </div>
 </div>
 
+
+
+{{-- =============================== CONFIRM MODAL =============================== --}}
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-content">
+    <h2>Confirm Appointment?</h2>
+    <p>Are you sure you want to mark this appointment as <strong>Completed</strong>?</p>
+
+    <p><strong>Reference:</strong> <span id="c-reference"></span></p>
+
+    <form id="confirmForm" method="POST">
+      @csrf
+      @method('PUT')
+      <button type="submit" class="modal-edit-btn">Confirm</button>
+    </form>
+
+    <button class="modal-close-btn" onclick="closeConfirmModal()">Cancel</button>
+  </div>
+</div>
+
+
+
+
 <script>
+/* ---------------- VIEW MODAL ---------------- */
+function openViewModal(data){
+  document.getElementById("v-reference").innerText = data.reference;
+  document.getElementById("v-donor").innerText = '#' + data.donor_id;
+  document.getElementById("v-date").innerText = data.date;
+  document.getElementById("v-amount").innerText = data.amount;
+  document.getElementById("v-status").innerText = data.status;
+  document.getElementById("v-type").innerText = data.type;
+  document.getElementById("v-location").innerText = data.location;
 
-// -------- OPEN MODAL ----------
-function openDonorModal(data) {
-    document.getElementById("modal-date").innerText = data.date;
-    document.getElementById("modal-amount").innerText = data.amount;
-    document.getElementById("modal-status").innerText = data.status;
-    document.getElementById("modal-type").innerText = data.type;
-    document.getElementById("modal-location").innerText = data.location;
-
-    document.getElementById("donorModal").style.display = "flex";
+  document.getElementById("viewModal").style.display = "flex";
 }
 
-// -------- CLOSE MODAL ----------
-function closeDonorModal() {
-    document.getElementById("donorModal").style.display = "none";
+function closeViewModal(){
+  document.getElementById("viewModal").style.display = "none";
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const tabSections = document.querySelectorAll('.appointment-section');
 
-  // Tab Switching Logic
-  tabSections.forEach(section => {
-    const tabButtons = section.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-      });
+
+/* ---------------- CONFIRM MODAL ---------------- */
+function openConfirmModal(reference, type){
+  document.getElementById("c-reference").innerText = reference;
+
+  let url = type === "milk"
+      ? `/nurse/appointments/confirm/milk/${reference}`
+      : `/nurse/appointments/confirm/pk/${reference}`;
+
+  document.getElementById("confirmForm").action = url;
+
+  document.getElementById("confirmModal").style.display = "flex";
+}
+
+function closeConfirmModal(){
+  document.getElementById("confirmModal").style.display = "none";
+}
+
+
+
+/* ---------------- FILTERING (tabs + search) ---------------- */
+document.querySelectorAll(".appointment-section").forEach(section => {
+
+  let rows = section.querySelectorAll("tbody tr");
+  let searchBox = section.querySelector(".search-box");
+  let tabs = section.querySelectorAll(".tab-button");
+
+  let currentFilter = "all";
+  let searchTerm = "";
+
+  // SEARCH
+  searchBox.addEventListener("input", function(){
+      searchTerm = this.value.toLowerCase();
+      applyFilters();
+  });
+
+  // TABS
+  tabs.forEach(tab => {
+    tab.addEventListener("click", function(){
+      tabs.forEach(t => t.classList.remove("active"));
+      this.classList.add("active");
+
+      currentFilter = this.dataset.filter;
+      applyFilters();
     });
   });
 
-  // Confirm button logic
-  document.querySelectorAll('.btn-confirm:not(.confirmed)').forEach(button => {
-    button.addEventListener('click', function() {
-      const appointmentId = this.getAttribute('data-id');
-      alert(`Appointment ${appointmentId} Confirmed!`);
-      this.classList.add('confirmed');
-      this.textContent = 'Confirmed';
-      this.disabled = true;
+  // Apply filters
+  function applyFilters(){
+    let now = new Date();
+    let ym = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+
+    rows.forEach(row => {
+      let status = row.dataset.status;
+      let dateYM = row.dataset.date;
+      let text = row.innerText.toLowerCase();
+
+      let pass = true;
+
+      // filter by tab
+      if(currentFilter === "pending" && status !== "pending") pass = false;
+      if(currentFilter === "this-month" && dateYM !== ym) pass = false;
+
+      // search
+      if(searchTerm && !text.includes(searchTerm)) pass = false;
+
+      row.style.display = pass ? "" : "none";
     });
-  });
+  }
+
 });
+
 </script>
 @endsection
 

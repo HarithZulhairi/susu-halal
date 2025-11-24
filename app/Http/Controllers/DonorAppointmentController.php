@@ -262,51 +262,109 @@ class DonorAppointmentController extends Controller
     }
 
 
-        public function cancelMilk(Request $request, $id)
-        {
-            $appointment = MilkAppointment::findOrFail($id);
+    public function cancelMilk(Request $request, $id)
+    {
+        $appointment = MilkAppointment::findOrFail($id);
 
-            $now = now();
-            $appointmentTime = \Carbon\Carbon::parse($appointment->appointment_datetime);
+        $now = now();
+        $appointmentTime = \Carbon\Carbon::parse($appointment->appointment_datetime);
 
-            $hoursDifference = $now->diffInHours($appointmentTime, false);
+        $hoursDifference = $now->diffInHours($appointmentTime, false);
 
-            // Appointment is in the future AND less than 24 hours away
-            if ($hoursDifference > 0 && $hoursDifference < 24) {
-                return redirect()->back()->with('error', 'You cannot cancel a Milk Donation appointment less than 24 hours before.');
-            }
-
-            $appointment->update(['status' => 'Canceled']);
-
-            return redirect()
-                ->route('donor.appointments')
-                ->with('success_maCancel', 'Milk Appointment canceled successfully.')
-                ->with('reference', $appointment->reference_num);
+        // Appointment is in the future AND less than 24 hours away
+        if ($hoursDifference > 0 && $hoursDifference < 24) {
+            return redirect()->back()->with('error', 'You cannot cancel a Milk Donation appointment less than 24 hours before.');
         }
 
+        $appointment->update(['status' => 'Canceled']);
 
-        public function cancelPumpingKit(Request $request, $id)
-        {
-            dd("FUCK YOU");
-            $appointment = PumpingKitAppointment::findOrFail($id);
+        return redirect()
+            ->route('donor.appointments')
+            ->with('success_maCancel', 'Milk Appointment canceled successfully.')
+            ->with('reference', $appointment->reference_num);
+    }
 
-            $now = now();
-            $appointmentTime = \Carbon\Carbon::parse($appointment->appointment_datetime);
 
-            $hoursDifference = $now->diffInHours($appointmentTime, false);
+    public function cancelPumpingKit(Request $request, $id)
+    {
+        $appointment = PumpingKitAppointment::findOrFail($id);
 
-            // Appointment is in the future AND less than 24 hours away
-            if ($hoursDifference > 0 && $hoursDifference < 24) {
-                return redirect()->back()->with('error', 'You cannot cancel a Pumping Kit appointment less than 24 hours before.');
-            }
+        $now = now();
+        $appointmentTime = \Carbon\Carbon::parse($appointment->appointment_datetime);
 
-            $appointment->update(['status' => 'Canceled']);
+        $hoursDifference = $now->diffInHours($appointmentTime, false);
 
-            return redirect()
-                ->route('donor.appointments')
-                ->with('success_pkCancel', 'Pumping Kit Appointment canceled successfully.')
-                ->with('reference', $appointment->reference_num);
+        // Appointment is in the future AND less than 24 hours away
+        if ($hoursDifference > 0 && $hoursDifference < 24) {
+            return redirect()->back()->with('error', 'You cannot cancel a Pumping Kit appointment less than 24 hours before.');
         }
+
+        $appointment->update(['status' => 'Canceled']);
+
+        return redirect()
+            ->route('donor.appointments')
+            ->with('success_pkCancel', 'Pumping Kit Appointment canceled successfully.')
+            ->with('reference', $appointment->reference_num);
+    }
+
+    //NURSE
+
+    public function nurseViewAppointments()
+    {
+        // Get all Milk Appointments
+        $milkAppointments = MilkAppointment::orderBy('appointment_datetime', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'reference' => $item->reference_num,
+                    'donor_id'  => $item->dn_id,
+                    'date'      => $item->appointment_datetime,
+                    'amount'    => $item->milk_amount,
+                    'status'    => $item->status,
+                    'type'      => strtoupper(str_replace('_', ' ', $item->delivery_method)),
+                    'location'  => $item->location ?? $item->collection_address,
+                ];
+            });
+
+        // Get all Pumping Kit Appointments
+        $pumpingAppointments = PumpingKitAppointment::orderBy('appointment_datetime', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'reference' => $item->reference_num,
+                    'donor_id'  => $item->dn_ID,
+                    'date'      => $item->appointment_datetime,
+                    'status'    => $item->status,
+                    'location'  => $item->location,
+                ];
+            });
+
+        return view('nurse.nurse_donor-appointment-record', [
+            'milkAppointments'    => $milkAppointments,
+            'pumpingAppointments' => $pumpingAppointments,
+        ]);
+    }
+
+    public function nurseConfirmMilkAppointment($reference)
+    {
+        $app = MilkAppointment::where('reference_num', $reference)->firstOrFail();
+        $app->status = "Confirmed";
+        $app->save();
+
+        return back()->with('success', "Milk appointment $reference completed.");
+    }
+
+    public function nurseConfirmPumpingKitAppointment($reference)
+    {
+        $app = PumpingKitAppointment::where('reference_num', $reference)->firstOrFail();
+        $app->status = "Confirmed";
+        $app->save();
+
+        return back()->with('success', "Pumping kit appointment $reference completed.");
+    }
+
+
+
 
 
 
