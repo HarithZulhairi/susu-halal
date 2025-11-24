@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\MilkController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -134,7 +135,11 @@ Route::middleware('auth')->group(function () {
     // ====================================================================
     Route::view('/doctor/milk-request', 'doctor.doctor_milk-request')->name('doctor.list-milk-request');
     Route::view('/nurse/milk-request', 'nurse.nurse_milk-request')->name('nurse.list-milk-request');
-    Route::view('/doctor/milk-request/create', 'doctor.doctor_milk-request-form')->name('doctor.milk-request-form');
+
+    // Route::view('/doctor/milk-request/create', 'doctor.doctor_milk-request-form')->name('doctor.milk-request-form');
+    Route::get('/doctor/milk-request/create', [RequestController::class, 'create'])->name('doctor.doctor_milk-request-form');
+    Route::post('/doctor/milk-request/create/store', [RequestController::class, 'store'])->name('doctor.doctor_milk-request-store');
+    
     Route::view('/nurse/allocate-milk', 'nurse.nurse_allocate-milk')->name('nurse.allocate-milk');
     Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');

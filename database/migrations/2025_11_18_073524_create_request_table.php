@@ -16,6 +16,7 @@ return new class extends Migration
 
             // Foreign Keys
             $table->unsignedBigInteger('dr_ID');
+            $table->unsignedBigInteger('pr_ID');
 
             // Milk attributes
             $table->double('current_weight');
@@ -28,6 +29,7 @@ return new class extends Migration
 
             // Define Foreign Key Relationships
             $table->foreign('dr_ID')->references('dr_ID')->on('doctor')->onDelete('cascade');
+            $table->foreign('pr_ID')->references('pr_ID')->on('parent')->onDelete('cascade');
         });
     }
 

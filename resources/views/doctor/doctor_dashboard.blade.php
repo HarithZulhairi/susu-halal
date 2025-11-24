@@ -104,7 +104,7 @@
                             </div>
                             <span class="quick-stat-badge primary">View Now</span>
                         </a>
-                        <a href="{{ route('doctor.milk-request-form') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <a href="{{ route('doctor.doctor_milk-request-form') }}" class="quick-stat-item" style="text-decoration: none;">
                             <div class="quick-stat-info">
                                 <div class="quick-stat-value"><i class="fas fa-box"></i></div>
                                 <div class="quick-stat-label">Request Milk</div>

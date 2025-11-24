@@ -38,7 +38,7 @@
   <div class="sidebar-section">
     <h4>Management</h4>
     <ul>
-      <li><a href="{{ route('doctor.milk-request-form') }}"><i class="fa-solid fa-file-lines"></i> Create Request</a></li>
+      <li><a href="{{ route('doctor.doctor_milk-request-form') }}"><i class="fa-solid fa-file-lines"></i> Create Request</a></li>
       <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
         <a href="{{ route('doctor.list-milk-request') }}"><i class="fa-solid fa-list"></i> Request Records</a>
       </li>
