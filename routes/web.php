@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -49,30 +50,28 @@ Route::get('/', fn() => view('welcome'))->name('home');
 Route::middleware('auth')->group(function () {
 
 
-    // Profile
-    Route::get('/labtech/dashboard', function () {
-        return view('labtech.dashboard');
-    })->name('labtech.dashboard');
+    Route::get('/donor/dashboard', [DashboardController::class, 'donor'])
+        ->name('donor.dashboard');
 
-    Route::get('/shariah/dashboard', function () {
-        return view('shariah.dashboard');
-    })->name('shariah.dashboard');
+    Route::get('/labtech/dashboard', [DashboardController::class, 'labtech'])
+        ->name('labtech.dashboard');
 
-    Route::get('/parent/dashboard', function () {
-        return view('parent.dashboard');
-    })->name('parent.dashboard');
+    Route::get('/doctor/dashboard', [DashboardController::class, 'doctor'])
+        ->name('doctor.dashboard');
 
-    Route::get('/donor/dashboard', function () {
-        return view('donor.dashboard');
-    })->name('donor.dashboard');
+    Route::get('/nurse/dashboard', [DashboardController::class, 'nurse'])
+        ->name('nurse.dashboard');
+
+    Route::get('/shariah/dashboard', [DashboardController::class, 'shariah'])
+        ->name('shariah.dashboard');
+
+    Route::get('/parent/dashboard', [DashboardController::class, 'parent'])
+        ->name('parent.dashboard');
+
+    Route::get('/hmmc/dashboard', [DashboardController::class, 'hmmc'])
+        ->name('hmmc.dashboard');
 });
 
-
-// User Management Module
-
-Route::get('/hmmc/dashboard', function () {
-    return view('hmmc.hmmc_dashboard');
-})->name('hmmc.dashboard');
 
 // In your routes file
 Route::middleware(['auth'])->group(function () {
@@ -122,14 +121,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Role-based Dashboards (keep only ONE of each)
-    Route::view('/hmmc/dashboard', 'hmmc.hmmc_dashboard')->name('hmmc.dashboard');
-    Route::view('/nurse/dashboard', 'nurse.nurse_dashboard')->name('nurse.dashboard');
-    Route::view('/doctor/dashboard', 'doctor.doctor_dashboard')->name('doctor.dashboard');
-    Route::view('/labtech/dashboard', 'labtech.labtech_dashboard')->name('labtech.dashboard');
-    Route::view('/shariah/dashboard', 'shariah.shariah_dashboard')->name('shariah.dashboard');
-    Route::view('/parent/dashboard', 'parent.parent_dashboard')->name('parent.dashboard');
-    Route::view('/donor/dashboard', 'donor.donor_dashboard')->name('donor.dashboard');
 
     // Extra Profile Views
     Route::view('/donor/edit-profile', 'donor.donor_edit-profile')->name('donor.edit-profile');

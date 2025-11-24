@@ -25,10 +25,13 @@
                     <i class="fas fa-hand-holding-heart"></i>
                 </div>
             </div>
-            <div class="stat-value">18</div>
+            <div class="stat-value">{{ $totalDonations }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                12% from last month
+                {{-- Optional: calculate percentage change --}}
+                @if(isset($donationChangePercent))
+                    {{ $donationChangePercent }}% from last month
+                @endif
             </div>
         </div>
 
@@ -39,10 +42,12 @@
                     <i class="fas fa-bottle-droplet"></i>
                 </div>
             </div>
-            <div class="stat-value">4,210ml</div>
+            <div class="stat-value">{{ $totalMilk }}ml</div>
             <div class="stat-change positive">
                 <i class="fas fa-arrow-up"></i>
-                8% from last month
+                @if(isset($milkChangePercent))
+                    {{ $milkChangePercent }}% from last month
+                @endif
             </div>
         </div>
 
@@ -53,27 +58,30 @@
                     <i class="fas fa-calendar-check"></i>
                 </div>
             </div>
-            <div class="stat-value">2</div>
+            <div class="stat-value">{{ $upcomingAppointments->count() }}</div>
             <div class="stat-change warning">
                 <i class="fas fa-clock"></i>
-                Next: Tomorrow
+                @if($nextAppointment = $upcomingAppointments->first())
+                    Next: {{ \Carbon\Carbon::parse($nextAppointment->appointment_datetime)->diffForHumans() }}
+                @endif
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Milk Receipient</span>
+                <span class="stat-label">Milk Recipients</span>
                 <div class="stat-icon red">
                     <i class="fas fa-baby"></i>
                 </div>
             </div>
-            <div class="stat-value">12</div>
+            <div class="stat-value">{{ $totalRecipients }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-heart"></i>
                 Making a difference
             </div>
         </div>
     </div>
+
 
     <!-- Main Content Grid -->
     <div class="content-grid">
@@ -133,7 +141,7 @@
         <div class="card users-card">
             <div class="card-header">
                 <h2>Upcoming Appointments</h2>
-                <a href="{{ route('donor.my-appointments') }}" class="view-all">
+                <a href="{{ route('donor.appointments') }}" class="view-all">
                     View All Appointments
                     <i class="fas fa-arrow-right"></i>
                 </a>
@@ -146,72 +154,48 @@
                             <th>TYPE</th>
                             <th>LOCATION</th>
                             <th>STATUS</th>
-                            <th>ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @forelse($upcomingAppointments as $app)
                         <tr>
                             <td>
                                 <div class="user-info">
                                     <div class="user-avatar teal"><i class="fas fa-calendar"></i></div>
                                     <div>
-                                        <div class="user-name">May 20, 2024</div>
-                                        <div class="user-email">10:00 AM - 11:00 AM</div>
+                                        <div class="user-name">{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('M d, Y') }}</div>
+                                        <div class="user-email">{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-donor">Milk Donation</span></td>
-                            <td>Main Center</td>
-                            <td><span class="badge badge-active">Confirmed</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
                             <td>
-                                <div class="user-info">
-                                    <div class="user-avatar blue"><i class="fas fa-calendar"></i></div>
-                                    <div>
-                                        <div class="user-name">May 25, 2024</div>
-                                        <div class="user-email">2:00 PM - 3:00 PM</div>
-                                    </div>
-                                </div>
+                                <span class="badge badge-donor">
+                                    {{ $app->milk_amount ? 'Milk Donation' : 'Pumping Kit Pickup' }}
+                                </span>
                             </td>
-                            <td><span class="badge badge-nurse">Health Screening</span></td>
-                            <td>North Branch</td>
-                            <td><span class="badge badge-pending">Pending</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
+                            <td>{{ $app->location ?? $app->collection_address ?? 'N/A' }}</td>
                             <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal"><i class="fas fa-calendar"></i></div>
-                                    <div>
-                                        <div class="user-name">June 1, 2024</div>
-                                        <div class="user-email">9:00 AM - 10:00 AM</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-advisor">Pumping Kit Pickup</span></td>
-                            <td>Main Center</td>
-                            <td><span class="badge badge-active">Scheduled</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
+                                <span class="status {{ strtolower($app->status) }}">
+                                    {{ ucfirst($app->status) }}
+                                </span>
                             </td>
                         </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:20px;">
+                                No upcoming appointments.
+                            </td>
+                        </tr>
+                        @endforelse
+
                     </tbody>
+
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-</script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -230,11 +214,11 @@ gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: {!! json_encode($monthLabels) !!},
         datasets: [
             {
                 label: 'Donation Volume (ml)',
-                data: [900, 800, 500, 500, 300, 200, 300],
+                data: {!! json_encode($monthlyDonations) !!},
                 borderColor: '#4B9CD3',
                 backgroundColor: gradientBlue,
                 fill: true,
@@ -245,7 +229,7 @@ new Chart(ctx, {
             },
             {
                 label: 'Donation Frequency',
-                data: [8, 12, 13, 14, 16, 18, 20],
+                data: {!! json_encode($monthlyFrequency) !!},
                 borderColor: '#48BB78',
                 backgroundColor: gradientGreen,
                 fill: true,
@@ -255,6 +239,7 @@ new Chart(ctx, {
                 pointHoverRadius: 7,
             }
         ]
+
     },
     options: {
         responsive: true,
