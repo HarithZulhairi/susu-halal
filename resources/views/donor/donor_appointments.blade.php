@@ -441,7 +441,9 @@
                     <textarea id="remarks" name="remarks" class="form-control" rows="2" placeholder="Optional..."></textarea>
                 </div>
 
-                <button class="modal-edit-btn">Save Changes</button>
+                <button class="modal-save-btn">
+                    <i class="fas fa-check"></i> Save Changes
+                </button>
             </div>
         </form>
 
@@ -465,7 +467,7 @@
                 @csrf
                 @method('PUT')
 
-                <button type="submit" class="modal-edit-btn" style="background:#d9534f;">
+                <button type="submit" class="modal-cancel-btn">
                     Confirm Cancellation
                 </button>
             </form>

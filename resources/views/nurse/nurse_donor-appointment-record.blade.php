@@ -163,17 +163,22 @@
     {{-- =============================== VIEW MODAL =============================== --}}
 <div id="viewModal" class="modal-overlay">
   <div class="modal-content">
-    <h2>Appointment Details</h2>
+    <div class="modal-header">
+            <h2>Appointment Details</h2>
+            <button class="modal-close-btn" onclick="closeViewModal()">Close</button>
+        </div>
+    
+      <div class="modal-body">
+          <p><strong>Reference:</strong> <span id="v-reference"></span></p>
+          <p><strong>Donor ID:</strong> <span id="v-donor"></span></p>
+          <p><strong>Date:</strong> <span id="v-date"></span></p>
+          <p><strong>Amount:</strong> <span id="v-amount"></span></p>
+          <p><strong>Status:</strong> <span id="v-status"></span></p>
+          <p><strong>Type:</strong> <span id="v-type"></span></p>
+          <p><strong>Location:</strong> <span id="v-location"></span></p>
+      </div>
 
-    <p><strong>Reference:</strong> <span id="v-reference"></span></p>
-    <p><strong>Donor ID:</strong> <span id="v-donor"></span></p>
-    <p><strong>Date:</strong> <span id="v-date"></span></p>
-    <p><strong>Amount:</strong> <span id="v-amount"></span></p>
-    <p><strong>Status:</strong> <span id="v-status"></span></p>
-    <p><strong>Type:</strong> <span id="v-type"></span></p>
-    <p><strong>Location:</strong> <span id="v-location"></span></p>
-
-    <button class="modal-close-btn" onclick="closeViewModal()">Close</button>
+    
   </div>
 </div>
 
@@ -182,18 +187,21 @@
 {{-- =============================== CONFIRM MODAL =============================== --}}
 <div id="confirmModal" class="modal-overlay">
   <div class="modal-content">
-    <h2>Confirm Appointment?</h2>
-    <p>Are you sure you want to mark this appointment as <strong>Completed</strong>?</p>
-
-    <p><strong>Reference:</strong> <span id="c-reference"></span></p>
-
+    <div class="modal-header">
+            <h2>Confirm Appointment?</h2>
+            <button class="modal-close-btn" onclick="closeConfirmModal()">Close</button>
+        </div>
+  
+    <div class="modal-body">
+        <p><strong>Reference:</strong> <span id="c-reference"></span></p>
+    </div>
     <form id="confirmForm" method="POST">
       @csrf
       @method('PUT')
       <button type="submit" class="modal-edit-btn">Confirm</button>
     </form>
 
-    <button class="modal-close-btn" onclick="closeConfirmModal()">Cancel</button>
+    
   </div>
 </div>
 

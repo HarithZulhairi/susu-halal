@@ -84,6 +84,9 @@
   </form>
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 
 document.getElementById("feeds_per_day").addEventListener("input", validateFeedingSchedule);
@@ -118,6 +121,51 @@ document.getElementById("weight").addEventListener("input", function () {
         document.getElementById("entered_volume").removeAttribute("max");
     }
 });
+
+document.querySelector(".milk-request-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let form = this;
+    let formData = new FormData(form);
+
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            "Accept": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Successfully Submitted!',
+                text: 'Milk request has been recorded.',
+                confirmButtonColor: '#28a745'
+            }).then(() => {
+                window.location.href = "{{ route('doctor.doctor_milk-request') }}";
+            });
+
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: 'Please check your inputs.'
+            });
+        }
+    })
+    .catch(err => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Something went wrong.'
+        });
+    });
+});
+
 </script>
 
 

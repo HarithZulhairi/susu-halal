@@ -6,6 +6,15 @@
     <link rel="stylesheet" href="{{ asset('css/nurse_set-infant-weight.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <style>
+        .swal2-container {
+            z-index: 9999 !important;
+        }
+        .modal-overlay {
+            z-index: 2000;
+        }
+    </style>
+
     <div class="container">
         <div class="main-content">
             <div class="page-header">
@@ -18,7 +27,6 @@
                     <div class="actions">
                         <button class="btn"><i class="fas fa-search"></i> Search</button>
                         <button class="btn"><i class="fas fa-filter"></i> Filter</button>
-                        <button class="btn"><i class="fas fa-ellipsis-h"></i></button>
                     </div>
                 </div>
 
@@ -33,37 +41,33 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ([
-                            ['id' => 'P001', 'name' => 'Sarah Ahmad Binti Fauzi', 'nicu' => 'A101', 'last_updated' => 'Jan 12, 2024', 'weight' => '2.0'],
-                            ['id' => 'P002', 'name' => 'Ahmad Jebon Bin Arif', 'nicu' => 'A102', 'last_updated' => 'Jan 12, 2024', 'weight' => '4.5']
-                        ] as $infant)
+                        @foreach ($parents as $parent)
                             <tr>
                                 <td>
                                     <div class="patient-info">
                                         <div class="patient-avatar"><i class="fa-solid fa-baby"></i></div>
                                         <div class="patient-details">
-                                            <strong>{{ $infant['id'] }}</strong>
-                                            <span>{{ $infant['name'] }}</span>
+                                            <strong>{{ $parent->formatted_id }}</strong>
+                                            <span>{{ $parent->pr_BabyName }}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $infant['nicu'] }}</td>
-                                <td>{{ $infant['last_updated'] }}</td>
+                                <td>{{ $parent->pr_NICU }}</td>
+                                <td>{{ $parent->updated_at?->format('d-m-Y h:i A') }}</td>
                                 <td>
                                     <div class="weight-display">
                                         <i class="fa-solid fa-weight-scale"></i>
-                                        <span>{{ $infant['weight'] }} kg</span>
+                                        <span>{{ $parent->pr_BabyCurrentWeight }} kg</span>
                                     </div>
                                 </td>
                                 <td class="actions">
                                     <button class="btn-view" title="View" 
-                                        onclick="openViewModal('{{ $infant['id'] }}', '{{ $infant['name'] }}', '{{ $infant['nicu'] }}', '{{ $infant['last_updated'] }}', '{{ $infant['weight'] }}')">
+                                        onclick="openViewModal('{{ $parent->formatted_id }}', '{{ $parent->pr_BabyName }}', '{{ $parent->pr_NICU }}', '{{ $parent->updated_at?->format('d-m-Y h:i A') }}', '{{ $parent->pr_BabyCurrentWeight }}')">
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
-                                    <button class="btn-edit" title="Update Weight" onclick="openWeightModal('{{ $infant['id'] }}')">
+                                    <button class="btn-edit" title="Update Weight" onclick="openWeightModal('{{ $parent->pr_ID }}')">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
-                                    <button class="btn-more" title="More"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                                 </td>
                             </tr>
                         @endforeach
@@ -100,14 +104,11 @@
 
             <div class="modal-body">
                 <form id="weightEntryForm">
-                    
+                @csrf
+                <input type="hidden" id="parentId" name="pr_ID">    
                     <div class="modal-section">
-                        <label>Select Patient ID <span class="text-danger">*</span></label>
-                        <select id="patientSelect" class="form-select" required onchange="updatePatientInfo()">
-                            <option value="">Select a patient...</option>
-                            <option value="P001" data-name="Sarah Ahmad Binti Fauzi" data-mrn="MRN-2024-001" data-dob="2024-01-01" data-diagnosis="Premature Birth" data-cubicle="A101">P001 - Sarah Ahmad Binti Fauzi</option>
-                            <option value="P002" data-name="Ahmad Jebon Bin Arif" data-mrn="MRN-2024-002" data-dob="2024-01-05" data-diagnosis="Low Birth Weight" data-cubicle="A102">P002 - Ahmad Jebon Bin Arif</option>
-                        </select>
+                        <label>Patient ID <span class="text-danger">*</span></label>
+                        <input type="text" id="PatientId" name="PatientId" class="form-control"  readonly>
                     </div>
 
                     <div id="patientInfoContainer" style="display: none;">
@@ -120,7 +121,7 @@
 
                     <div class="modal-section">
                         <label>Enter Today's Weight (kg) <span class="text-danger">*</span></label>
-                        <input type="number" id="weightInput" class="form-control" placeholder="e.g., 2.45" step="0.01" min="0" required>
+                        <input type="number" id="pr_BabyCurrentWeight" name="pr_BabyCurrentWeight" class="form-control" placeholder="e.g., 2.45" step="0.01" required>
                     </div>
 
                     <button type="submit" class="modal-close-btn">Save Record</button>
@@ -128,6 +129,8 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // --- VIEW MODAL FUNCTIONS ---
@@ -149,8 +152,10 @@
         }
 
         // --- WEIGHT ENTRY MODAL FUNCTIONS ---
-        function openWeightModal(preSelectId = null) {
+        function openWeightModal(id) {
             const modal = document.getElementById('weightModal');
+            document.getElementById('PatientId').value = "#P" + id;
+            document.getElementById('parentId').value = id;
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
@@ -194,11 +199,45 @@
             }
         });
 
-        // Handle Form Submit
+        // Submit weight update - NOW WORKS!
         document.getElementById('weightEntryForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Weight recorded successfully!');
-            closeWeightModal();
+
+            const prId = document.getElementById('parentId').value;
+            const weight = document.getElementById('pr_BabyCurrentWeight').value;
+
+            fetch("{{ route('nurse.nurse_infant-weight.update') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    pr_ID: prId,
+                    pr_BabyCurrentWeight: weight
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Weight updated successfully!',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    closeWeightModal();
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error(res.message || 'Update failed');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'Invalid weight. Please try again.', 'error');
+            });
         });
     </script>
+
 @endsection

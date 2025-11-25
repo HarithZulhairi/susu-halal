@@ -145,7 +145,7 @@ Route::middleware(['auth'])->group(function () {
     // ====================================================================
     // LAB TECH - MILK PROCESSING
     Route::prefix('labtech')->name('labtech.')->group(function () {
-        Route::get('/manage-milk-records', [MilkController::class, 'viewMilk'])
+        Route::get('/manage-milk-records', [MilkController::class, 'viewMilkLabtech'])
             ->name('labtech_manage-milk-records');
             
         Route::post('/manage-milk-records/store', [MilkController::class, 'storeMilkRecord'])
@@ -195,10 +195,15 @@ Route::middleware(['auth'])->group(function () {
     // Route::view('/doctor/milk-request/create', 'doctor.doctor_milk-request-form')->name('doctor.milk-request-form');
     Route::get('/doctor/milk-request/create', [RequestController::class, 'create'])->name('doctor.doctor_milk-request-form');
     Route::post('/doctor/milk-request/create/store', [RequestController::class, 'store'])->name('doctor.doctor_milk-request-store');
+    Route::delete('/doctor/milk-request/{id}/delete', [RequestController::class, 'delete'])->name('doctor.milk-request-delete');
     
     Route::view('/nurse/allocate-milk', 'nurse.nurse_allocate-milk')->name('nurse.allocate-milk');
     Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
-    Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');
+
+    // Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');
+    Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
+    Route::post('/nurse/set-infant-weight/update', [RequestController::class, 'updateInfantWeightNurse'])->name('nurse.nurse_infant-weight.update');
+
     Route::view('/parent/my-infant-request', 'parent.parent_my-infant-request')->name('parent.my-infant-request');
     Route::view('/hmmc/list-of-infants', 'hmmc.hmmc_list-of-infants')->name('hmmc.list-of-infants');
     Route::view('/shariah/infant-request', 'shariah.shariah_infant-request')->name('shariah.infant-request');
@@ -206,7 +211,10 @@ Route::middleware(['auth'])->group(function () {
     // Milk Records Views
     Route::view('/hmmc/manage-milk-records', 'hmmc.hmmc_manage-milk-records')->name('hmmc.manage-milk-records');
     Route::view('/shariah/manage-milk-records', 'shariah.shariah_manage-milk-records')->name('shariah.manage-milk-records');
-    Route::view('/nurse/manage-milk-records', 'nurse.nurse_manage-milk-records')->name('nurse.manage-milk-records');
+
+    Route::get('/nurse/manage-milk-records', [MilkController::class, 'viewMilkNurse'])->name('nurse.manage-milk-records');
+    Route::get('/milk-statuses', [MilkController::class, 'milkStatuses'])->name('milk-statuses');
+
     Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.view-milk-processing');
     Route::view('/nurse/view-milk-processing', 'nurse.nurse_view-milk-processing')->name('nurse.view-milk-processing');
 

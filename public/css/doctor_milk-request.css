@@ -58,11 +58,28 @@
   font-size: 14px;
 }
 
+th {
+    position: relative;
+}
+
+.sort-arrow {
+    font-size: 12px;
+    margin-left: 6px;
+    opacity: 0.5;
+}
+
+th.active-sort .sort-arrow {
+    opacity: 1;
+    font-weight: bold;
+}
+
+
 /* Search Input */
 .search-input {
   border: 1px solid #d1d5db;
   border-radius: 6px;
   padding: 8px 12px;
+  width: 320px;
 }
 
 /* Table */

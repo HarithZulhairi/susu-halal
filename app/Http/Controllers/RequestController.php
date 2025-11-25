@@ -13,12 +13,14 @@ class RequestController extends Controller
     public function create()
     {
         $parents = ParentModel::all();
-        return view('doctor.doctor_milk-request', compact('parents'));
+
+        return view('doctor.doctor_milk-request-form', compact('parents'));
     }
 
     public function view()
     {
-        $requests = MilkRequest::all();
+        $requests = MilkRequest::with(['parent', 'doctor'])->latest()->get();
+
         return view('doctor.doctor_milk-request', compact('requests'));
     }
 
@@ -47,7 +49,42 @@ class RequestController extends Controller
             'feeding_interval'   => $request->interval_hours,
         ]);
 
-        return redirect()->back()->with('success', 'Milk Request submitted successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Milk Request submitted successfully!'
+        ]);
     }
-}
 
+    public function delete($id)
+    {
+        $req = MilkRequest::findOrFail($id);
+        $req->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Milk request deleted successfully.'
+        ]);
+    }
+
+    public function setInfantWeightNurse()
+    {
+        $parents = ParentModel::all();
+
+        return view('nurse.nurse_set-infant-weight', compact('parents'));
+    }
+
+    public function updateInfantWeightNurse(Request $request)
+    {
+        $request->validate([
+            'pr_ID' => 'required|exists:parent,pr_ID',
+            'pr_BabyCurrentWeight' => 'required|numeric|min:0',
+        ]);
+
+        $parent = ParentModel::findOrFail($request->pr_ID);
+        $parent->pr_BabyCurrentWeight = $request->pr_BabyCurrentWeight;
+        $parent->save();
+
+        return response()->json(['success' => true, 'message' => 'Weight updated!']);
+    }
+
+}
