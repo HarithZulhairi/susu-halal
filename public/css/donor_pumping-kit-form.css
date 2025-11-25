@@ -1,19 +1,19 @@
 @import url("base_layout.css");
 
-.form-card {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.form-container {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
 }
 
+/* Form Card Header */
 .form-card h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 20px;
 }
 
 /* Form Layout */
@@ -36,7 +36,37 @@ form {
 }
 
 .form-group.full-width {
-  grid-column: 1 / -1;
+    grid-column: 1 / -1;
+    margin-top: 8px;
+}
+
+/* Input + Select Styling (Same as donor appointment form) */
+.form-group select,
+.form-group input[type="datetime-local"],
+.form-group textarea {
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #0f172a;
+    background: white;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group input[type="datetime-local"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #0891b2;
+    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+}
+
+/* Textarea (Reason for Booking) */
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+    background: white;
 }
 
 /* Labels */
@@ -84,11 +114,30 @@ input::placeholder {
 
 /* Form Actions */
 .form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-  padding-top: 24px;
-  border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid #f1f5f9;
+}
+
+.btn-cancel {
+    background: white;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 10px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
 }
 
 /* Continue Button */

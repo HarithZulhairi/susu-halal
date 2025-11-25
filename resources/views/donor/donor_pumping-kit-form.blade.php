@@ -55,7 +55,7 @@
 
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="window.history.back()">Cancel</button>
-                    <button type="button" class="btn-submit" onclick="storeFormData()">Continue</button>
+                    <button type="button" class="btn-continue" onclick="storeFormData()">Continue</button>
                 </div>
             </form>
         </div>
