@@ -105,32 +105,82 @@
 .pending { background-color: #feebc8; color: #d69e2e; }
 .confirmed { background-color: #c6f6d5; color: #38a169; }
 
-/* Confirm Button */
+/* ==================== BEAUTIFUL CONFIRM BUTTON ==================== */
+
+/* Main Confirm Button */
 .btn-confirm {
-  background-color: #4c51bf;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #fff;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.btn-confirm:hover:not(.confirmed) {
-  background-color: #3d42a5;
+.btn-confirm::before {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 12px;
 }
 
-.btn-confirm.confirmed {
-  background-color: #c6f6d5;
-  color: #38a169;
-  border: 1px solid #9ae6b4;
+.btn-confirm:hover:not(.confirmed):not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.btn-confirm:active:not(.confirmed):not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+}
+
+/* Completed/Confirmed State */
+.btn-confirm.confirmed,
+.btn-confirm:disabled {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border: 1px solid #6ee7b7;
   cursor: default;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+  font-weight: 600;
 }
 
-/* --- Inline Action Buttons (Display Fixed) --- */
+.btn-confirm.confirmed::before,
+.btn-confirm:disabled::before {
+  content: '\f058';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: #10b981;
+}
+
+.btn-confirm.confirmed:hover,
+.btn-confirm:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+}
+
+/* Adjust Actions Cell Padding */
+.records-table td.actions {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  vertical-align: middle;
+}
+
+/* Make sure buttons align nicely */
 .actions {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .actions button {
@@ -138,26 +188,42 @@
   border: none;
   cursor: pointer;
   font-size: 16px;
-  padding: 6px 4px;
+  padding: 6px 8px;
   border-radius: 6px;
-  transition: background 0.2s;
-  margin-right: 4px;
+  transition: all 0.2s ease;
 }
 
-.actions button:first-child {
-  margin-left: 0;
-}
-
-.actions button:last-child {
-  margin-right: 0;
+.actions .btn-view,
+.actions .btn-delete,
+.actions .btn-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .actions .btn-view i { color: #2563eb; }
 .actions .btn-delete i { color: #dc2626; }
 .actions .btn-more i { color: #6b7280; }
 
-.actions button:hover {
+.actions button:hover:not(.btn-confirm) {
   background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+/* Optional: Add a loading state */
+.btn-confirm.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.btn-confirm.loading::before {
+  content: '\f110';
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Align vertically inside the cell */
