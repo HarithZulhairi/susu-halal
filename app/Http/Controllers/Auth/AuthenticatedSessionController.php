@@ -35,6 +35,8 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         $role = $user->role;
 
+        session(['auth_role' => $role]);
+
         // Redirect by role
         return match($role) {
             'hmmc_admin' => redirect()->route('hmmc.dashboard'),

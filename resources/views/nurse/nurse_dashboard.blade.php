@@ -146,83 +146,42 @@
                             <th>TIME</th>
                             <th>TYPE</th>
                             <th>STATUS</th>
-                            <th>ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar teal">SA</div>
-                                    <div>
-                                        <div class="user-name">Sarah Ahmad</div>
-                                        <div class="user-email">Regular Donor</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>9:00 AM</td>
-                            <td><span class="badge badge-donor">Donation</span></td>
-                            <td><span class="badge badge-active">Confirmed</span></td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar blue">FK</div>
-                                    <div>
-                                        <div class="user-name">Fatima Khan</div>
-                                        <div class="user-email">New Donor</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>10:30 AM</td>
-                            <td><span class="badge badge-nurse">Screening</span></td>
-                            <td><span class="badge badge-pending">Waiting</span></td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal">AR</div>
-                                    <div>
-                                        <div class="user-name">Aisha Rahman</div>
-                                        <div class="user-email">Kit Pickup</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>2:00 PM</td>
-                            <td><span class="badge badge-advisor">Pumping Kit</span></td>
-                            <td><span class="badge badge-active">Scheduled</span></td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar pink">NJ</div>
-                                    <div>
-                                        <div class="user-name">Noor Jameela</div>
-                                        <div class="user-email">Follow-up</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>3:30 PM</td>
-                            <td><span class="badge badge-donor">Consultation</span></td>
-                            <td><span class="badge badge-pending">Rescheduled</span></td>
-                            <td class="actions">
-                               <button class="action-btn"><i class="fa-solid fa-pen-to-square"></i></button>
-<button class="action-btn delete"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
+@foreach($todayAppointments as $app)
+<tr>
+    <td>
+        <div class="user-info">
+            <div class="user-avatar {{ ['teal','blue','dark-teal','pink'][rand(0,3)] }}">
+                {{ strtoupper(substr($app->donor->dn_FullName ?? $app->donor->name, 0, 2)) }}
+            </div>
+            <div>
+                <div class="user-name">{{ $app->donor->dn_FullName ?? $app->donor->name }}</div>
+                <div class="user-email">
+                    {{ $app instanceof \App\Models\MilkAppointment ? 'Milk Donation' : 'Pumping Kit' }}
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td>{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</td>
+
+    <td>
+        <span class="badge badge-{{ $app instanceof \App\Models\MilkAppointment ? 'donor' : 'advisor' }}">
+            {{ $app instanceof \App\Models\MilkAppointment ? 'Donation' : 'Pump Kit' }}
+        </span>
+    </td>
+
+    <td>
+        <span class="badge badge-{{ strtolower($app->status ?? 'pending') }}">
+            {{ $app->status ?? 'Pending' }}
+        </span>
+    </td>
+</tr>
+@endforeach
+</tbody>
+
                 </table>
             </div>
         </div>
@@ -248,11 +207,11 @@ gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: @json($months),
         datasets: [
             {
-                label: 'Appointments Reviewed',
-                data: [30, 40, 35, 56, 78, 67, 34],
+                label: 'Milk Donation Appointments',
+                data: @json($milkData),
                 borderColor: '#4B9CD3',
                 backgroundColor: gradientBlue,
                 fill: true,
@@ -262,8 +221,8 @@ new Chart(ctx, {
                 pointHoverRadius: 7,
             },
             {
-                label: 'Milk Requests Processed',
-                data: [8, 12, 13, 14, 16, 18, 20],
+                label: 'Pumping Kit Appointments',
+                data: @json($kitData),
                 borderColor: '#48BB78',
                 backgroundColor: gradientGreen,
                 fill: true,

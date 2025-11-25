@@ -15,10 +15,7 @@ class PasswordResetLinkController extends Controller
      */
     public function create(): View
     {
-        return view('auth.reset-password', [
-            'request' => $request, // Make sure request is passed
-            'layout' => 'layouts.guest' // Force guest layout for reset page
-        ]);
+        return view('auth.forgot-password');
     }
 
     /**

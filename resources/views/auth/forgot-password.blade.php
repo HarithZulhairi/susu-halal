@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,20 +14,38 @@
             --secondary: #57cc99;
             --gradient: linear-gradient(135deg, #1a5f7a 0%, #57cc99 100%);
         }
+        
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { 
+                transform: translateY(0px); 
+            }
+            50% { 
+                transform: translateY(-10px); 
+            }
         }
-        .float-animation { animation: float 6s ease-in-out infinite; }
+        
+        .float-animation { 
+            animation: float 6s ease-in-out infinite; 
+        }
+        
         .gradient-text {
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+        
         .glass-effect {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Fix for backdrop-filter support */
+        @supports not (backdrop-filter: blur(10px)) {
+            .glass-effect {
+                background: rgba(255, 255, 255, 0.98);
+            }
         }
     </style>
 </head>
@@ -83,12 +102,16 @@
                     </div>
                     <h2 class="text-3xl font-bold text-gray-800">Forgot Password?</h2>
                     <p class="text-gray-600 text-sm">
-                        No worries — enter your email and we’ll send you a reset link.
+                        No worries — enter your email and we'll send you a reset link.
                     </p>
                 </div>
 
                 <!-- Session Status -->
-                <x-auth-session-status class="mb-4" :status="session('status')" />
+                @if(session('status'))
+                    <div class="mb-4 font-medium text-sm text-green-600">
+                        {{ session('status') }}
+                    </div>
+                @endif
 
                 <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
                     @csrf
@@ -107,12 +130,16 @@
                                 value="{{ old('email') }}" 
                                 required 
                                 autofocus
-                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl bg-white/80 backdrop-blur-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl bg-white/80 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                 placeholder="Enter your email"
                             >
                             <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         </div>
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        @if($errors->has('email'))
+                            <div class="mt-2 text-sm text-red-600">
+                                {{ $errors->first('email') }}
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Submit -->
@@ -148,4 +175,3 @@
     </div>
 </body>
 </html>
-

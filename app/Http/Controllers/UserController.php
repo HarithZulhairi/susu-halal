@@ -638,125 +638,130 @@ class UserController extends Controller
         }
     }
 
-public function sendCredentials(Request $request)
-{
-    \Log::info('Send credentials request started', $request->all());
+    public function sendCredentials(Request $request)
+    {
+        \Log::info('Send credentials request started', $request->all());
 
-    try {
-        $request->validate([
-            'donor_id' => 'required|integer',
-            'donor_name' => 'required|string',
-            'donor_email' => 'nullable|email',
-            'donor_contact' => 'nullable|string',
-        ]);
-
-        // Get donor data
-        $donor = DB::table('donor')
-            ->where('dn_ID', $request->donor_id)
-            ->first();
-
-        \Log::info('Donor lookup result:', ['found' => !!$donor, 'donor_id' => $request->donor_id]);
-
-        if (!$donor) {
-            \Log::error('Donor not found with ID: ' . $request->donor_id);
-            return response()->json([
-                'success' => false,
-                'message' => 'Donor not found.'
-            ], 404);
-        }
-
-        $username = $donor->dn_Username;
-        $temporaryPassword = $this->generateTemporaryPassword();
-
-        \Log::info('Generated temporary password for donor', [
-            'donor_id' => $donor->dn_ID,
-            'username' => $username
-        ]);
-
-        // Update donor password
-        DB::table('donor')
-            ->where('dn_ID', $request->donor_id)
-            ->update([
-                'dn_Password' => Hash::make($temporaryPassword),
-                'updated_at' => now()
+        try {
+            $request->validate([
+                'donor_id' => 'required|integer',
+                'donor_name' => 'required|string',
+                'donor_email' => 'nullable|email',
+                'donor_contact' => 'nullable|string',
             ]);
 
-        // Update or create user record
-        DB::table('users')->updateOrInsert(
-            ['email' => $donor->dn_Email ?? 'donor_'.$donor->dn_ID.'@noemail.local'],
-            [
-                'name' => $donor->dn_FullName,
-                'password' => Hash::make($temporaryPassword),
-                'role' => 'donor',
-                'role_id' => $donor->dn_ID,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
+            // Get donor data
+            $donor = DB::table('donor')
+                ->where('dn_ID', $request->donor_id)
+                ->first();
 
-        $whatsappSent = false;
-        $emailSent = false;
-        $errors = [];
+            \Log::info('Donor lookup result:', ['found' => !!$donor, 'donor_id' => $request->donor_id]);
 
-        // WhatsApp sending
-        if ($request->donor_contact && $request->donor_contact !== 'N/A') {
-            \Log::info('Attempting WhatsApp send to: ' . $request->donor_contact);
-            try {
-                $whatsappSent = $this->sendWhatsAppCredentials(
-                    $request->donor_contact,
-                    $username,
-                    $temporaryPassword,
-                    $request->donor_name
-                );
-                \Log::info('WhatsApp send result: ' . ($whatsappSent ? 'success' : 'failed'));
-            } catch (\Exception $e) {
-                $errors[] = 'WhatsApp: ' . $e->getMessage();
-                \Log::error('WhatsApp send error: ' . $e->getMessage());
+            if (!$donor) {
+                \Log::error('Donor not found with ID: ' . $request->donor_id);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Donor not found.'
+                ], 404);
             }
-        }
 
-        // Email sending (optional)
-        if ($request->donor_email) {
-            try {
-                Mail::to($request->donor_email)->send(new DonorCredentialsMail($donor));
-                $emailSent = true;
-            } catch (\Exception $e) {
-                $errors[] = 'Email: ' . $e->getMessage();
-                \Log::error('Email send error: ' . $e->getMessage());
+            $username = $donor->dn_Username;
+            $temporaryPassword = $this->generateTemporaryPassword();
+
+            \Log::info('Generated temporary password for donor', [
+                'donor_id' => $donor->dn_ID,
+                'username' => $username
+            ]);
+
+            // Update donor password with temporary one
+            DB::table('donor')
+                ->where('dn_ID', $request->donor_id)
+                ->update([
+                    'dn_Password' => Hash::make($temporaryPassword),
+                    'updated_at' => now()
+                ]);
+
+            // Update or create user record
+            DB::table('users')->updateOrInsert(
+                ['email' => $donor->dn_Email],
+                [
+                    'name' => $donor->dn_FullName,
+                    'password' => Hash::make($temporaryPassword),
+                    'role' => 'donor',
+                    'role_id' => $donor->dn_ID,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
+            $whatsappSent = false;
+            $emailSent = false;
+            $errors = [];
+
+            // Send WhatsApp if contact provided
+            if ($request->donor_contact && $request->donor_contact !== 'N/A') {
+                \Log::info('Attempting WhatsApp send to: ' . $request->donor_contact);
+                try {
+                    $whatsappSent = $this->sendWhatsAppCredentials(
+                        $request->donor_contact,
+                        $username,
+                        $temporaryPassword,
+                        $request->donor_name
+                    );
+                    \Log::info('WhatsApp send result: ' . ($whatsappSent ? 'success' : 'failed'));
+                } catch (\Exception $e) {
+                    $errors[] = 'WhatsApp: ' . $e->getMessage();
+                    \Log::error('WhatsApp send error: ' . $e->getMessage());
+                }
             }
-        } else {
-            \Log::info("No donor email provided; skipping email send.");
+
+            // Send Email if email provided
+            if ($request->donor_email && $request->donor_email !== 'N/A') {
+                \Log::info('Attempting email send to: ' . $request->donor_email);
+                try {
+                    $emailSent = $this->sendEmailCredentials(
+                        $request->donor_email,
+                        $username,
+                        $temporaryPassword,
+                        $request->donor_name
+                    );
+                    \Log::info('Email send result: ' . ($emailSent ? 'success' : 'failed'));
+                } catch (\Exception $e) {
+                    $errors[] = 'Email: ' . $e->getMessage();
+                    \Log::error('Email send error: ' . $e->getMessage());
+                    \Log::error('Email error details: ' . $e->getTraceAsString());
+                }
+            }
+
+            $message = $this->getSendResultMessage($whatsappSent, $emailSent);
+            
+            if (!empty($errors)) {
+                $message .= ' Errors: ' . implode(', ', $errors);
+            }
+
+            \Log::info('Credential sending completed', [
+                'message' => $message,
+                'whatsapp_sent' => $whatsappSent,
+                'email_sent' => $emailSent
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'whatsapp_sent' => $whatsappSent,
+                'email_sent' => $emailSent
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Send credentials overall error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send credentials: ' . $e->getMessage()
+            ], 500);
         }
-
-        $message = $this->getSendResultMessage($whatsappSent, $emailSent);
-
-        if (!empty($errors)) {
-            $message .= ' Errors: ' . implode(', ', $errors);
-        }
-
-        \Log::info('Credential sending completed', [
-            'message' => $message,
-            'whatsapp_sent' => $whatsappSent,
-            'email_sent' => $emailSent
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => $message,
-            'whatsapp_sent' => $whatsappSent,
-            'email_sent' => $emailSent
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Send credentials overall error: ' . $e->getMessage());
-        \Log::error('Stack trace: ' . $e->getTraceAsString());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send credentials: ' . $e->getMessage()
-        ], 500);
     }
-}
 
     /**
      * Send WhatsApp credentials (using your phone number for testing)
