@@ -42,7 +42,7 @@ class LoginRequest extends FormRequest
         $password = $this->input('password');
         $role     = $this->input('role');
 
-        // 1️⃣ Get role-specific user
+        // 1️⃣ Fetch user from role-specific table
         $roleUser = $this->getRoleUser($role, $username);
 
         if (!$roleUser) {
@@ -51,23 +51,22 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // 2️⃣ Check password
+        // 2️⃣ Verify password
         if (!Hash::check($password, $roleUser['password'])) {
             throw ValidationException::withMessages([
                 'password' => 'Invalid password.',
             ]);
         }
 
-        // --- FIRST-TIME DONOR DETECTION ---
+        // 3️⃣ First-time donor
         if ($role === 'donor' && $roleUser['first_login'] == 1) {
-            // Set session flags for AuthenticatedSessionController
             session([
                 'first_time_donor' => true,
-                'donor_nric' => $roleUser['nric'],
+                'donor_nric'       => $roleUser['nric'],
             ]);
         }
 
-        // 3️⃣ Create or update user in `users` table
+        // 4️⃣ Create/update the master user
         $authUser = User::updateOrCreate(
             [
                 'role'    => $role,
@@ -76,17 +75,36 @@ class LoginRequest extends FormRequest
             [
                 'name'      => $roleUser['name'],
                 'email'     => $roleUser['email'],
-                'username'  => $role !== 'donor' && $role !== 'parent' ? $username : null,
-                'ic_number' => $role === 'donor' || $role === 'parent' ? $username : null,
-                'password'  => bcrypt('dummy'), // not used
+                'username'  => in_array($role, ['donor', 'parent']) ? null : $username,
+                'ic_number' => in_array($role, ['donor', 'parent']) ? $username : null,
+                'password'  => bcrypt('dummy'),
             ]
         );
 
-        // 4️⃣ Log in
+        // 5️⃣ NEW: Update user_id in the role table (if null)
+        $modelMap = [
+            'hmmc_admin'     => \App\Models\HmmcAdmin::class,
+            'nurse'          => \App\Models\Nurse::class,
+            'doctor'         => \App\Models\Doctor::class,
+            'lab_technician' => \App\Models\LabTech::class,
+            'shariah_advisor'=> \App\Models\ShariahCommittee::class,
+            'parent'         => \App\Models\ParentModel::class,
+            'donor'          => \App\Models\Donor::class,
+        ];
+
+        // Only update if model exists and user_id is missing
+        if (isset($modelMap[$role])) {
+            $modelMap[$role]::where($roleUser['primary_key'], $roleUser['id'])
+                ->whereNull('user_id') // prevents overwriting existing link
+                ->update(['user_id' => $authUser->id]);
+        }
+
+        // 6️⃣ Login to application
         Auth::login($authUser, $this->boolean('remember'));
 
         $this->clearRateLimiter();
     }
+
 
     private function getRoleUser($role, $username)
     {
@@ -112,6 +130,7 @@ class LoginRequest extends FormRequest
 
         return [
             'id'       => $record->{$map['id']},
+            'primary_key' => $map['id'],
             'name'     => $record->{$map['name']},
             'email'    => $record->{$map['email']},
             'password' => $record->{$map['pass']},

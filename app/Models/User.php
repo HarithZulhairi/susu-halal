@@ -23,4 +23,10 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function HmmcAdmin()
+    {
+        return $this->hasOne(HmmcAdmin::class, 'user_id', 'id');
+    }
+
 }
