@@ -10,7 +10,7 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
-            <h1>Welcome, {{ optional(auth()->user()->HmmcAdmin)->ad_Admin ?? 'Unknown Admin ID' }}<br>
+            <h1>Welcome, {{ auth()->user()->hmmcadmin->ad_Name }}<br>
             <p class="muted">Shariah-compliant Human Milk Bank • HMMC Admin dashboard</p>
             </h1>
         </div>
