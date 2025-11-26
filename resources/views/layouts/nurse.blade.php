@@ -43,9 +43,6 @@
       <li><a href="{{ route('nurse.allocate-milk') }}"><i class="fa-solid fa-gear"></i>Milk Distribution</a></li>
       <li><a href="{{ route('nurse.milk-request-list') }}"><i class="fa-solid fa-gear"></i> Milk Requests</a></li>
       <li><a href="{{ route('nurse.nurse_set-infant-weight') }}"><i class="fa-solid fa-gear"></i> Record Infant Weight</a></li>
-      <li class="{{ request()->routeIs('doctor.list-milk-request') ? 'active' : '' }}">
-        <a href="{{ route('nurse.list-milk-request') }}"><i class="fa-solid fa-list"></i>Milk Request List</a>
-      </li>
     </ul>
   </div>
 

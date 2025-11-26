@@ -25,7 +25,7 @@ return new class extends Migration
             $table->time('feeding_start_time');
             $table->integer('feeding_perday');
             $table->integer('feeding_interval');
-            $table->timestamps()->useCurrent();
+            $table->timestamps();
 
             // Define Foreign Key Relationships
             $table->foreign('dr_ID')->references('dr_ID')->on('doctor')->onDelete('cascade');
