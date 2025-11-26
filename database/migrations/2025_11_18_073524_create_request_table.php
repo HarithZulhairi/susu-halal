@@ -25,10 +25,11 @@ return new class extends Migration
             $table->time('feeding_start_time');
             $table->integer('feeding_perday');
             $table->integer('feeding_interval');
+            $table->string('status')->nullable();
             $table->timestamps();
 
             // Define Foreign Key Relationships
-            $table->foreign('dr_ID')->references('dr_ID')->on('doctor')->onDelete('set null');
+            $table->foreign('dr_ID')->references('dr_ID')->on('doctor')->onDelete('cascade');
             $table->foreign('pr_ID')->references('pr_ID')->on('parent')->onDelete('cascade');
         });
     }

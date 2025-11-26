@@ -8,7 +8,7 @@
 <div class="request-page">
   <div class="form-header">
     <h1>🍼 New Milk Request</h1>
-    <p>Create donor milk feeding request for NICU patients {{ auth()->user()->id }} </p>
+    <p>Create donor milk feeding request for NICU patients {{ auth()->user()->id }}</p>
   </div>
 
   <form class="milk-request-form" method="POST" action="{{ route('doctor.doctor_milk-request-store') }}">

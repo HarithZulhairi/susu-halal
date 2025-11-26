@@ -105,6 +105,80 @@ body {
   vertical-align: middle;
 }
 
+/* --- SORTING STYLES --- */
+th {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+}
+th:hover {
+    background-color: #f1f5f9;
+}
+.sort-icon {
+    font-size: 0.8em;
+    margin-left: 5px;
+    color: #cbd5e1;
+}
+.sort-active {
+    color: #0ea5e9;
+}
+
+/* --- PAGINATION STYLES (Customized to match theme) --- */
+.pagination-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 20px;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 5px;
+}
+
+.page-item .page-link {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.page-item.active .page-link {
+    background-color: #0ea5e9;
+    border-color: #0ea5e9;
+    color: white;
+}
+
+.page-item.disabled .page-link {
+    color: #cbd5e1;
+    pointer-events: none;
+    background-color: #f8fafc;
+}
+
+.page-item:not(.active):not(.disabled) .page-link:hover {
+    background-color: #f1f5f9;
+    color: #0ea5e9;
+}
+
+/* Hide the default "Showing results X to Y" small text if it appears, 
+    depending on your Laravel version's default pagination view */
+.hidden.sm\:flex-1.sm\:flex.sm\:items-center.sm\:justify-between {
+    display: none; 
+}
+nav[role="navigation"] {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 /* ========== Patient Info ========== */
 .patient-info {
   display: flex;
@@ -146,10 +220,9 @@ body {
 }
 
 /* ========== Volume Text ========== */
-.select-text {
-  color: #b91c1c;
+.volume-text {
   font-weight: 600;
-  cursor: pointer;
+  color: #1A5F7A;
 }
 
 /* ========== Actions ========== */
@@ -191,14 +264,18 @@ body {
 }
 
 .select-text {
-  color: #b91c1c;
+  color: #16a34a;
   font-weight: 600;
   background: none;
   border: none;
   cursor: pointer;
+  font-size: large;
+  border-radius: 12px;
 }
 .select-text:hover {
   text-decoration: underline;
+  background-color: rgb(240, 240, 240);
+  transition: 0.2s;
 }
 .milk-list {
   border: 1px solid #d1d5db;
@@ -227,3 +304,48 @@ body {
   font-weight: 600;
 }
 
+.milk-item {
+    border: 1px solid #d1d5db;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.milk-item.selected {
+    border-color: #2563eb; /* Blue border */
+    background: #eff6ff;   /* Light blue background */
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.25);
+}
+
+.allocation-time {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.allocation-time label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.allocation-time input[type="datetime-local"] {
+    padding: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 80%;
+}
+    
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -26,6 +26,7 @@ class Request extends Model
         'feeding_start_time',
         'feeding_perday',
         'feeding_interval',
+        'status',
     ];
 
     /**
@@ -42,5 +43,12 @@ class Request extends Model
     public function parent()
     {
         return $this->belongsTo(ParentModel::class, 'pr_ID', 'pr_ID');
+    }
+
+    // --- ADD THIS FUNCTION ---
+    public function allocation()
+    {
+        // One Request has Many Allocations (Milk Units)
+        return $this->hasMany(Allocation::class, 'request_ID', 'request_ID');
     }
 }

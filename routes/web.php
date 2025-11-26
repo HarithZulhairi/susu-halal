@@ -202,6 +202,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/doctor/milk-request/{id}/delete', [RequestController::class, 'delete'])->name('doctor.milk-request-delete');
     
     Route::view('/nurse/allocate-milk', 'nurse.nurse_allocate-milk')->name('nurse.allocate-milk');
+    Route::post('/nurse/allocate/delete', [RequestController::class, 'deleteAllocation'])->name('nurse.allocate.delete');
 
     // Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::get('/nurse/milk-request-list', [RequestController::class, 'viewRequestNurse'])->name('nurse.nurse_milk-request-list');
