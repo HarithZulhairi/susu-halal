@@ -148,39 +148,55 @@
                             <th>STATUS</th>
                         </tr>
                     </thead>
-                    <tbody>
-@foreach($todayAppointments as $app)
-<tr>
-    <td>
-        <div class="user-info">
-            <div class="user-avatar {{ ['teal','blue','dark-teal','pink'][rand(0,3)] }}">
-                {{ strtoupper(substr($app->donor->dn_FullName ?? $app->donor->name, 0, 2)) }}
-            </div>
-            <div>
-                <div class="user-name">{{ $app->donor->dn_FullName ?? $app->donor->name }}</div>
-                <div class="user-email">
-                    {{ $app instanceof \App\Models\MilkAppointment ? 'Milk Donation' : 'Pumping Kit' }}
-                </div>
-            </div>
-        </div>
-    </td>
+                        <tbody>
+                        @foreach($todayAppointments as $app)
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar {{ ['teal','blue','dark-teal','pink'][$loop->index % 4] }}">
+                                        @if($app->dn_FullName)
+                                            @php
+                                                $names = explode(' ', $app->dn_FullName);
+                                                $initials = '';
+                                                if(count($names) >= 2) {
+                                                    $initials = substr($names[0], 0, 1) . substr($names[1], 0, 1);
+                                                } else {
+                                                    $initials = substr($app->dn_FullName, 0, 2);
+                                                }
+                                            @endphp
+                                            {{ strtoupper($initials) }}
+                                        @else
+                                            UD
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <div class="user-name">
+                                            {{ $app->dn_FullName ?? 'Unknown Donor' }}
+                                        </div>
+                                        <div class="user-email">
+                                            {{ $app instanceof \App\Models\MilkAppointment ? 'Milk Donation' : 'Pumping Kit' }}
+                                            • ID: {{ $app->dn_id }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
 
-    <td>{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</td>
 
-    <td>
-        <span class="badge badge-{{ $app instanceof \App\Models\MilkAppointment ? 'donor' : 'advisor' }}">
-            {{ $app instanceof \App\Models\MilkAppointment ? 'Donation' : 'Pump Kit' }}
-        </span>
-    </td>
+                            <td>
+                                <span class="badge badge-{{ $app instanceof \App\Models\MilkAppointment ? 'donor' : 'advisor' }}">
+                                    {{ $app instanceof \App\Models\MilkAppointment ? 'Donation' : 'Pump Kit' }}
+                                </span>
+                            </td>
 
-    <td>
-        <span class="badge badge-{{ strtolower($app->status ?? 'pending') }}">
-            {{ $app->status ?? 'Pending' }}
-        </span>
-    </td>
-</tr>
-@endforeach
-</tbody>
+                            <td>
+                                <span class="badge badge-{{ strtolower($app->status ?? 'pending') }}">
+                                    {{ $app->status ?? 'Pending' }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                        </tbody>
 
                 </table>
             </div>

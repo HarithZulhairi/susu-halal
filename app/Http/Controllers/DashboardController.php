@@ -96,19 +96,28 @@ class DashboardController extends Controller
             // Count PumpingKitAppointments per month
             $kitData[] = PumpingKitAppointment::whereMonth('appointment_datetime', $i)->count();
         }
-
+            $dn_id = auth()->user()->role_id;
             $today = Carbon::today();
 
-            // ====== TODAY’S APPOINTMENTS ======
-            $todayMilk = MilkAppointment::with('donor')
-                            ->whereDate('appointment_datetime', $today)
-                            ->get();
+            // ====== TODAY'S APPOINTMENTS ======
+            $todayMilk = MilkAppointment::join('donor', 'milk_appointments.dn_ID', '=', 'donor.dn_ID')
+                ->select(
+                    'milk_appointments.*',
+                    'donor.dn_FullName',
+                    'donor.dn_ID as donor_id'
+                )
+                ->whereDate('milk_appointments.appointment_datetime', $today)
+                ->get();
 
-            $todayKit = PumpingKitAppointment::with('donor')
-                            ->whereDate('appointment_datetime', $today)
-                            ->get();
+            $todayKit = PumpingKitAppointment::join('donor', 'pumping_kit_appointments.dn_ID', '=', 'donor.dn_ID')
+                ->select(
+                    'pumping_kit_appointments.*',
+                    'donor.dn_FullName',
+                    'donor.dn_ID as donor_id'
+                )
+                ->whereDate('pumping_kit_appointments.appointment_datetime', $today)
+                ->get();
 
-            // Merge both collections
             $todayAppointments = $todayMilk->merge($todayKit);
 
         return view('nurse.nurse_dashboard', [
