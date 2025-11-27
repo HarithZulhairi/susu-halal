@@ -1,201 +1,328 @@
-/* Import standardized status colors (Assuming status_colors.css is in the asset path) */
-@import url("status_colors.css");
+
 @import url("base_layout.css");
 @import url("modal.css");
 
-/* Table Controls */
-.table-controls {
+/* ===== Card ===== */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-}
-
-.search-filter {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.btn-search, .btn-filter, .btn-more-options {
-    padding: 8px 16px;
-    border: 1px solid #d1d5db;
-    background: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-    font-weight: 500;
-}
-
-.btn-more-options {
-    padding: 8px 12px;
-}
-
-.btn-search:hover, .btn-filter:hover, .btn-more-options:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-}
-
-.btn-review {
-    background: #16a34a;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-review:hover {
-    background: #15803d;
-}
-
-/* Table Wrapper */
-.table-wrapper {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-/* Table Styles */
-.records-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.records-table thead {
-    background: #f9fafb;
+    padding: 18px 24px;
     border-bottom: 1px solid #e5e7eb;
 }
 
-.records-table th {
-    text-align: left;
-    padding: 14px 20px;
-    font-size: 11px;
+.card-header h2 {
+    font-size: 18px;
+    color: #1A5F7A;
     font-weight: 600;
+}
+
+.actions-header {
+    display: flex;
+    gap: 10px;
+}
+
+.card-header .btn {
+    background: #f3f4f6;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #374151;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.card-header .btn:hover {
+    background: #e5e7eb;
+}
+
+.card-header .btn-add-records {
+    background: #10b981;
+    color: white;
+}
+
+.card-header .btn-add-records:hover {
+    background: #0adf98;
+}
+
+/* ===== Record List ===== */
+.records-list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Row */
+.record-header {
+    display: grid;
+    /* Give clinical status more room (second column) to avoid overflow into Volume */
+    grid-template-columns: 2fr 1.8fr 0.8fr 1.2fr 1fr 0.7fr;
+    padding: 14px 24px;
+    background: #f9fafb;
     color: #6b7280;
     text-transform: uppercase;
+    font-size: 12px;
     letter-spacing: 0.5px;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e7eb;
 }
 
-.records-table tbody tr {
-    border-bottom: 1px solid #f3f4f6;
-    transition: background 0.15s;
+/* Make sortable headers look like plain header text (not default buttons) */
+.record-header .sortable-header {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    justify-self: start;
 }
 
-.records-table tbody tr:hover {
-    background: #f9fafb;
+.record-header .sortable-header:focus {
+    outline: none;
 }
 
-.records-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-.records-table td {
-    padding: 16px 20px;
-    font-size: 14px;
+.record-header .sortable-header .sort-indicator {
+    font-size: 11px;
+    line-height: 1;
     color: #374151;
-    vertical-align: middle;
+    display: inline-block;
+    width: 12px;
+    text-align: center;
 }
 
-/* Donor Info */
-.donor-info {
+/* Pagination controls */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 0 18px 0;
+}
+.pagination-controls .page-btn {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #374151;
+    font-weight: 600;
+}
+.pagination-controls .page-btn:hover {
+    background: #f3f4f6;
+}
+.pagination-controls .page-btn.active {
+    background: #1A5F7A;
+    color: white;
+    border-color: #14646d;
+}
+.pagination-controls .page-btn[disabled] {
+    opacity: 0.5;
+    cursor: default;
+}
+
+/* Filter panel */
+.filter-panel {
+    display: none;
+    padding: 12px 100px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    gap: 12px;
+}
+.filter-panel.active {
+    display: grid;
+    align-items: center;
+}
+.filter-panel .form-control, .filter-panel input, .filter-panel select {
+    padding: 8px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+.filter-panel .filter-actions {
+    display: flex;
+    gap: 4rem;
+    justify-content: center;
+}
+.filter-panel .filter-actions .btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #1A5F7A; /* primary blue used in headers */
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(26,95,122,0.12);
+    transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.filter-panel .filter-actions .btn:hover {
+    transform: translateY(-2px);
+    background: #145c6a;
+    box-shadow: 0 8px 24px rgba(20,92,106,0.14);
+}
+.filter-panel .filter-actions .btn:focus {
+    outline: 3px solid rgba(26,95,122,0.12);
+    outline-offset: 2px;
+}
+
+/* Align the ACTIONS header and the actions column content to the right so they are visually parallel */
+.record-header > span:last-child {
+    justify-self: end; /* grid cell alignment */
+    text-align: right;
+}
+
+/* Ensure the actions cell in data rows is right aligned within the grid */
+.record-item > .actions {
+    justify-self: end;
+}
+
+/* Data Rows */
+.record-item {
+    display: grid;
+    /* Match header: widen clinical status column */
+    grid-template-columns: 2fr 1.8fr 0.8fr 1.2fr 1fr 0.7fr;
+    align-items: center;
+    padding: 16px 24px;
+    border-top: 1px solid #f3f4f6;
+    font-size: 14px;
+    background: #fff;
+}
+
+.record-item:nth-child(even) {
+    background: #fafafa;
+}
+
+/* Milk Donor */
+.milk-donor-info {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.donor-avatar {
-    width: 40px;
-    height: 40px;
+.milk-icon-wrapper {
+    background: #e0f2fe;
+    padding: 8px;
     border-radius: 50%;
-    background: #e0e7ff;
-    color: #4f46e5;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.milk-icon {
+    font-size: 20px;
+    color: #0369a1;
+}
+
+/* **FIX: Ensures Milk ID and Donor Name stack vertically** */
+.milk-donor-info > div {
+    display: flex;
+    flex-direction: column; /* Key fix */
+}
+/* **END FIX** */
+
+
+.milk-id {
     font-weight: 600;
-    font-size: 14px;
-    flex-shrink: 0;
+    color: #111827;
 }
 
 .donor-name {
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 2px;
-    font-size: 14px;
-}
-
-.donor-details {
-    color: #6b7280;
     font-size: 13px;
+    color: #6b7280;
 }
 
-/* Status Badges (Clinical Status) */
-.status-badge {
+.status-clickable {
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
+    padding: 8px 14px !important;
+}
+
+.status-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-decoration: none;
+}
+
+/* .status-clickable::after {
+    content: ' →';
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-left: 4px;
+}
+
+.status-clickable:hover::after {
+    opacity: 1;
+} */
+
+/* Clinical Status Colors */
+.status-tag {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-block;
+    /* Prevent overflowing adjacent columns: truncate long labels with ellipsis */
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-.status-labelling { 
-    background: #dbeafe; /* Blue */
-    color: #1e40af; 
-}
+.status-labelling { background: #dbeafe; color: #1e40af; }
+.status-screening { background: #fef9c3; color: #a16207; }
+.status-distributing { background: #d1fae5; color: #065f46; }
+.status-dispatching { background: #fecaca; color: #b91c1c; }
+.status-tag.status-approved  { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.status-tag.status-rejected  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+/* .status-tag.status-pending   { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; } */
+.status-tag.status-pending   {     background: #dedede;color: #8b8b8b; border: 1px solid #9e9d9b; }
 
-.status-storaging { 
-    background: #e0e7ff; /* Light Violet */
-    color: #4338ca; 
-}
-
-.status-screening { 
-    background: #fef3c7; /* Amber */
-    color: #92400e; 
-}
-
-.status-dispatching { 
-    background: #fce7f3; /* Pink */
-    color: #9f1239; 
-}
-
-/* Date Styling */
-.date {
+/* Eligibility */
+.eligibility-tag {
+    color: #065f46;
     font-weight: 500;
-    font-size: 14px;
 }
 
-.date.green { 
-    color: #16a34a; 
+/* ===== Action Buttons ===== */
+.actions {
+    display: flex; /* Changed from inline-block for better alignment control */
+    justify-content: flex-end; /* Align actions to the right of the column */
 }
 
-.date.red { 
-    color: #dc2626; 
-}
-
-/* Action Buttons - Fixed for straight alignment */
 .actions button {
     background: none;
     border: none;
     cursor: pointer;
     font-size: 16px;
-    padding: 6px 8px;
+    padding: 6px 4px;
     border-radius: 6px;
-    transition: all 0.2s;
+    transition: background 0.2s;
     margin-right: 4px;
+}
+
+.actions button:last-child {
+    margin-right: 0;
 }
 
 .actions .btn-view i { color: #2563eb; }
@@ -204,42 +331,138 @@
 
 .actions button:hover {
     background: #f3f4f6;
-    transform: scale(1.1);
 }
 
-/* Modal Styles */
-.modal {
-    display: none;
+/* MODAL OVERLAY */
+.modal-overlay {
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.3s ease;
-}
-
-.modal.active {
-    display: flex;
+    background: rgba(0,0,0,0.5);
+    display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
+    z-index: 9999;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+/* MODAL BOX */
+.modal-box {
+    background: #fff;
+    width: 450px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    animation: popup 0.3s ease;
 }
 
-@keyframes slideUp {
-    from { 
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Make the view modal larger and scrollable when content is long */
+#viewMilkModal .modal-content {
+    width: 900px;
+    max-width: 95vw;
+    max-height: 90vh;
+    padding: 22px;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
+#viewMilkModal .modal-body p {
+    margin-bottom: 12px;
+}
+
+#viewMilkModal .modal-body p strong {
+    display: inline-block;
+    width: 120px;
+}
+
+/* Stage layout in view modal */
+#viewMilkModal .stage-block {
+    margin-bottom: 12px;
+}
+
+#viewMilkModal .stage-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 20px 1fr;
+    align-items: center;
+    column-gap: 12px;
+}
+
+#viewMilkModal .stage-row strong {
+    grid-column: 1 / 2;
+}
+
+#viewMilkModal .stage-row .dash {
+    grid-column: 3 / 4;
+    text-align: center;
+}
+
+#viewMilkModal .stage-row span {
+    display: block;
+    text-align: center; /* center date/time */
+}
+
+/* Results block (now separate from the Screening row) - use same grid so results align under start column */
+#viewMilkModal .stage-result-block {
+    display: grid;
+    grid-template-columns: 140px 1fr 20px 1fr;
+    column-gap: 12px;
+    margin-top: 6px;
+    margin-bottom: 12px;
+}
+
+#viewMilkModal .stage-result {
+    display: contents; /* allow child elements to participate in parent grid */
+}
+
+#viewMilkModal .stage-result strong { grid-column: 1 / 2; display: block; }
+#viewMilkModal .stage-result span { grid-column: 2 / 3; display: block; white-space: pre-wrap; text-align: left; }
+
+@keyframes popup {
+    from { transform: scale(0.85); opacity: 0;}
+    to { transform: scale(1); opacity: 1;}
+}
+
+.modal-header, .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.cancel-btn, .save-btn {
+    padding: 8px 14px;
+    border-radius: 5px;
+    border: none;
+}
+
+.save-btn {
+    background: #007bff;
+    color: white;
+}
+
+.cancel-btn {
+    background: #ccc;
+}
+
+/* Expired label under expiry date */
+.expired-text {
+    color: #dc2626; /* red */
+    font-weight: 700;
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+.no-results-message {
+    grid-column: 1 / -1;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 20px 0;
+}

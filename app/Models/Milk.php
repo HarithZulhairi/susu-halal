@@ -22,6 +22,8 @@ class Milk extends Model
         'milk_volume',
         'milk_expiryDate',
         'milk_shariahApproval',
+        'milk_shariahApprovalDate',
+        'milk_shariahRemarks',
         'milk_Status',
 
         'milk_stage1StartDate',

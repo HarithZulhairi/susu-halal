@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Donor;
 use App\Models\Milk;
+use Carbon\Carbon;
 
 class MilkController extends Controller
 {
@@ -129,6 +130,195 @@ class MilkController extends Controller
         return view('nurse.nurse_manage-milk-records', compact('milks'));
     }
 
+    public function viewMilkShariah(Request $request)
+    {
+        $donors = Donor::all();
+
+        // Build query and apply filters from request (GET)
+        $query = Milk::with('donor');
+
+        // Search by donor name or milk ID
+        if ($request->filled('searchInput')) {
+            $search = $request->input('searchInput');
+            $query->where(function($q) use ($search) {
+                $q->where('milk_ID', 'like', "%{$search}%")
+                  ->orWhereHas('donor', function($dq) use ($search) {
+                      $dq->where('dn_FullName', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Clinical status filter (exact match or treat 'Not Yet Started' as null)
+        if ($request->filled('filterStatus')) {
+            $status = $request->input('filterStatus');
+            if (strtolower($status) === 'not yet started') {
+                $query->whereNull('milk_Status');
+            } else {
+                $query->where('milk_Status', $status);
+            }
+        }
+
+        // Volume range filter
+        if ($request->filled('volumeMin')) {
+            $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
+        }
+        if ($request->filled('volumeMax')) {
+            $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
+        }
+
+        // Expiry date range
+        if ($request->filled('expiryFrom')) {
+            $query->whereDate('milk_expiryDate', '>=', $request->input('expiryFrom'));
+        }
+        if ($request->filled('expiryTo')) {
+            $query->whereDate('milk_expiryDate', '<=', $request->input('expiryTo'));
+        }
+
+        // Shariah approval
+        if ($request->filled('filterShariah')) {
+            $sh = $request->input('filterShariah');
+            if (strtolower($sh) === 'not yet reviewed') {
+                $query->whereNull('milk_shariahApproval');
+            } elseif (strtolower($sh) === 'approved') {
+                $query->where('milk_shariahApproval', true);
+            } elseif (strtolower($sh) === 'rejected') {
+                $query->where('milk_shariahApproval', false);
+            }
+        }
+
+        $milks = $query->orderByDesc('created_at')->get();
+
+        return view('shariah.shariah_manage-milk-records', compact('donors', 'milks'));
+    }
+
+    public function viewMilkHMMC(Request $request)
+    {
+        $donors = Donor::all();
+
+        // Build query and apply filters from request (GET)
+        $query = Milk::with('donor');
+        
+
+        // Search by donor name or milk ID
+        if ($request->filled('searchInput')) {
+            $search = $request->input('searchInput');
+            $query->where(function($q) use ($search) {
+                $q->where('milk_ID', 'like', "%{$search}%")
+                  ->orWhereHas('donor', function($dq) use ($search) {
+                      $dq->where('dn_FullName', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Clinical status filter (exact match or treat 'Not Yet Started' as null)
+        if ($request->filled('filterStatus')) {
+            $status = $request->input('filterStatus');
+            if (strtolower($status) === 'not yet started') {
+                $query->whereNull('milk_Status');
+            } else {
+                $query->where('milk_Status', $status);
+            }
+        }
+
+        // Volume range filter
+        if ($request->filled('volumeMin')) {
+            $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
+        }
+        if ($request->filled('volumeMax')) {
+            $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
+        }
+
+        // Expiry date range
+        if ($request->filled('expiryFrom')) {
+            $query->whereDate('milk_expiryDate', '>=', $request->input('expiryFrom'));
+        }
+        if ($request->filled('expiryTo')) {
+            $query->whereDate('milk_expiryDate', '<=', $request->input('expiryTo'));
+        }
+
+        // Shariah approval
+        if ($request->filled('filterShariah')) {
+            $sh = $request->input('filterShariah');
+            if (strtolower($sh) === 'not yet reviewed') {
+                $query->whereNull('milk_shariahApproval');
+            } elseif (strtolower($sh) === 'approved') {
+                $query->where('milk_shariahApproval', true);
+            } elseif (strtolower($sh) === 'rejected') {
+                $query->where('milk_shariahApproval', false);
+            }
+        }
+
+        $milks = $query->orderByDesc('created_at')->get();
+
+        return view('hmmc.hmmc_manage-milk-records', compact('donors', 'milks'));
+    }
+
+    public function viewMilkProcessingShariah($id)
+    {
+        // 1. Fetch the Milk record with its Donor
+        $milk = Milk::with('donor')->findOrFail($id);
+
+        // 2. Decode the JSON result from Screening Stage (milk_stage1Result)
+        // The database stores it as a JSON string or null.
+        $screeningResults = [];
+        if ($milk->milk_stage1Result) {
+            $decoded = json_decode($milk->milk_stage1Result, true);
+            if (is_array($decoded)) {
+                $screeningResults = $decoded;
+            }
+        }
+
+        // 3. Return view with data
+        return view('shariah.shariah_view-milk-processing', compact('milk', 'screeningResults'));
+    }
+
+    public function updateDecision(Request $request)
+    {
+        $request->validate([
+            'milk_id' => 'required|exists:milk,milk_ID',
+            'approval' => 'required|boolean',
+            'remarks' => 'nullable|string'
+        ]);
+
+        $milk = Milk::findOrFail($request->milk_id);
+        $milk->milk_shariahApproval = $request->approval;
+        $milk->milk_shariahRemarks = $request->remarks;
+        $milk->milk_shariahApprovalDate = Carbon::now(); // Set current date
+        $milk->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    // 2. Update Method
+    public function updateMilkRecordHMMC(Request $request, $id)
+    {
+        $request->validate([
+            'milk_volume' => 'required|numeric|min:0',
+            'milk_expiryDate' => 'required|date',
+            'milk_shariahApprovalDate' => 'nullable|date',
+            'milk_shariahRemarks' => 'nullable|string'
+        ]);
+
+        $milk = Milk::findOrFail($id);
+        
+        $milk->update([
+            'milk_volume' => $request->milk_volume,
+            'milk_expiryDate' => $request->milk_expiryDate,
+            'milk_shariahApprovalDate' => $request->milk_shariahApprovalDate,
+            'milk_shariahRemarks' => $request->milk_shariahRemarks,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Record updated successfully']);
+    }
+
+    public function deleteMilkRecordHMMC($id)
+    {
+        $milk = Milk::findOrFail($id);
+        $milk->delete();
+
+        return response()->json(['success' => true, 'message' => 'Record deleted successfully']);
+    }
+
 
     public function storeMilkRecord(Request $request)
     {
@@ -147,6 +337,8 @@ class MilkController extends Controller
 
             // New simplified fields
             'milk_shariahApproval' => null, // or null if you prefer, but false is clearer
+            'milk_shariahApprovalDate' => null,
+            'milk_shariahRemarks' => null,
             'milk_Status'         => null, // Overall status
 
             // Stage 1: Screening (starts immediately when milk is received)

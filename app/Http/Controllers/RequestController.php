@@ -56,9 +56,46 @@ class RequestController extends Controller
         // Only NON-EXPIRED milk
         $milks = Milk::whereDate('milk_expiryDate', '>=', Carbon::today())
                     ->where('milk_Status', 'Distributing Completed')
+                    ->where('milk_shariahApproval', '1')
                     ->get();
 
         return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
+    }
+
+    public function viewRequestHMMC(Request $request)
+    {
+        $search = $request->input('search');
+        $status = $request->input('status'); // Get status from tabs
+
+        // 1. Start the query
+        $query = MilkRequest::with(['parent', 'doctor', 'allocation.milk']);
+
+        // 2. Apply Search Filter
+        if ($search) {
+            $query->whereHas('parent', function ($q) use ($search) {
+                $q->where('pr_BabyName', 'LIKE', "%{$search}%")
+                ->orWhere('pr_ID', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // 3. Apply Status Filter (Tabs)
+        if ($status && $status !== 'All') {
+            $query->where('status', $status);
+        }
+
+        // 4. Order and Paginate
+        $requests = $query->latest()->paginate(10);
+
+        // 5. Append query parameters so tabs + search + pagination work together
+        $requests->appends(['search' => $search, 'status' => $status]);
+
+        // Only NON-EXPIRED milk
+        $milks = Milk::whereDate('milk_expiryDate', '>=', Carbon::today())
+                    ->where('milk_Status', 'Distributing Completed')
+                    ->where('milk_shariahApproval', '1')
+                    ->get();
+
+        return view('hmmc.hmmc_milk-request', compact('requests', 'milks'));
     }
 
     public function store(Request $request)
@@ -159,14 +196,53 @@ class RequestController extends Controller
         ]);
     }
 
+    public function viewInfantWeightHMMC(Request $request)
+    {
+        // Start Query with Relationships
+        $query = ParentModel::with(['requests.allocation.milk']);
+
+        // --- SEARCH LOGIC ---
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('pr_ID', 'like', "%{$searchTerm}%")
+                ->orWhere('pr_BabyName', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // --- PAGINATION CHANGE ---
+        // Change ->get() to ->paginate(10)
+        $parents = $query->latest()->paginate(10);
+
+        // Ensure search term persists when clicking "Next Page"
+        $parents->appends(['search' => $request->search]);
+
+        return view('hmmc.hmmc_list-of-infants', compact('parents'));
+    }
+
     public function setInfantWeightNurse()
     {
         $parents = ParentModel::all();
 
         return view('nurse.nurse_set-infant-weight', compact('parents'));
     }
+    
 
     public function updateInfantWeightNurse(Request $request)
+    {
+        $request->validate([
+            'pr_ID' => 'required|exists:parent,pr_ID',
+            'pr_BabyCurrentWeight' => 'required|numeric|min:0',
+        ]);
+
+        $parent = ParentModel::findOrFail($request->pr_ID);
+        $parent->pr_BabyCurrentWeight = $request->pr_BabyCurrentWeight;
+        $parent->save();
+
+        return response()->json(['success' => true, 'message' => 'Weight updated!']);
+    }
+
+    public function updateInfantWeightHMMC(Request $request)
     {
         $request->validate([
             'pr_ID' => 'required|exists:parent,pr_ID',

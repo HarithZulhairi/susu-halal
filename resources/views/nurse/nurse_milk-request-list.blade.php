@@ -448,7 +448,7 @@
                             <div style="width: 100%;">
                                 <div style="display:flex; justify-content:space-between; align-items: center;">
                                     <div>
-                                        <strong>${milk.milk_batchID || milk.formattedID || 'ID: '+milk.milk_ID}</strong>
+                                        <strong>${milk.milk_batchID || milk.formattedID || '#M'+milk.milk_ID}</strong>
                                         <div style="font-size:12px; color:#666;">Expires: ${milk.milk_expiryDate || '-'}</div>
                                     </div>
                                     <span style="font-weight:bold; color:#2563eb;">${milk.milk_volume} ml</span>

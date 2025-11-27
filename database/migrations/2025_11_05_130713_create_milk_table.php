@@ -22,6 +22,8 @@ return new class extends Migration
             $table->integer('milk_volume');
             $table->date('milk_expiryDate')->nullable();
             $table->boolean('milk_shariahApproval')->nullable();
+            $table->string('milk_shariahRemarks')->nullable();
+            $table->date('milk_shariahApprovalDate')->nullable();
             $table->string('milk_Status')->nullable();
             $table->date('milk_stage1StartDate')->nullable();
             $table->date('milk_stage1EndDate')->nullable();

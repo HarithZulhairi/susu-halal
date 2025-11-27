@@ -37,6 +37,12 @@ class ParentModel extends Model
         return $this->hasMany(Milk::class, 'pr_ID');
     }
 
+    public function requests()
+    {
+        // A Parent has many Requests
+        return $this->hasMany(Request::class, 'pr_ID', 'pr_ID');
+    }
+
     /**
      * Accessor for formatted Parent ID, e.g. #P1, #P2, ...
      */

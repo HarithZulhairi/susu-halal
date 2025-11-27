@@ -83,6 +83,8 @@
                             'volume'     => $milk->milk_volume . ' mL',
                             'expiry'     => $milk->milk_expiryDate ? \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') : '-',
                             'shariah'    => is_null($milk->milk_shariahApproval) ? 'Not Yet Reviewed' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected'),
+                            'shariahDate' => $milk->milk_shariahApprovalDate ? \Carbon\Carbon::parse($milk->milk_shariahApprovalDate)->format('M d, Y') : '-',
+                            'shariahRemarks' => $milk->milk_shariahRemarks ?? '-',
                             'stage1Start' => $milk->milk_stage1StartDate && $milk->milk_stage1StartTime ? $milk->milk_stage1StartDate . ' ' . $milk->milk_stage1StartTime : '-',
                             'stage1End'   => $milk->milk_stage1EndDate && $milk->milk_stage1EndTime ? $milk->milk_stage1EndDate . ' ' . $milk->milk_stage1EndTime : '-',
                             'stage1Result'=> $milk->milk_stage1Result,
@@ -99,7 +101,9 @@
                          data-status="{{ strtolower($milk->milk_Status ?? 'not yet started') }}"
                          data-volume="{{ $milk->milk_volume }}"
                          data-expiry="{{ $milk->milk_expiryDate }}"
-                         data-shariah="{{ strtolower($milk->milk_shariahApproval ?? 'not yet reviewed') }}">
+                         data-shariah="{{ strtolower($milk->milk_shariahApproval ?? 'not yet reviewed') }}"
+                         data-shariah-date="{{ $milk->milk_shariahApprovalDate ?? '-' }}"
+                         data-shariah-remarks="{{ $milk->milk_shariahRemarks ?? '-' }}">
 
                         <!-- Donor Info -->
                         <div class="milk-donor-info">
@@ -191,6 +195,12 @@
             <hr>
             <h3>Quality Control</h3>
             <p><strong>Shariah Approval:</strong> <span id="view-shariah"></span></p>
+            <p><strong>Shariah Approval Date:</strong>
+                <span id="view-shariahDate"></span>
+            </p>
+            <p><strong>Shariah Remarks:</strong>
+                <span id="view-shariahRemarks"></span>
+            </p>
         </div>
     </div>
 </div>
@@ -317,7 +327,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function pollStatuses() {
         try {
-            const res = await fetch("{{ route('milk-statuses') }}", {headers:{'Accept':'application/json'}});
+            const res = await fetch("{{ route('nurse.milk-statuses') }}", {headers:{'Accept':'application/json'}});
             if (!res.ok) return;
             const items = await res.json();
 
@@ -410,6 +420,8 @@ function openViewMilkModal(data) {
     document.getElementById('view-volume').textContent     = data.volume || '-';
     document.getElementById('view-expiry').textContent     = data.expiry || '-';
     document.getElementById('view-shariah').textContent    = data.shariah || '-';
+    document.getElementById('view-shariahDate').textContent    = data.shariahDate || '-';
+    document.getElementById('view-shariahRemarks').textContent    = data.shariahRemarks || '-';
 
     document.getElementById('view-stage1-start').textContent = data.stage1Start || '-';
     document.getElementById('view-stage1-end').textContent   = data.stage1End || '-';

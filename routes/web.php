@@ -122,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
     // Extra Profile Views
     Route::view('/donor/edit-profile', 'donor.donor_edit-profile')->name('donor.edit-profile');
     Route::view('/doctor/edit-profile', 'doctor.doctor_edit-profile')->name('doctor.edit-profile');
+    Route::view('/hmmc/edit-profile', 'hmmc.hmmc_edit-profile')->name('hmmc.hmmc_edit-profile');
     Route::view('/shariah/profile', 'shariah.shariah_profile')->name('shariah.profile');
 
     // ====================================================================
@@ -201,6 +202,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/doctor/milk-request/create/store', [RequestController::class, 'store'])->name('doctor.doctor_milk-request-store');
     Route::delete('/doctor/milk-request/{id}/delete', [RequestController::class, 'delete'])->name('doctor.milk-request-delete');
     
+
     Route::view('/nurse/allocate-milk', 'nurse.nurse_allocate-milk')->name('nurse.allocate-milk');
     Route::post('/nurse/allocate/delete', [RequestController::class, 'deleteAllocation'])->name('nurse.allocate.delete');
 
@@ -213,17 +215,29 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/nurse/set-infant-weight/update', [RequestController::class, 'updateInfantWeightNurse'])->name('nurse.nurse_infant-weight.update');
 
     Route::view('/parent/my-infant-request', 'parent.parent_my-infant-request')->name('parent.my-infant-request');
-    Route::view('/hmmc/list-of-infants', 'hmmc.hmmc_list-of-infants')->name('hmmc.list-of-infants');
+
+    // Route::view('/hmmc/list-of-infants', 'hmmc.hmmc_list-of-infants')->name('hmmc.list-of-infants');
+    Route::get('/hmmc/milk-request', [RequestController::class, 'viewRequestHMMC'])->name('hmmc.hmmc_milk-request');
+    Route::get('/hmmc/list-of-infants', [RequestController::class, 'viewInfantWeightHMMC'])->name('hmmc.hmmc_list-of-infants');
+    Route::post('/hmmc/list-of-infants/update', [RequestController::class, 'updateInfantWeightHMMC'])->name('hmmc.hmmc_list-of-infants.update');
+    
     Route::view('/shariah/infant-request', 'shariah.shariah_infant-request')->name('shariah.infant-request');
 
     // Milk Records Views
-    Route::view('/hmmc/manage-milk-records', 'hmmc.hmmc_manage-milk-records')->name('hmmc.manage-milk-records');
-    Route::view('/shariah/manage-milk-records', 'shariah.shariah_manage-milk-records')->name('shariah.manage-milk-records');
+    Route::get('/hmmc/manage-milk-records', [MilkController::class, 'viewMilkHMMC'])->name('hmmc.hmmc_manage-milk-records');
+    Route::put('/hmmc/manage-milk-records/{id}', [MilkController::class, 'updateMilkRecordHMMC'])->name('hmmc.update-milk-record');
+    Route::delete('/hmmc/manage-milk-records/{id}', [MilkController::class, 'deleteMilkRecordHMMC'])->name('hmmc.delete-milk-record');
+
+    Route::get('/shariah/manage-milk-records', [MilkController::class, 'viewMilkShariah'])->name('shariah.shariah_manage-milk-records');
 
     Route::get('/nurse/manage-milk-records', [MilkController::class, 'viewMilkNurse'])->name('nurse.manage-milk-records');
-    Route::get('/milk-statuses', [MilkController::class, 'milkStatuses'])->name('milk-statuses');
+    Route::get('/nurse/milk-statuses', [MilkController::class, 'milkStatuses'])->name('nurse.milk-statuses');
 
-    Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.view-milk-processing');
+    Route::get('/shariah/milk-statuses', [MilkController::class, 'milkStatuses'])->name('shariah.milk-statuses');
+
+    // Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.shariah_view-milk-processing');
+    Route::get('/shariah/view-milk-processing/{id}', [MilkController::class, 'viewMilkProcessingShariah'])->name('shariah.shariah_view-milk-processing');
+    Route::post('/shariah/update-decision', [MilkController::class, 'updateDecision'])->name('shariah.update-decision');
     Route::view('/nurse/view-milk-processing', 'nurse.nurse_view-milk-processing')->name('nurse.view-milk-processing');
 
     // Appointment Module

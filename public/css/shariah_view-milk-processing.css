@@ -105,7 +105,7 @@
 }
 
 .detail-item p {
-    font-size: 15px;
+    font-size: 20px;
     color: #555;
     margin: 0;
     font-weight: 500;
@@ -212,7 +212,7 @@
 
 .results-table tbody td {
     padding: 14px 16px;
-    font-size: 14px;
+    font-size: 16px;
     color: #333;
     font-weight: 500;
 }
@@ -271,6 +271,61 @@
 .btn-decline:hover {
     background: #b91c1c;
     transform: translateY(-2px);
+}
+
+/* ===== MODERN SHARIAH REMARKS FORM ===== */
+.shariah-decision-section {
+    margin-top: 40px;
+    background: #f8fafc; /* Light gray background for context */
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+}
+
+.remarks-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.remarks-section label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b; /* Dark slate */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Optional icon for label (add <i class="fas fa-pen"></i> in HTML if desired) */
+.remarks-section label i {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.remarks-section textarea {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    font-family: inherit;
+    font-size: 15px;
+    color: #334155;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 120px;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.remarks-section textarea:focus {
+    border-color: #3b82f6; /* Primary Blue */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.remarks-section textarea::placeholder {
+    color: #94a3b8;
 }
 
 

@@ -95,14 +95,14 @@
                             </div>
                             <span class="quick-stat-badge primary">View Now</span>
                         </a>
-                        <a href="{{ route('hmmc.manage-milk-records') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <a href="{{ route('hmmc.hmmc_manage-milk-records') }}" class="quick-stat-item" style="text-decoration: none;">
                             <div class="quick-stat-info">
                                 <div class="quick-stat-value"><i class="fas fa-box"></i></div>
                                 <div class="quick-stat-label">milk records</div>
                             </div>
                             <span class="quick-stat-badge primary">View Milk Record Now</span>
                         </a>
-                        <a href="{{ route('hmmc.list-of-infants') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <a href="{{ route('hmmc.hmmc_list-of-infants') }}" class="quick-stat-item" style="text-decoration: none;">
                             <div class="quick-stat-info">
                                 <div class="quick-stat-value"><i class="fas fa-list"></i></div>
                                 <div class="quick-stat-label">View Infant Receipient</div>

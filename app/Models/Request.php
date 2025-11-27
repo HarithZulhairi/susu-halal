@@ -51,4 +51,10 @@ class Request extends Model
         // One Request has Many Allocations (Milk Units)
         return $this->hasMany(Allocation::class, 'request_ID', 'request_ID');
     }
+
+    public function getFormattedIdAttribute()
+    {
+        return '#R' . $this->request_ID;
+    }
+
 }

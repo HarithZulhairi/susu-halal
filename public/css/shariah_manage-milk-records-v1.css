@@ -1,0 +1,245 @@
+/* Import standardized status colors (Assuming status_colors.css is in the asset path) */
+@import url("status_colors.css");
+@import url("base_layout.css");
+@import url("modal.css");
+
+/* Table Controls */
+.table-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-filter {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-search, .btn-filter, .btn-more-options {
+    padding: 8px 16px;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.btn-more-options {
+    padding: 8px 12px;
+}
+
+.btn-search:hover, .btn-filter:hover, .btn-more-options:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-review {
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-review:hover {
+    background: #15803d;
+}
+
+/* Table Wrapper */
+.table-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Table Styles */
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.records-table thead {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.records-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.records-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.15s;
+}
+
+.records-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.records-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.records-table td {
+    padding: 16px 20px;
+    font-size: 14px;
+    color: #374151;
+    vertical-align: middle;
+}
+
+/* Donor Info */
+.donor-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.donor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #4f46e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.donor-name {
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 2px;
+    font-size: 14px;
+}
+
+.donor-details {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+/* Status Badges (Clinical Status) */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-labelling { 
+    background: #dbeafe; /* Blue */
+    color: #1e40af; 
+}
+
+.status-storaging { 
+    background: #e0e7ff; /* Light Violet */
+    color: #4338ca; 
+}
+
+.status-screening { 
+    background: #fef3c7; /* Amber */
+    color: #92400e; 
+}
+
+.status-dispatching { 
+    background: #fce7f3; /* Pink */
+    color: #9f1239; 
+}
+
+/* Date Styling */
+.date {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.date.green { 
+    color: #16a34a; 
+}
+
+.date.red { 
+    color: #dc2626; 
+}
+
+/* Action Buttons - Fixed for straight alignment */
+.actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin-right: 4px;
+}
+
+.actions .btn-view i { color: #2563eb; }
+.actions .btn-delete i { color: #dc2626; }
+.actions .btn-more i { color: #6b7280; }
+
+.actions button:hover {
+    background: #f3f4f6;
+    transform: scale(1.1);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
