@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ParentModel;
+use App\Models\Request as MilkRequest;
 use App\Models\MilkAppointment;
 use App\Models\PumpingKitAppointment;
 use App\Models\User;
@@ -80,7 +82,66 @@ class DashboardController extends Controller
     public function nurse()
     {
         // ====== STATS DATA ======
-        
+        // Active Donors (donors who passed screening)
+        $activeDonors = Donor::whereHas('screening', function($query) {
+            $query->where('dtb_ScreeningStatus', 'passed');
+        })->count();
+
+        // Pending Appointments (both milk and pumping kit)
+        $pendingMilkAppointments = MilkAppointment::where('status', 'Pending')->count();
+        $pendingKitAppointments = PumpingKitAppointment::where('status', 'Pending')->count();
+        $pendingAppointments = $pendingMilkAppointments + $pendingKitAppointments;
+
+        // Today's pending appointments for the change indicator
+        $todayPendingAppointments = MilkAppointment::where('status', 'Pending')
+            ->whereDate('appointment_datetime', Carbon::today())
+            ->count() + PumpingKitAppointment::where('status', 'Pending')
+            ->whereDate('appointment_datetime', Carbon::today())
+            ->count();
+
+        // Milk Requests (milk records that need processing - not yet completed)
+        $milkRequests = Milk::whereNotIn('milk_Status', [
+            'Distributing Completed', 
+            'Completed',
+            'Rejected'
+        ])->count();
+
+        // Milk requests from last week for percentage change
+        $lastWeekMilkRequests = Milk::whereNotIn('milk_Status', [
+            'Distributing Completed', 
+            'Completed',
+            'Rejected'
+        ])->where('created_at', '>=', Carbon::now()->subWeek())
+        ->count();
+
+        $requestsChange = $lastWeekMilkRequests > 0 
+            ? round((($milkRequests - $lastWeekMilkRequests) / $lastWeekMilkRequests) * 100) . '%' 
+            : '0%';
+
+        // Processing Queue (milk records in active processing stages)
+        $processingQueue = Milk::whereIn('milk_Status', [
+            'Screening',
+            'Screening Completed', 
+            'Labelling',
+            'Labelling Completed',
+            'Distributing'
+        ])->count();
+
+        // Urgent processing (milk expiring soon - within 3 days)
+        $urgentQueue = Milk::where('milk_expiryDate', '<=', Carbon::now()->addDays(3))
+            ->whereIn('milk_Status', ['Screening', 'Screening Completed', 'Labelling', 'Labelling Completed', 'Distributing'])
+            ->count();
+
+        // Active donors change from last month
+        $lastMonthActiveDonors = Donor::whereHas('screening', function($query) {
+            $query->where('dtb_ScreeningStatus', 'passed');
+        })->where('created_at', '>=', Carbon::now()->subMonth())
+        ->count();
+
+        $donorsChange = $lastMonthActiveDonors > 0 
+            ? round((($activeDonors - $lastMonthActiveDonors) / $lastMonthActiveDonors) * 100) . '%' 
+            : '100%';
+
         // ====== GRAPH DATA (Monthly) ======
         $months = [];
         $milkData = [];
@@ -121,6 +182,10 @@ class DashboardController extends Controller
             $todayAppointments = $todayMilk->merge($todayKit);
 
         return view('nurse.nurse_dashboard', [
+            'activeDonors' => $activeDonors,
+            'pendingAppointments' => $pendingAppointments,
+            'milkRequests' => $milkRequests,
+            'processingQueue' => $processingQueue,
             'months' => $months,
             'milkData' => $milkData,
             'kitData' => $kitData,
@@ -192,7 +257,48 @@ class DashboardController extends Controller
     // ============================
     public function doctor()
     {
-        return view('doctor.doctor_dashboard');
+        // ====== STATS DATA ======
+        // Total Patients (parents with babies)
+        $totalPatients = ParentModel::count(); // Adjust based on your actual model
+
+        // Active Donors (donors who passed screening)
+        $activeDonors = Donor::whereHas('screening', function($query) {
+            $query->where('dtb_ScreeningStatus', 'passed');
+        })->count();
+
+        // Pending Milk Requests
+        $pendingRequests = MilkRequest::where('status', 'Pending')->count();
+
+        // ====== RECENT MILK REQUESTS FOR TABLE ======
+        $recentRequests = MilkRequest::with(['parent', 'doctor'])
+            ->orderBy('created_at', 'desc')
+            ->take(5) // Get only 5 most recent for dashboard
+            ->get();
+
+        // ====== GRAPH DATA ======
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+        $prescriptionsData = [30, 45, 55, 48, 60, 72, 90]; // Sample data
+        $milkRequestsData = [20, 35, 40, 38, 50, 65, 75]; // Sample data
+
+        return view('doctor.doctor_dashboard', [
+            // Stats data
+            'totalPatients' => $totalPatients,
+            'activeDonors' => $activeDonors,
+            'pendingRequests' => $pendingRequests,
+            
+            // Recent requests for table
+            'recentRequests' => $recentRequests,
+            
+            // Graph data
+            'months' => $months,
+            'prescriptionsData' => $prescriptionsData,
+            'milkRequestsData' => $milkRequestsData,
+            
+            // Change indicators (you can calculate these similarly to nurse dashboard)
+            'patientChange' => '5%',
+            'prescriptionChange' => '7%',
+            'appointmentChange' => '2 completed',
+        ]);
     }
 
     // ============================

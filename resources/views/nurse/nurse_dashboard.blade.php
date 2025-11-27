@@ -26,10 +26,6 @@
                 </div>
             </div>
             <div class="stat-value">{{ $activeDonors ?? 45 }}</div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                {{ $donorsChange ?? '12%' }} from last month
-            </div>
         </div>
 
         <div class="stat-card">
@@ -40,10 +36,6 @@
                 </div>
             </div>
             <div class="stat-value">{{ $pendingAppointments ?? 8 }}</div>
-            <div class="stat-change warning">
-                <i class="fas fa-clock"></i>
-                {{ $appointmentsChange ?? '3 today' }}
-            </div>
         </div>
 
         <div class="stat-card">
@@ -54,10 +46,6 @@
                 </div>
             </div>
             <div class="stat-value">{{ $milkRequests ?? 23 }}</div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                {{ $requestsChange ?? '18%' }} from last week
-            </div>
         </div>
 
         <div class="stat-card">
@@ -68,10 +56,6 @@
                 </div>
             </div>
             <div class="stat-value">{{ $processingQueue ?? 15 }}</div>
-            <div class="stat-change warning">
-                <i class="fas fa-exclamation-circle"></i>
-                {{ $queueChange ?? '5 urgent' }}
-            </div>
         </div>
     </div>
 
