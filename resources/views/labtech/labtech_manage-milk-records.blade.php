@@ -96,7 +96,9 @@
                             data-status="{{ strtolower($milk->milk_Status ?? 'not yet started') }}"
                             data-volume="{{ $milk->milk_volume }}"
                             data-expiry="{{ $milk->milk_expiryDate }}"
-                            data-shariah="{{ strtolower($milk->milk_shariahApproval ?? 'not yet reviewed') }}">
+                            data-shariah="{{ strtolower($milk->milk_shariahApproval ?? 'not yet reviewed') }}"
+                            data-shariah-date="{{ $milk->milk_shariahApprovalDate ?? '' }}"
+                            data-shariah-remarks="{{ $milk->milk_shariahRemarks ?? '' }}">
                         <div class="milk-donor-info">
                             <div class="milk-icon-wrapper">
                                 <i class="fas fa-bottle-droplet milk-icon"></i>
@@ -155,6 +157,8 @@
                                     'volume' => $milk->milk_volume . ' mL',
                                     'expiry' => $milk->milk_expiryDate ? \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') : 'Not set',
                                     'shariah' => is_null($milk->milk_shariahApproval) ? 'Not Yet Reviewed' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected'),
+                                    'shariahRemarks' => $milk->milk_shariahRemarks ?? 'N/A',
+                                    'shariahApprovalDate' => $milk->milk_shariahApprovalDate ? \Carbon\Carbon::parse($milk->milk_shariahApprovalDate)->format('M d, Y') : 'N/A',
                                     'milk_stage1StartDate' => $milk->milk_stage1StartDate ?? '',
                                     'milk_stage1StartTime' => $milk->milk_stage1StartTime ?? '',
                                     'milk_stage1EndDate' => $milk->milk_stage1EndDate ?? '',
@@ -322,6 +326,12 @@
             <h3>Quality Control</h3>
             <p><strong>Shariah Approval:</strong>
                 <span id="view-shariah"></span>
+            </p>
+            <p><strong>Shariah Approval Date:</strong>
+                <span id="view-shariah-date"></span>
+            </p>
+            <p><strong>Shariah Remarks:</strong>
+                <span id="view-shariah-remarks"></span>
             </p>
         </div>
     </div>
@@ -655,6 +665,8 @@ function openViewMilkModal(data) {
     document.getElementById('view-volume').textContent = data.volume || '-';
     document.getElementById('view-expiry').textContent = data.expiry || '-';
     document.getElementById('view-shariah').textContent = data.shariah || '-';
+    document.getElementById('view-shariah-remarks').textContent = data.shariahRemarks || '-';
+    document.getElementById('view-shariah-date').textContent = data.shariahApprovalDate || '-';
 
     // Stage datetimes: helper to combine date+time or show '-'
     function fmt(dt, tm) {
