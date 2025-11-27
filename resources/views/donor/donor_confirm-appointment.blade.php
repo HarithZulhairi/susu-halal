@@ -174,7 +174,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('confirm_address').innerText = data.collection_address;
     }
 
-    document.getElementById('confirm_remarks').innerText = data.remarks;
+    const remarks = (data.remarks && data.remarks.trim().length > 0)
+    ? data.remarks
+    : "No additional notes.";
+
+    document.getElementById('confirm_remarks').innerText = remarks;
+    // store empty string in hidden input if no real remarks
+    document.getElementById('remarks').value = remarks === "No additional notes." ? '' : data.remarks;
+
     
     //Set Data to be Stored in DB
     // Set values for database submission
