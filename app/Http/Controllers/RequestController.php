@@ -256,4 +256,39 @@ class RequestController extends Controller
         return response()->json(['success' => true, 'message' => 'Weight updated!']);
     }
 
+    public function viewMyInfantMilkRequests()
+    {
+        // Logged-in parent (user_id foreign key)
+        $parent = ParentModel::where('user_id', auth()->id())
+            ->with([
+                'requests.allocation.milk'
+            ])
+            ->firstOrFail();
+
+        return view('parent.parent_my-infant-request', compact('parent'));
+    }
+
+    public function viewInfantMilkShariah(Request $request)
+    {
+        // Same as HMMC
+        $query = ParentModel::with(['requests.allocation.milk']);
+
+        // Search logic
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('pr_ID', 'like', "%{$request->search}%")
+                ->orWhere('pr_BabyName', 'like', "%{$request->search}%");
+            });
+        }
+
+        // Pagination
+        $parents = $query->latest()->paginate(10);
+        $parents->appends(['search' => $request->search]);
+
+        return view('shariah.shariah_infant-request', compact('parents'));
+    }
+
+
+
+
 }

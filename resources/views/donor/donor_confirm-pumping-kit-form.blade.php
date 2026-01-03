@@ -95,10 +95,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Example: Fill the page with the stored values
     let kitType = "";
-    if (data.kit_type === "manual") {
+    if (data.kit_type === "manual_kit") {
+        kitType = "Manual Pumping Kit";
+    } else if (data.kit_type === "automatic_kit") {
         kitType = "Automatic Pumping Kit";
-    } else if (data.kit_type === "automatic") {
-        kitType = "Automatic";
     }
 
     document.getElementById('confirm_type').innerText = kitType;
@@ -134,7 +134,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     document.getElementById('confirm_location').innerText = deliveryLocation;
 
-    document.getElementById('confirm_reason').innerText = data.reason;
+    const reason = (data.reason && data.reason.trim().length > 0)
+    ? data.reason
+    : "No reason provided.";
+
+    document.getElementById('confirm_reason').innerText = reason;
+    // store empty string in hidden input if no real remarks
+    document.getElementById('reason').value = reason === "No reason provided." ? '' : data.reason;
+
 
     //Send to be Inserted into the Database
     document.getElementById('kit_type').value = data.kit_type;

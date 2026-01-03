@@ -17,6 +17,7 @@ return new class extends Migration
             // Foreign keys
             $table->unsignedBigInteger('dn_ID'); // Reference to donor table
             $table->unsignedBigInteger('ns_ID')->nullable(); // Nurse who screened (optional)
+            $table->unsignedBigInteger('dr_ID')->nullable(); // Nurse who screened (optional)
             
             // Health Screening Fields
             $table->enum('dtb_ScreeningStatus', ['pending', 'passed', 'failed'])->default('pending');
@@ -36,6 +37,7 @@ return new class extends Migration
             // Foreign key constraints
             $table->foreign('dn_ID')->references('dn_ID')->on('donor')->onDelete('cascade');
             $table->foreign('ns_ID')->references('ns_ID')->on('nurse')->onDelete('set null');
+            $table->foreign('dr_ID')->references('dr_ID')->on('doctor')->onDelete('set null');
         });
     }
 

@@ -884,7 +884,7 @@
                             <div class="space-y-2">
                                 <label for="gestationWeek_${i}" class="text-xs font-medium text-gray-700 flex items-center">
                                     <i class="fas fa-clock text-pink-500 mr-2"></i>
-                                    Gestation Week <span class="text-red-500">*</span>
+                                    Week Baby Was Born <span class="text-red-500">*</span>
                                 </label>
                                 <input 
                                     id="gestationWeek_${i}" 

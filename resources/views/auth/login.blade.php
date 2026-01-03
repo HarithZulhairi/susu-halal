@@ -52,10 +52,11 @@
         <!-- Left Side - Brand & Illustration -->
         <div class="hidden lg:flex flex-col items-center justify-center space-y-8">
             <div class="text-center space-y-4">
-                <div class="w-20 h-20 mx-auto bg-gradient-to-br from-[#1a5f7a] to-[#57cc99] rounded-2xl flex items-center justify-center shadow-2xl">
-                    <i class="fas fa-baby-carriage text-white text-3xl"></i>
-                </div>
-                <h1 class="text-4xl font-bold gradient-text">Rahma Milk Bank</h1>
+                <a href="{{ url('/') }}" class="flex justify-center">
+                    <img src="{{ asset('images/hmmc_logo_clear.png') }}" 
+                        alt="HALIMATUSSAADIA Mother's Milk Centre Logo" 
+                        class="w-[400px] h-auto">
+                </a>
                 <p class="text-gray-600 text-lg max-w-md mx-auto">
                     Shariah-compliant human milk sharing platform supporting mothers and infants in need.
                 </p>

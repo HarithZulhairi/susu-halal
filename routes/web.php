@@ -214,7 +214,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
     Route::post('/nurse/set-infant-weight/update', [RequestController::class, 'updateInfantWeightNurse'])->name('nurse.nurse_infant-weight.update');
 
-    Route::view('/parent/my-infant-request', 'parent.parent_my-infant-request')->name('parent.my-infant-request');
+    Route::get('/parent/my-infant-request',
+    [RequestController::class, 'viewMyInfantMilkRequests'])
+    ->name('parent.my-infant-request');
+
 
     // Route::view('/hmmc/list-of-infants', 'hmmc.hmmc_list-of-infants')->name('hmmc.list-of-infants');
     Route::get('/hmmc/milk-request', [RequestController::class, 'viewRequestHMMC'])->name('hmmc.hmmc_milk-request');
@@ -222,6 +225,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/hmmc/list-of-infants/update', [RequestController::class, 'updateInfantWeightHMMC'])->name('hmmc.hmmc_list-of-infants.update');
     
     Route::view('/shariah/infant-request', 'shariah.shariah_infant-request')->name('shariah.infant-request');
+
+    Route::get('/shariah/infant-request', 
+    [RequestController::class, 'viewInfantMilkShariah'])->name('shariah.infant-request');
+
 
     // Milk Records Views
     Route::get('/hmmc/manage-milk-records', [MilkController::class, 'viewMilkHMMC'])->name('hmmc.hmmc_manage-milk-records');
@@ -276,32 +283,6 @@ Route::get('/test-email', function () {
     }
 })->name('test.email');
 
-//Controller
-Route::post('/donor/milk/store', [DonorAppointmentController::class, 'storeMilkAppointment'])
-    ->name('donor.store-milk-appointment');
-
-Route::get('/donor/appointments', [DonorAppointmentController::class, 'showAppointment'])
-    ->name('donor.appointments');
-
-Route::put('/donor/appointments/update/milk/{id}', [DonorAppointmentController::class, 'updateMilkAppointment'])
-    ->name('donor.update-milk');
-
-Route::put('/donor/appointments/update/pk/{id}', [DonorAppointmentController::class, 'updatePumpingKitAppointment'])
-    ->name('donor.update-pumping');
-
-
-Route::post('/donor/pk/store', [DonorAppointmentController::class, 'storePumpingKitAppointment'])
-    ->name('donor.store-pk-appointment');
-
-Route::put('/donor/appointments/cancel/milk/{id}', [DonorAppointmentController::class, 'cancelMilk'])
-    ->name('donor.cancel-milk');
-
-Route::put('/donor/appointments/cancel/pk/{id}', [DonorAppointmentController::class, 'cancelPumpingKit'])
-    ->name('donor.cancel-pk');
-
-
-
-
 
 //Controller
 Route::post('/donor/milk/store', [DonorAppointmentController::class, 'storeMilkAppointment'])
@@ -334,6 +315,18 @@ Route::put('/nurse/appointments/confirm/milk/{reference}',
 
 Route::put('/nurse/appointments/confirm/pk/{reference}', 
     [DonorAppointmentController::class, 'nurseConfirmPumpingKitAppointment']);
+
+Route::get('/nurse/donor-candidate-list', [DonorAppointmentController::class, 'showAllDonorToBeNurse'])->name('nurse.donor-candidate-list');
+
+Route::put('/nurse/candidates/approve/{id}', [DonorAppointmentController::class, 'approveDonorToBeNurse']);
+Route::put('/nurse/candidates/reject/{id}', [DonorAppointmentController::class, 'rejectDonorToBeNurse']);
+
+Route::get('/doctor/donor-candidate-list', [DonorAppointmentController::class, 'showAllDonorToBeDr'])->name('doctor.donor-candidate-list');
+
+Route::put('/doctor/candidates/approve/{id}', [DonorAppointmentController::class, 'approveDonorToBeDr']);
+Route::put('/doctor/candidates/reject/{id}', [DonorAppointmentController::class, 'rejectDonorToBeDr']);
+
+
 
 
 

@@ -257,6 +257,80 @@ class DonorScreeningController extends Controller
         return response()->json($stats);
     }
 
+    public function showAllDonorToBe()
+    {
+        // Load all candidates from DB
+        $candidates = DonorToBe::orderBy('created_at', 'desc')->get();
+
+        return view('nurse.donor-candidates', [
+            'candidates' => $candidates
+        ]);
+    }
+
+
+
+    /**
+     * Approve donor candidate screening
+     */
+    public function approveDonorToBe(Request $request, $id)
+    {
+        $candidate = DonorToBe::findOrFail($id);
+
+        // Update statuses
+        $candidate->screening_status = 'Approved';
+        $candidate->eligible_status  = 'Approved';
+
+        // Optional remarks
+        if ($request->filled('remarks')) {
+            $candidate->remarks = $request->remarks;
+        }
+
+        $candidate->save();
+
+        Log::info("Candidate approved by nurse.", [
+            'candidate_id' => $candidate->id,
+            'nurse_id' => auth()->id()
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Candidate screening approved successfully.');
+    }
+
+
+
+    /**
+     * Reject donor candidate screening
+     */
+    public function rejectDonorToBe(Request $request, $id)
+    {
+        // Validate reason
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
+        $candidate = DonorToBe::findOrFail($id);
+
+        // Update statuses
+        $candidate->screening_status = 'Rejected';
+        $candidate->eligible_status  = 'Rejected';
+
+        // Save rejection reason
+        $candidate->rejection_reason = $request->reason;
+
+        $candidate->save();
+
+        Log::warning("Candidate screening rejected.", [
+            'candidate_id' => $candidate->id,
+            'reason' => $request->reason,
+            'nurse_id' => auth()->id()
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Candidate screening rejected.');
+    }
+
     /**
      * Notification methods
      */

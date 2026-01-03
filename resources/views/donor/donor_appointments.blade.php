@@ -128,6 +128,35 @@
 </div>
 @endif
 
+@if(session('too_close'))
+<div id="cancelErrorModal" class="success-modal-overlay">
+    <div class="success-modal" style="border-top: 6px solid #dc2626;">
+        
+        <div class="icon-circle" style="background:#dc2626;">
+            <i class="fas fa-exclamation"></i>
+        </div>
+
+        <h2>Unable to Cancel Appointment</h2>
+
+        <p>
+            Cancellation is not allowed less than <strong>24 hours</strong> before the appointment time.
+        </p>
+
+        <p style="margin-top:10px; font-weight:bold;">
+            Reference Number: {{ session('cantCancelRef') }}
+        </p>
+
+        <button class="btn-close-success" 
+                onclick="document.getElementById('cancelErrorModal').style.display='none'"
+                style="background:#dc2626;">
+            Close
+        </button>
+
+    </div>
+</div>
+@endif
+
+
 
     <div class="main-content">
         <div class="appointments-page">
@@ -570,7 +599,7 @@
         } else if (e.target === editModal){
             editModal.style.display = "none";
         }else if (e.target === cancelModal){
-            editModal.style.display = "none";
+            cancelModal.style.display = "none";
         }
     }
 

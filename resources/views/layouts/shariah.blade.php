@@ -36,7 +36,7 @@
     <h4>Management</h4>
     <ul>
       <li><a href="{{ route('shariah.shariah_manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records Approval</a></li>
-      <!-- <li><a href="{{ route('shariah.infant-request') }}"><i class="fa-solid fa-gear"></i> Infant Milk Request</a></li> -->
+      <li><a href="{{ route('shariah.infant-request') }}"><i class="fa-solid fa-gear"></i> Infant Milk Request</a></li> 
     </ul>
   </div>
 

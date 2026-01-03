@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MilkAppointment;
 use App\Models\PumpingKitAppointment;
+use App\Models\DonorToBe;
 
 class DonorAppointmentController extends Controller
 {
@@ -264,19 +265,26 @@ class DonorAppointmentController extends Controller
 
     public function cancelMilk(Request $request, $id)
     {
+        
         $appointment = MilkAppointment::findOrFail($id);
 
         $now = now();
         $appointmentTime = \Carbon\Carbon::parse($appointment->appointment_datetime);
 
         $hoursDifference = $now->diffInHours($appointmentTime, false);
-
+        
         // Appointment is in the future AND less than 24 hours away
         if ($hoursDifference > 0 && $hoursDifference < 24) {
-            return redirect()->back()->with('error', 'You cannot cancel a Milk Donation appointment less than 24 hours before.');
+            return redirect()
+            ->route('donor.appointments')
+            ->with('too_close', true)
+            ->with('cantCancelRef', $appointment->reference_num);
         }
 
+        
         $appointment->update(['status' => 'Canceled']);
+
+        
 
         return redirect()
             ->route('donor.appointments')
@@ -287,6 +295,7 @@ class DonorAppointmentController extends Controller
 
     public function cancelPumpingKit(Request $request, $id)
     {
+        
         $appointment = PumpingKitAppointment::findOrFail($id);
 
         $now = now();
@@ -296,7 +305,10 @@ class DonorAppointmentController extends Controller
 
         // Appointment is in the future AND less than 24 hours away
         if ($hoursDifference > 0 && $hoursDifference < 24) {
-            return redirect()->back()->with('error', 'You cannot cancel a Pumping Kit appointment less than 24 hours before.');
+            return redirect()
+            ->route('donor.appointments')
+            ->with('too_close', true)
+            ->with('cantCancelRef', $appointment->reference_num);
         }
 
         $appointment->update(['status' => 'Canceled']);
@@ -361,6 +373,172 @@ class DonorAppointmentController extends Controller
         $app->save();
 
         return back()->with('success', "Pumping kit appointment $reference completed.");
+    }
+
+    public function showAllDonorToBeNurse()
+    {
+        // Load all candidates from DB
+        $dtb = DonorToBe::orderBy('created_at', 'desc')
+            ->get();
+
+        // ---- COUNTERS ----
+        $total = $dtb->count();
+        $pending = $dtb->where('dtb_ScreeningStatus', 'pending')->count(); 
+        $passed = $dtb->where('dtb_ScreeningStatus', 'passed')->count(); 
+        $rejected = $dtb->where('dtb_ScreeningStatus', 'rejected')->count(); 
+
+        return view('nurse.nurse_donor-candidate-list', [
+            'dtb' => $dtb,
+            'total'      => $total,
+            'pending'    => $pending,
+            'passed'     => $passed,
+            'rejected'   => $rejected,
+        ]);
+    }
+
+
+
+    /**
+     * Approve donor candidate screening
+     */
+    public function approveDonorToBeNurse(Request $request, $id)
+    {
+        $dtb = DonorToBe::findOrFail($id);
+
+        // Update statuses
+        $dtb->dtb_ScreeningStatus = 'passed';
+
+        // Optional remarks
+        if ($request->filled('dtb_ScreeningStatus')) {
+            $dtb->dtb_ScreeningStatus = $request->dtb_ScreeningStatus;
+        }
+
+        $nurse_id = auth()->user()->role_id;
+
+        //Update Nurse ID
+        $dtb->ns_ID = $nurse_id;
+        $dtb->dtb_ScreenedAt = now();
+
+        $dtb->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Candidate screening approved successfully.');
+    }
+
+
+
+    /**
+     * Reject donor candidate screening
+     */
+    public function rejectDonorToBeNurse(Request $request, $id)
+    {
+        // Validate reason
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
+        $dtb = DonorToBe::findOrFail($id);
+
+        // Update statuses
+        $dtb->dtb_ScreeningStatus = 'failed';
+
+        // Save rejection reason
+        $dtb->dtb_ScreeningRemark = $request->reason;
+        
+        $nurse_id = auth()->user()->role_id;
+        //Update Nurse ID
+        $dtb->ns_ID = $nurse_id;
+        $dtb->dtb_ScreenedAt = now();
+
+        $dtb->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Candidate screening rejected.');
+    }
+
+    public function showAllDonorToBeDr()
+    {
+        // Load all candidates from DB
+        $dtb = DonorToBe::orderBy('created_at', 'desc')
+            ->get();
+
+        // ---- COUNTERS ----
+        $total = $dtb->count();
+        $pending = $dtb->where('dtb_ScreeningStatus', 'pending')->count(); 
+        $passed = $dtb->where('dtb_ScreeningStatus', 'passed')->count(); 
+        $rejected = $dtb->where('dtb_ScreeningStatus', 'rejected')->count(); 
+
+        return view('doctor.doctor_donor-candidates', [
+            'dtb' => $dtb,
+            'total'      => $total,
+            'pending'    => $pending,
+            'passed'     => $passed,
+            'rejected'   => $rejected,
+        ]);
+    }
+
+
+
+    /**
+     * Approve donor candidate screening
+     */
+    public function approveDonorToBeDr(Request $request, $id)
+    {
+        $dtb = DonorToBe::findOrFail($id);
+
+        // Update statuses
+        $dtb->dtb_ScreeningStatus = 'passed';
+
+        // Optional remarks
+        if ($request->filled('dtb_ScreeningStatus')) {
+            $dtb->dtb_ScreeningStatus = $request->dtb_ScreeningStatus;
+        }
+
+        $dr_id = auth()->user()->role_id;
+
+        //Update Nurse ID
+        $dtb->dr_ID = $dr_id;
+        $dtb->dtb_ScreenedAt = now();
+
+        $dtb->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Candidate screening approved successfully.');
+    }
+
+
+
+    /**
+     * Reject donor candidate screening
+     */
+    public function rejectDonorToBeDr(Request $request, $id)
+    {
+        // Validate reason
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
+        $dtb = DonorToBe::findOrFail($id);
+
+        // Update statuses
+        $dtb->dtb_ScreeningStatus = 'failed';
+
+        // Save rejection reason
+        $dtb->dtb_ScreeningRemark = $request->reason;
+        
+        $dr_id = auth()->user()->role_id;
+        //Update Nurse ID
+        $dtb->dr_ID = $dr_id;
+        $dtb->dtb_ScreenedAt = now();
+
+        $dtb->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Candidate screening rejected.');
     }
 
 
