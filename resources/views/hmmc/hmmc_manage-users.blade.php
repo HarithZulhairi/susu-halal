@@ -431,7 +431,9 @@
                 </div>
                 <h3>Success! 🎊</h3>
                 <p id="successMessage"></p>
-                <div class="success-details" id="successDetails"></div>
+                <div class="success-details" id="successDetails" style="margin-top: 15px;">
+                    <!-- Dynamic WhatsApp Link Button will be inserted here -->
+                </div>
             </div>
             
             <div class="credential-error-celebrate" id="credentialError" style="display: none;">
@@ -839,16 +841,49 @@
                     }
                     if (data.whatsapp_sent) {
                         document.getElementById('whatsappStatus').innerHTML = '<i class="fas fa-check" style="color: #10b981;"></i>';
+                        
+
+                        // Open WhatsApp link if provided
+                        if (data.whatsapp_link) {
+                            // Try to open immediately
+                            const newWindow = window.open(data.whatsapp_link, '_blank');
+                            
+                            // If blocked or failed, show a manual button
+                            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                                console.log('Popup blocked. Showing manual link.');
+                                const successDetails = document.getElementById('successDetails');
+                                successDetails.innerHTML = `
+                                    <a href="${data.whatsapp_link}" target="_blank" class="btn-whatsapp-manual" style="
+                                        display: inline-block;
+                                        background-color: #25D366;
+                                        color: white;
+                                        padding: 10px 20px;
+                                        border-radius: 5px;
+                                        text-decoration: none;
+                                        font-weight: bold;
+                                        margin-top: 10px;
+                                    ">
+                                        <i class="fab fa-whatsapp"></i> Click to Open WhatsApp
+                                    </a>
+                                `;
+                            } else {
+                                // Clear manual link if auto-open worked (optional, but good for UI)
+                                document.getElementById('successDetails').innerHTML = '';
+                            }
+                        }
                     }
                     
-                    // Close modal after 4 seconds
+                    // Close modal after 5 seconds (gave slightly more time)
                     setTimeout(() => {
-                        modal.style.display = 'none';
-                        success.style.display = 'none';
-                        // Reset status indicators
-                        document.getElementById('emailStatus').innerHTML = '<i class="fas fa-clock"></i>';
-                        document.getElementById('whatsappStatus').innerHTML = '<i class="fas fa-clock"></i>';
-                    }, 4000);
+                        // Only auto-close if we didn't show a manual link needed for interaction
+                        if (!document.getElementById('successDetails').innerHTML) {
+                           modal.style.display = 'none';
+                           success.style.display = 'none';
+                           // Reset status indicators
+                           document.getElementById('emailStatus').innerHTML = '<i class="fas fa-clock"></i>';
+                           document.getElementById('whatsappStatus').innerHTML = '<i class="fas fa-clock"></i>';
+                        }
+                    }, 5000);
                 } else {
                     throw new Error(data.message || 'Failed to send credentials');
                 }

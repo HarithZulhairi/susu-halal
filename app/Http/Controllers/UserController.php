@@ -699,15 +699,17 @@ class UserController extends Controller
             $errors = [];
 
             // Send WhatsApp if contact provided
+            $whatsappLink = null;
             if ($request->donor_contact && $request->donor_contact !== 'N/A') {
                 \Log::info('Attempting WhatsApp send to: ' . $request->donor_contact);
                 try {
-                    $whatsappSent = $this->sendWhatsAppCredentials(
+                    $whatsappLink = $this->sendWhatsAppCredentials(
                         $request->donor_contact,
                         $username,
                         $temporaryPassword,
                         $request->donor_name
                     );
+                    $whatsappSent = !!$whatsappLink;
                     \Log::info('WhatsApp send result: ' . ($whatsappSent ? 'success' : 'failed'));
                 } catch (\Exception $e) {
                     $errors[] = 'WhatsApp: ' . $e->getMessage();
@@ -749,6 +751,7 @@ class UserController extends Controller
                 'success' => true,
                 'message' => $message,
                 'whatsapp_sent' => $whatsappSent,
+                'whatsapp_link' => $whatsappLink, // Return the link
                 'email_sent' => $emailSent
             ]);
 
@@ -801,16 +804,16 @@ class UserController extends Controller
 
             Log::info("WhatsApp approval credentials link for {$fullname}: {$whatsappLink}");
 
-            // Auto-open in development
+            // Log link for development
             if (app()->environment('local')) {
-                $this->openWhatsAppLink($whatsappLink);
+                 Log::info("Development mode: WhatsApp link generated: {$whatsappLink}");
             }
 
-            return true;
+            return $whatsappLink; // Return the link string
 
         } catch (\Exception $e) {
             Log::error('WhatsApp approval send failed: ' . $e->getMessage());
-            return false;
+            return null;
         }
     }
 
@@ -856,25 +859,7 @@ class UserController extends Controller
         return ltrim($phone, '+');
     }
 
-    /**
-     * Auto-open WhatsApp link in browser
-     */
-    private function openWhatsAppLink($link)
-    {
-        try {
-            if (PHP_OS_FAMILY === 'Windows') {
-                shell_exec("start \"\" \"{$link}\"");
-            } elseif (PHP_OS_FAMILY === 'Darwin') { // Mac
-                shell_exec("open \"{$link}\"");
-            } else { // Linux
-                shell_exec("xdg-open \"{$link}\"");
-            }
-            
-            Log::info("Auto-opened WhatsApp link for testing");
-        } catch (\Exception $e) {
-            Log::warning('Could not auto-open WhatsApp: ' . $e->getMessage());
-        }
-    }
+
 
     /**
      * Generate temporary password for manual sending
