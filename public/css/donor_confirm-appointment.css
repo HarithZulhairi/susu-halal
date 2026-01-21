@@ -1,5 +1,13 @@
 @import url("base_layout.css");
 
+/* Optional: Style for the reason display */
+#reason_block .detail-value {
+    font-style: italic;
+    color: #475569;
+    background: #fef3c7; /* Light yellow background for emphasis */
+    border-color: #fbbf24;
+}
+
 /* Confirmation Container */
 .confirmation-container {
   background: white;

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -222,6 +222,7 @@
     </div>
 
     <form id="personalInfoForm" class="space-y-5">
+        <!-- Existing NRIC field -->
         <div class="space-y-2">
             <label for="nric" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                 <i class="fas fa-id-card text-blue-500 text-sm"></i>
@@ -241,6 +242,7 @@
             <p class="text-xs text-gray-500 ml-1">Your national identification or passport number</p>
         </div>
 
+        <!-- Existing Full Name field -->
         <div class="space-y-2">
             <label for="fullname" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                 <i class="fas fa-user text-green-500 text-sm"></i>
@@ -260,11 +262,17 @@
             <p class="text-xs text-gray-500 ml-1">Your official full name</p>
         </div>
 
+        <!-- Date of Birth with Age Display -->
         <div class="space-y-2">
-            <label for="dob" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
-                <i class="fas fa-calendar-alt text-purple-500 text-sm"></i>
-                <span>Date of Birth <span class="text-red-500">*</span></span>
-            </label>
+            <div class="flex justify-between items-center">
+                <label for="dob" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                    <i class="fas fa-calendar-alt text-purple-500 text-sm"></i>
+                    <span>Date of Birth <span class="text-red-500">*</span></span>
+                </label>
+                <div id="ageDisplay" class="text-sm font-medium text-gray-600 hidden">
+                    Age: <span id="ageValue" class="text-blue-600">0</span> years
+                </div>
+            </div>
             <div class="relative">
                 <input 
                     id="dob" 
@@ -272,12 +280,162 @@
                     type="date" 
                     required 
                     class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
+                    onchange="calculateAge()"
                 >
                 <i class="fas fa-calendar-alt absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
             <p class="text-xs text-gray-500 ml-1">Your date of birth</p>
         </div>
 
+        <!-- Marital Status -->
+        <div class="space-y-2">
+            <label class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                <i class="fas fa-heart text-pink-500 text-sm"></i>
+                <span>Marital Status <span class="text-red-500">*</span></span>
+            </label>
+            <div class="flex space-x-6">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="marital_status" value="married" class="form-radio text-pink-600 h-4 w-4" checked onclick="toggleHusbandConsent(true)">
+                    <span class="ml-2 text-gray-700">Married</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="marital_status" value="single" class="form-radio text-pink-600 h-4 w-4" onclick="toggleHusbandConsent(false)">
+                    <span class="ml-2 text-gray-700">Single</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Husband Consent (shown only when married) -->
+        <div id="husbandConsentSection" class="space-y-2">
+            <label class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                <i class="fas fa-handshake text-blue-500 text-sm"></i>
+                <span>Husband Consent <span class="text-red-500">*</span></span>
+            </label>
+            <div class="flex space-x-6">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="husband_consent" value="yes" class="form-radio text-blue-600 h-4 w-4" checked>
+                    <span class="ml-2 text-gray-700">Yes</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="husband_consent" value="no" class="form-radio text-blue-600 h-4 w-4">
+                    <span class="ml-2 text-gray-700">No</span>
+                </label>
+            </div>
+            <p class="text-xs text-gray-500 ml-1">Consent from husband for milk donation</p>
+        </div>
+
+        <!-- Voluntary or Not -->
+        <div class="space-y-2">
+            <label class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                <i class="fas fa-hand-holding-heart text-green-500 text-sm"></i>
+                <span>Donation Type <span class="text-red-500">*</span></span>
+            </label>
+            <div class="flex space-x-6">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="donation_type" value="voluntary" class="form-radio text-green-600 h-4 w-4" checked>
+                    <span class="ml-2 text-gray-700">Voluntary</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="donation_type" value="non-voluntary" class="form-radio text-green-600 h-4 w-4">
+                    <span class="ml-2 text-gray-700">Non-voluntary</span>
+                </label>
+            </div>
+            <p class="text-xs text-gray-500 ml-1">Type of milk donation</p>
+        </div>
+
+        <!-- Religion -->
+        <div class="space-y-2">
+            <label for="religion" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                <i class="fas fa-pray text-purple-500 text-sm"></i>
+                <span>Religion <span class="text-red-500">*</span></span>
+            </label>
+            <div class="relative">
+                <select 
+                    id="religion" 
+                    name="religion" 
+                    required 
+                    class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm appearance-none"
+                >
+                    <option value="" disabled selected>Select your religion</option>
+                    <option value="islam">Islam</option>
+                    <option value="christianity">Christianity</option>
+                    <option value="buddhism">Buddhism</option>
+                    <option value="hinduism">Hinduism</option>
+                    <option value="other">Other</option>
+                </select>
+                <i class="fas fa-pray absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Lebihan Susu (Excess Milk) - UPDATED VERSION -->
+        <div class="space-y-2">
+            <label class="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                <i class="fas fa-wine-bottle text-yellow-500 text-sm"></i>
+                <span>Do you have excess breast milk? <span class="text-red-500">*</span></span>
+            </label>
+            <div class="flex space-x-6 mb-3">
+                <label class="inline-flex items-center">
+                    <input type="radio" name="has_excess_milk" value="yes" class="form-radio text-yellow-600 h-4 w-4" checked onclick="toggleMilkQuantity(true)">
+                    <span class="ml-2 text-gray-700">Yes</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" name="has_excess_milk" value="no" class="form-radio text-yellow-600 h-4 w-4" onclick="toggleMilkQuantity(false)">
+                    <span class="ml-2 text-gray-700">No</span>
+                </label>
+            </div>
+            
+            <!-- Milk Quantity (shown only when excess milk is "Yes") -->
+            <div id="milkQuantitySection" class="space-y-3 p-4 border border-yellow-200 rounded-xl bg-yellow-50">
+                <label class="block text-sm font-medium text-gray-700">
+                    <i class="fas fa-weight text-yellow-600 mr-2"></i>
+                    Milk Quantity (per day)
+                </label>
+                
+                <!-- Unit Selection -->
+                <div class="space-y-2">
+                    <label class="text-xs font-medium text-gray-700">Select Unit <span class="text-red-500">*</span></label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="milk_unit" value="ml" class="form-radio text-yellow-600 h-4 w-4" checked onclick="updateQuantityPlaceholder('ml')">
+                            <span class="ml-2 text-gray-700">Milliliters (ml)</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="milk_unit" value="l" class="form-radio text-yellow-600 h-4 w-4" onclick="updateQuantityPlaceholder('l')">
+                            <span class="ml-2 text-gray-700">Liters (L)</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="milk_unit" value="oz" class="form-radio text-yellow-600 h-4 w-4" onclick="updateQuantityPlaceholder('oz')">
+                            <span class="ml-2 text-gray-700">Ounces (oz)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Quantity Input (single field) -->
+                <div class="space-y-2">
+                    <label for="milk_quantity" class="text-xs font-medium text-gray-700">
+                        Amount <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            id="milk_quantity" 
+                            name="milk_quantity" 
+                            type="number" 
+                            min="0"
+                            step="0.01"
+                            required
+                            class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 transition"
+                            placeholder="e.g., 500"
+                        >
+                        <span id="unitIndicator" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">ml</span>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-gray-500">Enter the approximate amount of excess milk you produce daily</p>
+            </div>
+        </div>
+
+        <!-- Existing Email field -->
         <div class="space-y-2">
             <label for="email" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                 <i class="fas fa-envelope text-yellow-500 text-sm"></i>
@@ -295,26 +453,8 @@
             </div>
             <p class="text-xs text-gray-500 ml-1">We will send your login credentials here (if provided).</p>
         </div>
-        {{--  
-        <div class="space-y-2">
-            <label for="contact" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
-                <i class="fas fa-phone text-orange-500 text-sm"></i>
-                <span>Contact <span class="text-red-500">*</span></span>
-            </label>
-            <div class="relative">
-                <input 
-                    id="contact" 
-                    name="contact" 
-                    type="tel" 
-                    required 
-                    class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm"
-                    placeholder="Enter your Phone Number"
-                >
-                <i class="fas fa-phone absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-            <p class="text-xs text-gray-500 ml-1">Your primary contact phone number</p>
-        </div>--}}
 
+        <!-- Existing Address field -->
         <div class="space-y-2">
             <label for="address" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                 <i class="fas fa-home text-pink-500 text-sm"></i>
@@ -334,6 +474,7 @@
             <p class="text-xs text-gray-500 ml-1">Enter your complete residential address</p>
         </div>
 
+        <!-- Existing Parity field -->
         <div class="space-y-2">
             <label for="parity" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
                 <i class="fas fa-baby text-indigo-500 text-sm"></i>
@@ -355,10 +496,12 @@
             <p class="text-xs text-gray-500 ml-1">Number of times you have given birth (Parity 0 for no live births).</p>
         </div>
 
+        <!-- Delivery Details Container (unchanged) -->
         <div id="delivery-info-container" class="space-y-4 p-4 border border-gray-200 rounded-xl hidden bg-blue-50">
             <p class="font-semibold text-gray-700">Delivery Details:</p>
-            </div>
+        </div>
 
+        <!-- Navigation Buttons -->
         <div class="flex gap-4 pt-4">
             <button 
                 type="button"
@@ -395,205 +538,286 @@
     </div>
 
     <div id="healthLifestylePage" class="w-full max-w-6xl mx-auto hidden">
-        <div class="w-full max-w-3xl mx-auto">
-            <div class="mb-8">
-                <div class="flex items-center justify-between max-w-3xl mx-auto">
-                    <div class="step-item completed flex flex-col items-center flex-1">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#57cc99] to-[#2a9d8f] flex items-center justify-center text-white shadow-lg mb-2">
-                            <i class="fas fa-check text-sm"></i>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">Email</span>
+    <div class="w-full max-w-3xl mx-auto">
+        <div class="mb-8">
+            <div class="flex items-center justify-between max-w-3xl mx-auto">
+                <div class="step-item completed flex flex-col items-center flex-1">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#57cc99] to-[#2a9d8f] flex items-center justify-center text-white shadow-lg mb-2">
+                        <i class="fas fa-check text-sm"></i>
                     </div>
-                    <div class="step-item completed flex flex-col items-center flex-1">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#57cc99] to-[#2a9d8f] flex items-center justify-center text-white shadow-lg mb-2">
-                            <i class="fas fa-check text-sm"></i>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">Profile</span>
-                    </div>
-                    <div class="step-item active flex flex-col items-center flex-1">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a5f7a] to-[#57cc99] flex items-center justify-center text-white shadow-lg mb-2">
-                            <span class="text-sm font-semibold">3</span>
-                        </div>
-                        <span class="text-xs font-medium text-gray-700">Health</span>
-                    </div>
-                    <div class="step-item flex flex-col items-center flex-1">
-                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mb-2">
-                            <span class="text-sm font-semibold">4</span>
-                        </div>
-                        <span class="text-xs font-medium text-gray-400">Time Slot</span>
-                    </div>
-                     <div class="step-item flex flex-col items-center flex-1">
-                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mb-2">
-                            <span class="text-sm font-semibold">5</span>
-                        </div>
-                        <span class="text-xs font-medium text-gray-400">Complete</span>
-                    </div>
+                    <span class="text-xs font-medium text-gray-700">Email</span>
                 </div>
-            </div>
-
-            <div class="glass-effect rounded-3xl shadow-2xl p-8 space-y-6">
-                <div class="text-center space-y-2 pb-4 border-b border-gray-200">
-                    <h2 class="text-3xl font-bold gradient-text">Health & Lifestyle</h2>
-                    <p class="text-gray-600">Fill out your health and lifestyle information</p>
+                <div class="step-item completed flex flex-col items-center flex-1">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#57cc99] to-[#2a9d8f] flex items-center justify-center text-white shadow-lg mb-2">
+                        <i class="fas fa-check text-sm"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-700">Profile</span>
                 </div>
-
-                <form id="healthLifestyleForm" class="space-y-5">
-                    
-                    <div class="space-y-2">
-                        <label for="infectiousRisk" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-shield-virus text-red-500 text-sm"></i>
-                            <span>Do you have any **Infectious Disease Risk**? <span class="text-red-500">*</span></span>
-                        </label>
-                        <div class="flex space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="infectiousRiskOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('infectiousRiskDetail', false)" required>
-                                <span class="ml-2 text-gray-700">No</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="infectiousRiskOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('infectiousRiskDetail', true)" required>
-                                <span class="ml-2 text-gray-700">Yes</span>
-                            </label>
-                        </div>
-                        <div id="infectiousRiskDetail" class="relative mt-2 hidden">
-                            <textarea 
-                                name="infectiousRiskDetailText" 
-                                rows="2"
-                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
-                                placeholder="Please specify details about the infectious disease risk."
-                            ></textarea>
-                            <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
-                        </div>
+                <div class="step-item active flex flex-col items-center flex-1">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1a5f7a] to-[#57cc99] flex items-center justify-center text-white shadow-lg mb-2">
+                        <span class="text-sm font-semibold">3</span>
                     </div>
-
-                    <div class="space-y-2">
-                        <label for="medication" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-pills text-blue-500 text-sm"></i>
-                            <span>Are you currently taking any **Medication**? <span class="text-red-500">*</span></span>
-                        </label>
-                        <div class="flex space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="medicationOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('medicationDetail', false)" required>
-                                <span class="ml-2 text-gray-700">No</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="medicationOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('medicationDetail', true)" required>
-                                <span class="ml-2 text-gray-700">Yes</span>
-                            </label>
-                        </div>
-                        <div id="medicationDetail" class="relative mt-2 hidden">
-                            <textarea 
-                                name="medicationDetailText" 
-                                rows="2"
-                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
-                                placeholder="Please list the medications you are taking."
-                            ></textarea>
-                            <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="recentIllness" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-thermometer-half text-orange-500 text-sm"></i>
-                            <span>Have you had any **Recent Illness**? (last 30 days) <span class="text-red-500">*</span></span>
-                        </label>
-                        <div class="flex space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="recentIllnessOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('recentIllnessDetail', false)" required>
-                                <span class="ml-2 text-gray-700">No</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="recentIllnessOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('recentIllnessDetail', true)" required>
-                                <span class="ml-2 text-gray-700">Yes</span>
-                            </label>
-                        </div>
-                        <div id="recentIllnessDetail" class="relative mt-2 hidden">
-                            <textarea 
-                                name="recentIllnessDetailText" 
-                                rows="2"
-                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
-                                placeholder="Please specify details about your recent illness."
-                            ></textarea>
-                            <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="tobaccoAlcohol" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-smoking-ban text-gray-600 text-sm"></i>
-                            <span>Do you use **Tobacco or Alcohol**? <span class="text-red-500">*</span></span>
-                        </label>
-                        <div class="flex space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="tobaccoAlcoholOption" value="no" class="form-radio text-green-600 h-4 w-4" checked required>
-                                <span class="ml-2 text-gray-700">No</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="tobaccoAlcoholOption" value="yes" class="form-radio text-red-600 h-4 w-4" required>
-                                <span class="ml-2 text-gray-700">Yes</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label for="dietaryAlerts" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
-                            <i class="fas fa-utensils text-green-500 text-sm"></i>
-                            <span>Do you have any **Dietary Alerts or Restrictions**? <span class="text-red-500">*</span></span>
-                        </label>
-                        <div class="flex space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="dietaryAlertsOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('dietaryAlertsDetail', false)" required>
-                                <span class="ml-2 text-gray-700">No</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="dietaryAlertsOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('dietaryAlertsDetail', true)" required>
-                                <span class="ml-2 text-gray-700">Yes</span>
-                            </label>
-                        </div>
-                        <div id="dietaryAlertsDetail" class="relative mt-2 hidden">
-                            <textarea 
-                                name="dietaryAlertsDetailText" 
-                                rows="2"
-                                class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
-                                placeholder="Please list any dietary alerts or restrictions."
-                            ></textarea>
-                            <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-4 pt-4">
-                        <button 
-                            type="button"
-                            onclick="goBackToPersonalInfo()"
-                            class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-2xl font-semibold hover:bg-gray-200 transition-all duration-200 focus:ring-4 focus:ring-gray-200 focus:outline-none"
-                        >
-                            <span class="flex items-center justify-center space-x-2">
-                                <i class="fas fa-arrow-left"></i>
-                                <span>Back</span>
-                            </span>
-                        </button>
-                        <button 
-                            type="submit" 
-                            class="flex-1 bg-gradient-to-r from-[#1a5f7a] to-[#57cc99] text-white py-3 px-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:ring-4 focus:ring-blue-200 focus:outline-none"
-                        >
-                            <span class="flex items-center justify-center space-x-2">
-                                <span>Next</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="text-center mt-6 space-y-2">
-                <div class="flex justify-center space-x-6 text-sm text-gray-500">
-                    <a href="#" class="hover:text-gray-700 transition-colors">Privacy Policy</a>
-                    <a href="#" class="hover:text-gray-700 transition-colors">Terms of Service</a>
-                    <a href="#" class="hover:text-gray-700 transition-colors">Support</a>
+                    <span class="text-xs font-medium text-gray-700">Health</span>
                 </div>
-                <p class="text-xs text-gray-400">&copy; 2024 Rahma Milk Bank. All rights reserved.</p>
+                <div class="step-item flex flex-col items-center flex-1">
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mb-2">
+                        <span class="text-sm font-semibold">4</span>
+                    </div>
+                    <span class="text-xs font-medium text-gray-400">Time Slot</span>
+                </div>
+                 <div class="step-item flex flex-col items-center flex-1">
+                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mb-2">
+                        <span class="text-sm font-semibold">5</span>
+                    </div>
+                    <span class="text-xs font-medium text-gray-400">Complete</span>
+                </div>
             </div>
         </div>
+
+        <div class="glass-effect rounded-3xl shadow-2xl p-8 space-y-6">
+            <div class="text-center space-y-2 pb-4 border-b border-gray-200">
+                <h2 class="text-3xl font-bold gradient-text">Health & Lifestyle</h2>
+                <p class="text-gray-600">Fill out your health and lifestyle information</p>
+            </div>
+
+            <form id="healthLifestyleForm" class="space-y-5">
+                
+                <div class="space-y-2">
+                    <label for="infectiousRisk" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-shield-virus text-red-500 text-sm"></i>
+                        <span>Do you have any **Infectious Disease Risk**? <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="infectiousRiskOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('infectiousRiskDetail', false)" required>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="infectiousRiskOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('infectiousRiskDetail', true)" required>
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                    </div>
+                    <div id="infectiousRiskDetail" class="relative mt-2 hidden">
+                        <textarea 
+                            name="infectiousRiskDetailText" 
+                            rows="2"
+                            class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
+                            placeholder="Please specify details about the infectious disease risk."
+                        ></textarea>
+                        <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="medication" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-pills text-blue-500 text-sm"></i>
+                        <span>Are you currently taking any **Medication**? <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="medicationOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('medicationDetail', false)" required>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="medicationOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('medicationDetail', true)" required>
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                    </div>
+                    <div id="medicationDetail" class="relative mt-2 hidden">
+                        <textarea 
+                            name="medicationDetailText" 
+                            rows="2"
+                            class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
+                            placeholder="Please list the medications you are taking."
+                        ></textarea>
+                        <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="recentIllness" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-thermometer-half text-orange-500 text-sm"></i>
+                        <span>Have you had any **Recent Illness**? (last 30 days) <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="recentIllnessOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('recentIllnessDetail', false)" required>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="recentIllnessOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('recentIllnessDetail', true)" required>
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                    </div>
+                    <div id="recentIllnessDetail" class="relative mt-2 hidden">
+                        <textarea 
+                            name="recentIllnessDetailText" 
+                            rows="2"
+                            class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
+                            placeholder="Please specify details about your recent illness."
+                        ></textarea>
+                        <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- NEW: Smoking Status -->
+                <div class="space-y-2">
+                    <label for="smokingStatus" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-smoking text-gray-600 text-sm"></i>
+                        <span>What is your **Smoking Status**? <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="flex flex-col space-y-2">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="smokingStatus" value="non_smoker" class="form-radio text-green-600 h-4 w-4" checked required>
+                            <span class="ml-2 text-gray-700">Non-smoker (Never smoked)</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="smokingStatus" value="passive_smoker" class="form-radio text-orange-600 h-4 w-4" required>
+                            <span class="ml-2 text-gray-700">Passive smoker (Exposed to secondhand smoke)</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="smokingStatus" value="former_smoker" class="form-radio text-yellow-600 h-4 w-4" required>
+                            <span class="ml-2 text-gray-700">Former smoker (Quit smoking)</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="smokingStatus" value="current_smoker" class="form-radio text-red-600 h-4 w-4" required>
+                            <span class="ml-2 text-gray-700">Current smoker</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-1">This helps us assess potential health risks</p>
+                </div>
+
+                <!-- NEW: Health Status (Physical & Mental) -->
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-heartbeat text-green-500 text-sm"></i>
+                        <span>Are you **Healthy Physically and Mentally**? <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Physical Health -->
+                        <div class="space-y-2 p-3 border border-green-100 rounded-xl bg-green-50">
+                            <label class="block text-xs font-medium text-gray-700">
+                                <i class="fas fa-running text-green-600 mr-1"></i>
+                                Physical Health
+                            </label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="physicalHealth" value="good" class="form-radio text-green-600 h-4 w-4" checked required>
+                                    <span class="ml-2 text-gray-700">Good</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="physicalHealth" value="fair" class="form-radio text-yellow-600 h-4 w-4" required>
+                                    <span class="ml-2 text-gray-700">Fair</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="physicalHealth" value="poor" class="form-radio text-red-600 h-4 w-4" required>
+                                    <span class="ml-2 text-gray-700">Poor</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Mental Health -->
+                        <div class="space-y-2 p-3 border border-blue-100 rounded-xl bg-blue-50">
+                            <label class="block text-xs font-medium text-gray-700">
+                                <i class="fas fa-brain text-blue-600 mr-1"></i>
+                                Mental Health
+                            </label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="mentalHealth" value="good" class="form-radio text-green-600 h-4 w-4" checked required>
+                                    <span class="ml-2 text-gray-700">Good</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="mentalHealth" value="fair" class="form-radio text-yellow-600 h-4 w-4" required>
+                                    <span class="ml-2 text-gray-700">Fair</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="mentalHealth" value="poor" class="form-radio text-red-600 h-4 w-4" required>
+                                    <span class="ml-2 text-gray-700">Poor</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-1">Please rate your overall physical and mental health status</p>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="tobaccoAlcohol" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-smoking-ban text-gray-600 text-sm"></i>
+                        <span>Do you use **Tobacco or Alcohol**? <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="tobaccoAlcoholOption" value="no" class="form-radio text-green-600 h-4 w-4" checked required>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="tobaccoAlcoholOption" value="yes" class="form-radio text-red-600 h-4 w-4" required>
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="dietaryAlerts" class="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-utensils text-green-500 text-sm"></i>
+                        <span>Do you have any **Dietary Alerts or Restrictions**? <span class="text-red-500">*</span></span>
+                    </label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="dietaryAlertsOption" value="no" class="form-radio text-green-600 h-4 w-4" checked onclick="toggleDetail('dietaryAlertsDetail', false)" required>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="dietaryAlertsOption" value="yes" class="form-radio text-red-600 h-4 w-4" onclick="toggleDetail('dietaryAlertsDetail', true)" required>
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                    </div>
+                    <div id="dietaryAlertsDetail" class="relative mt-2 hidden">
+                        <textarea 
+                            name="dietaryAlertsDetailText" 
+                            rows="2"
+                            class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/80 backdrop-blur-sm resize-none"
+                            placeholder="Please list any dietary alerts or restrictions."
+                        ></textarea>
+                        <i class="fas fa-comment-dots absolute left-4 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button 
+                        type="button"
+                        onclick="goBackToPersonalInfo()"
+                        class="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-2xl font-semibold hover:bg-gray-200 transition-all duration-200 focus:ring-4 focus:ring-gray-200 focus:outline-none"
+                    >
+                        <span class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back</span>
+                        </span>
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="flex-1 bg-gradient-to-r from-[#1a5f7a] to-[#57cc99] text-white py-3 px-4 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 focus:ring-4 focus:ring-blue-200 focus:outline-none"
+                    >
+                        <span class="flex items-center justify-center space-x-2">
+                            <span>Next</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="text-center mt-6 space-y-2">
+            <div class="flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="#" class="hover:text-gray-700 transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-gray-700 transition-colors">Terms of Service</a>
+                <a href="#" class="hover:text-gray-700 transition-colors">Support</a>
+            </div>
+            <p class="text-xs text-gray-400">&copy; 2024 Rahma Milk Bank. All rights reserved.</p>
+        </div>
     </div>
+</div>
 
     <div id="donorAvailabilityPage" class="w-full max-w-6xl mx-auto hidden">
     <div class="w-full max-w-3xl mx-auto">
@@ -826,6 +1050,9 @@
     <input type="hidden" name="tobaccoAlcoholOption" id="final_tobaccoAlcoholOption">
     <input type="hidden" name="dietaryAlertsOption" id="final_dietaryAlertsOption">
     <input type="hidden" name="dietaryAlertsDetailText" id="final_dietaryAlertsDetailText">
+    <input type="hidden" name="smokingStatus" id="final_smokingStatus">
+    <input type="hidden" name="physicalHealth" id="final_physicalHealth">
+    <input type="hidden" name="mentalHealth" id="final_mentalHealth">
     
     <!-- Step 4 Data -->
     <input type="hidden" name="availableDays" id="final_availableDays">
@@ -834,6 +1061,111 @@
 
 
 <script>
+
+    // Calculate age from date of birth
+function calculateAge() {
+    const dobInput = document.getElementById('dob');
+    const ageDisplay = document.getElementById('ageDisplay');
+    const ageValue = document.getElementById('ageValue');
+    
+    if (!dobInput.value) {
+        ageDisplay.classList.add('hidden');
+        return;
+    }
+    
+    const dob = new Date(dobInput.value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    
+    ageValue.textContent = age;
+    ageDisplay.classList.remove('hidden');
+}
+
+// Toggle husband consent section based on marital status
+function toggleHusbandConsent(isMarried) {
+    const consentSection = document.getElementById('husbandConsentSection');
+    const consentRadios = document.querySelectorAll('input[name="husband_consent"]');
+    
+    if (isMarried) {
+        consentSection.classList.remove('hidden');
+        consentRadios.forEach(radio => radio.required = true);
+    } else {
+        consentSection.classList.add('hidden');
+        consentRadios.forEach(radio => {
+            radio.required = false;
+            radio.checked = false;
+        });
+    }
+}
+
+// Update quantity placeholder based on selected unit
+function updateQuantityPlaceholder(unit) {
+    const quantityInput = document.getElementById('milk_quantity');
+    const unitIndicator = document.getElementById('unitIndicator');
+    
+    if (unit === 'ml') {
+        quantityInput.placeholder = "e.g., 500";
+        unitIndicator.textContent = "ml";
+        quantityInput.step = "1"; // Whole numbers for ml
+    } else if (unit === 'l') {
+        quantityInput.placeholder = "e.g., 0.5";
+        unitIndicator.textContent = "L";
+        quantityInput.step = "0.01"; // Decimals for liters
+    } else if (unit === 'oz') {
+        quantityInput.placeholder = "e.g., 16.9";
+        unitIndicator.textContent = "oz";
+        quantityInput.step = "0.1"; // Decimals for ounces
+    }
+}
+
+    // Toggle milk quantity section based on excess milk selection
+    function toggleMilkQuantity(hasExcessMilk) {
+        const quantitySection = document.getElementById('milkQuantitySection');
+        const quantityInput = document.getElementById('milk_quantity');
+        const unitRadios = document.querySelectorAll('input[name="milk_unit"]');
+        
+        if (hasExcessMilk) {
+            quantitySection.classList.remove('hidden');
+            quantityInput.required = true;
+            unitRadios.forEach(radio => radio.required = true);
+        } else {
+            quantitySection.classList.add('hidden');
+            quantityInput.required = false;
+            quantityInput.value = '';
+            unitRadios.forEach(radio => {
+                radio.required = false;
+                radio.checked = false;
+            });
+            // Reset to default
+            document.querySelector('input[name="milk_unit"][value="ml"]').checked = true;
+            updateQuantityPlaceholder('ml');
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default values for new fields
+        toggleHusbandConsent(true); // Default to married
+        toggleMilkQuantity(true); // Default to having excess milk
+        
+        // Calculate age if DOB is already filled
+        const dobInput = document.getElementById('dob');
+        if (dobInput && dobInput.value) {
+            calculateAge();
+        }
+        
+        // Add onchange event to DOB field if not already there
+        if (dobInput && !dobInput.hasAttribute('onchange')) {
+            dobInput.addEventListener('change', calculateAge);
+        }
+    });
+
+
     // Function to toggle textareas for Health & Lifestyle Page (Step 3)
     function toggleDetail(detailId, isVisible) {
         const detailElement = document.getElementById(detailId);
@@ -1043,8 +1375,11 @@ function submitAllData() {
         const tobaccoAlcoholOption = document.querySelector('input[name="tobaccoAlcoholOption"]:checked')?.value;
         const dietaryAlertsOption = document.querySelector('input[name="dietaryAlertsOption"]:checked')?.value;
         const dietaryAlertsDetailText = document.querySelector('textarea[name="dietaryAlertsDetailText"]')?.value || '';
+        const smokingStatus = document.querySelector('input[name="smokingStatus"]:checked')?.value;
+        const physicalHealth = document.querySelector('input[name="physicalHealth"]:checked')?.value;
+        const mentalHealth = document.querySelector('input[name="mentalHealth"]:checked')?.value;
         
-        if (!infectiousRiskOption || !medicationOption || !recentIllnessOption || !tobaccoAlcoholOption || !dietaryAlertsOption) {
+        if (!smokingStatus || !physicalHealth || !mentalHealth || !infectiousRiskOption || !medicationOption || !recentIllnessOption || !tobaccoAlcoholOption || !dietaryAlertsOption) {
             throw new Error('Please fill all health and lifestyle information');
         }
         
@@ -1099,6 +1434,8 @@ function submitAllData() {
         formData.append('dietaryAlertsDetailText', dietaryAlertsDetailText);
         formData.append('availableDays', JSON.stringify(availableDays));
         formData.append('timeSlots', JSON.stringify(timeSlots));
+        formData.append('smokingStatus', smokingStatus);
+i
 
         console.log('Form data collected, making AJAX request...');
         console.log('Terms accepted:', termsChecked);

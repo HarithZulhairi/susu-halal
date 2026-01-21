@@ -1,5 +1,27 @@
 @import url("base_layout.css");
 
+/* CORRECTED CSS for the Reason Group */
+#reason_group { 
+    display: flex;        /* Enables flexbox layout */
+    flex-direction: column; /* Forces the Label to be on TOP and Textarea BELOW */
+    margin-top: 16px;     /* Adds breathing room between the 'ml' input and this section */
+}
+
+#reason_group label {
+    margin-bottom: 8px;   /* Adds a small gap between the Label and the Text Box */
+    color: #334155;
+    font-weight: 500;
+}
+
+#reason_group textarea {
+    min-height: 80px;
+    width: 100%;          /* Ensures the box fills the width */
+    resize: vertical;     /* Allows user to resize vertically only */
+}
+
+#reason_group small {
+    margin-top: 6px;      /* Spacing for the note below the box */
+}
 
 /* Form Container */
 .form-container {

@@ -44,6 +44,12 @@
                         <input type="hidden" name="milk_amount" id="milk_amount">
                     </div>
 
+                    <div class="detail-item" id="reason_block" style="display:none;">
+                        <label>Reason for less than 1 liter</label>
+                        <div class="detail-value", id="confirm_reason"></div>
+                        <input type="hidden" name="less_amount_reason" id="less_amount_reason">
+                    </div>
+
                     {{-- 2. Delivery Method (Formerly Donation Method) --}}
                     <div class="detail-item">
                         <label>Delivery Method</label>
@@ -116,9 +122,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log(data);
 
-    // Example: Fill the page with the stored values
-    document.getElementById('confirm_amount').innerText =
-    data.milk_amount_select === "other" ? (data.milk_amount_custom + " ml") : (data.milk_amount_select + " ml");
+    // Amount display
+    const amount = data.milk_amount_select === "other" 
+        ? data.milk_amount_custom 
+        : data.milk_amount_select;
+    
+    document.getElementById('confirm_amount').innerText = amount + " ml";
+    
+    // NEW: Show reason if amount is less than 1000ml
+    const reasonBlock = document.getElementById('reason_block');
+    const reasonValue = document.getElementById('confirm_reason');
+    
+    if (amount < 1000 && data.less_amount_reason) {
+        reasonBlock.style.display = 'block';
+        reasonValue.innerText = data.less_amount_reason;
+    } else {
+        reasonBlock.style.display = 'none';
+    }
 
 // Convert datetime into Malaysian readable format
     const dateObj = new Date(data.appointment_datetime);
@@ -195,6 +215,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('collection_address').value = data.collection_address || null;
 
     document.getElementById('remarks').value = data.remarks;
+
+    document.getElementById('less_amount_reason').value = data.less_amount_reason || '';
 
 
 });

@@ -74,22 +74,23 @@ body {
 /* ===== Stage Tabs Navigation ===== */
 .stage-tabs {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 30px;
+  flex-wrap: wrap; /* Allow wrapping on small screens */
 }
 
 .stage-tab {
-  flex: 1;
-  padding: 14px 24px;
+  flex: 1 1 150px; /* Flex-grow, Flex-shrink, Min-width */
+  padding: 12px 15px;
   background: #ffffff;
   border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   color: #64748b;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.2s ease;
 }
 
 .stage-tab:hover {
@@ -103,7 +104,7 @@ body {
   background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
   color: #ffffff;
   border-color: #0ea5e9;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
 }
 
 /* ===== Stage Content Visibility ===== */
@@ -114,6 +115,13 @@ body {
 
 .stage-content.active {
   display: block;
+}
+
+/* Specific styling for the Bottle Table Volume Cell */
+.volume-cell {
+    background-color: #f0f9ff;
+    font-weight: bold;
+    color: #0369a1;
 }
 
 @keyframes fadeInUp {

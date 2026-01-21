@@ -1,6 +1,6 @@
 @extends('layouts.donor')
 
-@section('title', 'Milk Donation Appointment')
+@section('title', 'Milk Donation Appointment') 
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/donor_appointment-form.css') }}">
@@ -40,13 +40,27 @@
                     <div class="form-group" id="custom_amount_group" style="display: none;">
                         <label for="milk_amount_custom">Custom Amount (ml)</label>
                         <div class="input-with-unit">
-                            <input type="number" id="milk_amount_custom" max="1000" name="milk_amount_custom" class="form-control" min="1" placeholder="Enter amount">
+                            <input type="number" id="milk_amount_custom" max="1000" name="milk_amount_custom" class="form-control" min="1" placeholder="Enter amount" oninput="toggleReasonField()">
                             <span class="unit-label">ml</span>
                         </div>
                     </div>
 
-                    {{-- Removed: Milk Storage Condition --}}
-                    {{-- Removed: Container Type --}}
+                    {{-- Add this new field for reason when less than 1 liter --}}
+                    <div class="form-group" id="reason_group" style="display: none;">
+                    <label for="less_amount_reason">Reason for donating less than 1 liter</label>
+                    
+                    <textarea 
+                        id="less_amount_reason" 
+                        name="less_amount_reason" 
+                        class="form-control" 
+                        rows="3" 
+                        placeholder="Please provide a brief reason why you're donating less than 1 liter..."
+                    ></textarea>
+                    
+                    <small class="form-text text-muted">
+                        Note: This helps us better understand donor patterns and manage our inventory.
+                    </small>
+                </div>
 
                 </div>
 
@@ -154,6 +168,12 @@
         document.getElementById('milk_amount_custom').value = data.milk_amount_custom;
     }
 
+    // Restore reason field
+    document.getElementById('less_amount_reason').value = data.less_amount_reason || '';
+    
+    // Make sure reason field shows/hides correctly
+    toggleReasonField();
+
     // Datetime
     document.getElementById('appointment_datetime').value = data.appointment_datetime;
 
@@ -179,19 +199,58 @@
 
 
     function toggleCustomAmount() {
-        const select = document.getElementById('milk_amount_select');
-        const customGroup = document.getElementById('custom_amount_group');
-        const customInput = document.getElementById('milk_amount_custom');
+    const select = document.getElementById('milk_amount_select');
+    const customGroup = document.getElementById('custom_amount_group');
+    const customInput = document.getElementById('milk_amount_custom');
+    const reasonGroup = document.getElementById('reason_group');
+    const reasonInput = document.getElementById('less_amount_reason');
+    
+    if (select.value === 'other') {
+        customGroup.style.display = 'block';
+        customInput.setAttribute('required', 'required');
+        // Check if custom amount is less than 1000ml
+        toggleReasonField();
+    } else {
+        customGroup.style.display = 'none';
+        document.getElementById('reason_group').style.display = 'none'; // Ensure both hide
+        customInput.removeAttribute('required');
+        document.getElementById('less_amount_reason').removeAttribute('required');
         
-        if (select.value === 'other') {
-            customGroup.style.display = 'block';
-            customInput.setAttribute('required', 'required');
-        } else {
-            customGroup.style.display = 'none';
-            customInput.removeAttribute('required');
-            customInput.value = ''; // Clear input if hidden
-        }
+        customInput.value = ''; 
+        document.getElementById('less_amount_reason').value = ''; 
     }
+}
+
+function toggleReasonField() {
+    const customInput = document.getElementById('milk_amount_custom');
+    const reasonGroup = document.getElementById('reason_group');
+    const reasonInput = document.getElementById('less_amount_reason');
+    const select = document.getElementById('milk_amount_select');
+    
+    // Get the current value as a number
+    const val = parseInt(customInput.value);
+    
+    // Show reason field if:
+    // 1. "Other" is selected AND
+    // 2. The input is either EMPTY (isNaN) OR less than 1000
+    if (select.value === 'other' && (isNaN(val) || val < 1000)) {
+        reasonGroup.style.display = 'block';
+        reasonInput.setAttribute('required', 'required');
+    } else {
+        // Hide if the user types 1000 or more
+        reasonGroup.style.display = 'none';
+        reasonInput.removeAttribute('required');
+    }
+}
+
+// Add validation for custom amount
+document.getElementById('milk_amount_custom').addEventListener('blur', function() {
+    const value = parseInt(this.value);
+    if (value && value > 1000) {
+        alert("Milk amount cannot exceed 1000 ml. Please enter a value between 1-1000 ml.");
+        this.value = '';
+    }
+});
 
     function toggleLocationFields() {
         const delivery = document.querySelector('input[name="delivery_method"][value="delivery"]');
@@ -247,9 +306,15 @@
     const location = document.getElementById('location').value;
     const collectionAddress = document.getElementById('collection_address').value;
     const remarks = document.getElementById('remarks').value;
+    const lessAmountReason = document.getElementById('less_amount_reason').value.trim(); // New
 
     // VALIDATION CHECKS
     let errors = [];
+
+    // Add validation for reason when amount is less than 1000ml
+    if (milkSelect === "other" && customInput && parseInt(customInput) < 1000 && !lessAmountReason) {
+        errors.push("Please provide a reason for donating less than 1 liter.");
+    }
 
     // MUST PICK AMOUNT
     if (!milkSelect && !customInput) {
@@ -299,7 +364,8 @@
         delivery_method: deliveryMethod,
         location,
         collection_address: collectionAddress,
-        remarks
+        remarks,
+        less_amount_reason: lessAmountReason // New
     };
    
     // Use sessionStorage so it only lasts for this session
