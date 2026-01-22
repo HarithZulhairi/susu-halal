@@ -3,7 +3,7 @@
 @section('title', 'Parent Profile')
 
 @section('content')
-    <link rel="stylesheet" href="{{ asset('css/donor_profile.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/parent_profile.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     @if(session('success'))
@@ -117,7 +117,7 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- Right Content Area -->
             <div class="profile-content">
                 <!-- Personal Information -->
@@ -190,6 +190,42 @@
                                     <span class="status-badge completed">No</span>
                                 @endif
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ========================================================= --}}
+                {{-- NEW: MILK KINSHIP APPROVAL CARD --}}
+                {{-- ========================================================= --}}
+                <div class="profile-section" style="border-left: 4px solid #f59e0b;">
+                    <div class="section-header">
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-handshake" style="color:#f59e0b;"></i> 
+                            Milk Kinship Approvals
+                        </h3>
+                        <span class="status-badge processing">1 Pending Request</span>
+                    </div>
+
+                    <div class="kinship-list">
+                        {{-- GENERALIZED QUESTION --}}
+                        <div class="kinship-item" id="request-generic">
+                            <div class="kinship-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="kinship-details">
+                                <h4>Do you consent to establish Milk Kinship?</h4>
+                                <p class="kinship-note" style="margin-top:10px; line-height:1.5;">
+                                    <small><em>Approving this will establish a Milk Kinship (Mahram) relationship.</em></small>
+                                </p>
+                            </div>
+                            <div class="kinship-actions">
+                                <button type="button" class="btn-kinship reject" onclick="handleKinshipDecision('generic', 'reject')">
+                                    <i class="fas fa-times"></i> Decline
+                                </button>
+                                <button type="button" class="btn-kinship approve" onclick="handleKinshipDecision('generic', 'approve')">
+                                    <i class="fas fa-check"></i> I Accept & Confirm
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -293,5 +329,45 @@
             });
         });
     });
+
+    // Handle Kinship Approval/Rejection
+    function handleKinshipDecision(batchId, action) {
+        const isApprove = action === 'approve';
+        const titleText = isApprove ? 'Approve Kinship?' : 'Reject Request?';
+        const bodyText = isApprove 
+            ? 'This confirms that your child has received milk from this donor, establishing a Milk Kinship (Mahram) relationship.' 
+            : 'Are you sure you want to reject this milk record linkage?';
+        const confirmColor = isApprove ? '#16a34a' : '#ef4444';
+        const btnText = isApprove ? 'Yes, Confirm Kinship' : 'Yes, Reject';
+
+        Swal.fire({
+            title: titleText,
+            text: bodyText,
+            icon: isApprove ? 'question' : 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: btnText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Simulate backend success
+                Swal.fire(
+                    isApprove ? 'Approved!' : 'Rejected!',
+                    isApprove ? 'Milk kinship has been recorded.' : 'Request has been removed.',
+                    'success'
+                );
+
+                // Remove the item from UI for demo purposes
+                const item = document.getElementById('request-' + batchId.replace('-', ''));
+                if(item) {
+                    item.style.transition = 'all 0.5s ease';
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(20px)';
+                    setTimeout(() => item.remove(), 500);
+                }
+            }
+        });
+    }
+
 </script>
 @endsection

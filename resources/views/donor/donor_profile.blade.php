@@ -199,6 +199,42 @@
                     </div>
                 </div>
 
+                {{-- ========================================================= --}}
+                {{-- NEW: GENERAL MILK KINSHIP NOTIFICATION CARD --}}
+                {{-- ========================================================= --}}
+                <div class="profile-section" style="border-left: 4px solid #f59e0b;">
+                    <div class="section-header">
+                        <h3 style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-handshake" style="color:#f59e0b;"></i> 
+                            Milk Kinship (Mahram) Confirmation
+                        </h3>
+                        <span class="status-badge processing">Action Required</span>
+                    </div>
+
+                    <div class="kinship-list">
+                        {{-- GENERALIZED QUESTION --}}
+                        <div class="kinship-item" id="request-generic">
+                            <div class="kinship-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="kinship-details">
+                                <h4>Do you consent to establish Milk Kinship?</h4>
+                                <p class="kinship-note" style="margin-top:10px; line-height:1.5;">
+                                    <small><em>By accepting, you acknowledge that you will become the <strong>Milk Mother (Ibu Susuan)</strong> to the recipient infant(s) associated with this batch, establishing a permanent Mahram relationship in accordance with Shariah law.</em></small>
+                                </p>
+                            </div>
+                            <div class="kinship-actions">
+                                <button type="button" class="btn-kinship reject" onclick="handleKinshipDecision('generic', 'reject')">
+                                    <i class="fas fa-times"></i> Decline
+                                </button>
+                                <button type="button" class="btn-kinship approve" onclick="handleKinshipDecision('generic', 'approve')">
+                                    <i class="fas fa-check"></i> I Accept & Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Certifications & Qualifications -->
                 <div class="profile-section">
                     <h3>Certifications & Qualifications</h3>
@@ -361,5 +397,43 @@
             });
         });
     });
+
+    function handleKinshipDecision(requestId, action) {
+        const isApprove = action === 'approve';
+        const titleText = isApprove ? 'Accept Kinship?' : 'Decline Request?';
+        const bodyText = isApprove 
+            ? 'This will formally record you as the Milk Mother (Ibu Susuan) for Baby Adam.' 
+            : 'Are you sure you want to decline this request?';
+        const confirmColor = isApprove ? '#16a34a' : '#ef4444';
+        const btnText = isApprove ? 'Yes, I Accept' : 'Yes, Decline';
+
+        Swal.fire({
+            title: titleText,
+            text: bodyText,
+            icon: isApprove ? 'question' : 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: btnText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Simulate backend success
+                Swal.fire(
+                    isApprove ? 'Accepted!' : 'Declined!',
+                    isApprove ? 'You are now recorded as the Milk Mother.' : 'Request removed.',
+                    'success'
+                );
+
+                // Animate removal
+                const item = document.getElementById('request-' + requestId);
+                if(item) {
+                    item.style.transition = 'all 0.5s ease';
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(20px)';
+                    setTimeout(() => item.remove(), 500);
+                }
+            }
+        });
+    }
 </script>
 @endsection

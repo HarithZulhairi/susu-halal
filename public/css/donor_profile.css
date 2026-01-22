@@ -879,3 +879,136 @@
     opacity: 1;
     transition: opacity 0.5s ease-in-out;
 }
+
+/* ===== Milk Kinship Approval Styles (Donor) ===== */
+.kinship-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.kinship-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px;
+    background: #fffbf0; /* Light yellow/gold background */
+    border: 1px solid #fcd34d;
+    border-radius: 12px;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.kinship-item:hover {
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    transform: translateY(-2px);
+}
+
+.kinship-icon {
+    width: 50px;
+    height: 50px;
+    background: #fef3c7;
+    color: #d97706;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kinship-details {
+    flex: 1;
+}
+
+.kinship-details h4 {
+    margin: 0 0 5px 0;
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.kinship-details p {
+    margin: 0;
+    color: #475569;
+    font-size: 14px;
+}
+
+.kinship-meta {
+    display: flex;
+    gap: 15px;
+    margin: 8px 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.kinship-meta i {
+    color: #94a3b8;
+    margin-right: 5px;
+}
+
+.kinship-note {
+    color: #b45309;
+    margin-top: 8px !important;
+    font-size: 12px !important;
+}
+
+.kinship-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 150px; /* Slightly wider for longer text */
+}
+
+.btn-kinship {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-kinship:active {
+    transform: scale(0.96);
+}
+
+.btn-kinship.approve {
+    background: #16a34a; /* Green */
+    color: white;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.2);
+}
+
+.btn-kinship.approve:hover {
+    background: #15803d;
+}
+
+.btn-kinship.reject {
+    background: white;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+}
+
+.btn-kinship.reject:hover {
+    background: #fef2f2;
+}
+
+/* Responsive adjustment for mobile */
+@media (max-width: 640px) {
+    .kinship-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .kinship-actions {
+        flex-direction: row;
+        width: 100%;
+    }
+    .btn-kinship {
+        flex: 1;
+    }
+}
