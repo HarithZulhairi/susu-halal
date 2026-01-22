@@ -1,9 +1,9 @@
-@extends('layouts.nurse')
+@extends('layouts.doctor')
 
 @section('title', 'Manage Milk Records')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/nurse_manage-milk-records.css') }}">
+<link rel="stylesheet" href="{{ asset('css/doctor_manage-milk-records.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>

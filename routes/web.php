@@ -8,12 +8,17 @@ use App\Http\Controllers\MilkController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserController; 
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\DonorScreeningController;
 use App\Http\Controllers\DonorAppointmentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
+
+//new routes
+Route::view('/doctor/manage-milk-records', 'doctor.doctor_manage-milk-records')->name('doctor.manage-milk-records');
+Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.view-milk-processing');
+Route::view('/donor/manage-milk-records', 'donor.donor_manage-milk-records')->name('donor.manage-milk-records');
 
 // Load Laravel Breeze/Fortify auth routes (login, logout, password reset, etc.)
 // Only guests can access login/register

@@ -1,406 +1,264 @@
-/* Import standardized status colors */
-@import url("status_colors.css");
+@import url("base_layout.css");
 
-/* Import the base layout for standardized padding and positioning */
-/* Assuming base_layout.css includes body, .container, .main-content definitions */
-@import url("base_layout.css"); 
-
-
-
-/* ===== Page Header ===== */
+/* ===== Header ===== */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 30px;
 }
-
-
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+}
+.page-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 4px 0 0 0;
+}
 .btn-back {
-    background: #00bcd4;
-    color: white;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 6px;
-    cursor: pointer;
+    background: white;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
     font-weight: 600;
     font-size: 14px;
+    transition: all 0.2s;
+}
+.btn-back:hover {
+    background: #f1f5f9;
+    transform: translateY(-1px);
+}
+
+/* ===== Top Overview Card ===== */
+.overview-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
+    gap: 20px;
+}
+.overview-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0, 188, 212, 0.3);
+    gap: 16px;
+    padding: 10px;
 }
-
-.btn-back:hover {
-    background: #00acc1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4);
-}
-
-/* ===== Stage Card (Milk Details Wrapper) ===== */
-.stage-card {
-    background: white;
+.icon-box {
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-
-.stage-title {
-    margin-bottom: 25px;
-}
-
-.stage-title h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0 0 5px 0;
-}
-
-.stage-subtitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: #666;
-    letter-spacing: 1px;
-    margin: 0;
-}
-
-/* ===== Stage Content Wrapper (Image + Details) ===== */
-.stage-content-wrapper {
     display: flex;
-    gap: 40px;
-    align-items: flex-start;
-    margin-bottom: 25px;
-}
-
-/* ===== Image Section ===== */
-.stage-image-section {
-    flex-shrink: 0;
-}
-
-.stage-image-section img {
-    width: 240px;
-    height: 240px;
-    border-radius: 12px;
-    object-fit: cover;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* ===== Details Section (Metadata) ===== */
-.stage-details {
-    flex: 1;
-}
-
-.details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.detail-item label {
-    display: block;
-    font-size: 14px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 6px;
-}
-
-.detail-item p {
+    align-items: center;
+    justify-content: center;
     font-size: 20px;
-    color: #555;
-    margin: 0;
-    font-weight: 500;
 }
+.icon-box.blue { background: #eff6ff; color: #3b82f6; }
+.icon-box.purple { background: #f5f3ff; color: #8b5cf6; }
+.icon-box.green { background: #f0fdf4; color: #22c55e; }
 
-/* ===== Time Status Section ===== */
-.time-status-section {
-    text-align: center;
-    margin: 30px 0;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.time-label {
-    font-size: 16px;
-    color: #333;
-    margin: 0;
-    font-weight: 500;
-}
-
-.status-badge {
-    /* Uses inherited status styles from status_colors.css */
-    display: inline-block;
-    padding: 6px 20px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 14px;
-    margin-left: 8px;
-}
-
-/* Custom Status overrides for this page demo */
-.status-badge.completed {
-    background: #28a745; /* Success Green */
-    color: white;
-}
-.status-badge.active {
-    background: #ffc107; /* Warning Orange */
-    color: white;
-}
-.status-badge.pending {
-    background: #dc3545; /* Danger Red */
-    color: white;
-}
-
-
-/* ===== Results Section ===== */
-.results-section {
-    margin-top: 30px;
-}
-
-.results-section h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 15px;
-}
-
-/* ===== Results Table ===== */
-.results-table-container {
-    overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    margin-bottom: 30px; /* Space before new action buttons */
-}
-
-.results-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-}
-
-.results-table thead {
-    background: #f8f9fa;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.results-table thead th {
-    padding: 14px 16px;
-    text-align: left;
-    font-size: 13px;
-    font-weight: 700;
-    color: #555;
+.overview-item label {
+    display: block;
+    font-size: 12px;
     text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 700;
     letter-spacing: 0.5px;
 }
-
-.results-table thead th:last-child {
-    text-align: center;
+.overview-item span {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
-.results-table tbody tr {
-    border-bottom: 1px solid #f3f4f6;
-    transition: background 0.2s ease;
+/* ===== Timeline ===== */
+.audit-timeline {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 50px;
+}
+.audit-timeline::before {
+    content: '';
+    position: absolute;
+    left: 19px; /* Center with marker */
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: #e2e8f0;
 }
 
-.results-table tbody tr:hover {
-    background: #f9fafb;
+.timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+    opacity: 0.6; /* Dim pending items */
+    transition: all 0.3s ease;
+}
+.timeline-item.completed {
+    opacity: 1;
 }
 
-.results-table tbody tr:last-child {
-    border-bottom: none;
+.timeline-marker {
+    position: absolute;
+    left: -40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 4px solid white;
+    box-shadow: 0 0 0 2px #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    z-index: 2;
+}
+.timeline-item.completed .timeline-marker {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 0 0 4px #d1fae5;
 }
 
-.results-table tbody td {
-    padding: 14px 16px;
+.timeline-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #f1f5f9;
+}
+.timeline-item.completed .timeline-content {
+    border-left: 4px solid #10b981;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f8fafc;
+    padding-bottom: 10px;
+}
+.timeline-header h3 {
     font-size: 16px;
-    color: #333;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+.timeline-header .date {
+    font-size: 13px;
+    color: #64748b;
     font-weight: 500;
 }
 
-.results-table tbody td:first-child {
+.result-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.result-list li {
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 4px;
+}
+.badge-pass {
+    background: #ecfdf5;
+    color: #047857;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 700;
-    color: #00bcd4;
 }
 
-.results-table tbody td:nth-child(2) {
-    font-weight: 600;
-    color: #1a1a1a;
+/* ===== Decision Card ===== */
+.decision-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s;
 }
-
-/* ===== Shariah Approve/Decline Actions ===== */
-.shariah-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 20px;
-    padding: 20px 0;
-    border-top: 1px solid #e5e7eb;
-    margin-top: 20px;
+.decision-header {
+    background: #1e293b;
+    color: white;
+    padding: 16px 24px;
 }
-
-.btn-approve,
-.btn-decline {
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.decision-header h2 {
+    font-size: 18px;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 10px;
-    border: none;
 }
 
-.btn-approve {
-    background: #16a34a; /* Green */
-    color: white;
-    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+.decision-body {
+    padding: 30px;
 }
 
-.btn-approve:hover {
-    background: #15803d;
-    transform: translateY(-2px);
+/* Locked State */
+.locked-body {
+    text-align: center;
+    color: #94a3b8;
+    padding: 50px 20px;
+}
+.locked-body i { margin-bottom: 15px; color: #cbd5e1; }
+.locked-body h3 { color: #64748b; margin-bottom: 10px; }
+
+/* Active State */
+.active-decision {
+    border: 2px solid #3b82f6;
+}
+.decision-instruction {
+    font-size: 15px;
+    color: #475569;
+    margin-bottom: 20px;
+}
+#shariahForm label {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 8px;
+}
+#shariahForm textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    font-family: inherit;
+    margin-bottom: 20px;
+    resize: vertical;
+}
+#shariahForm textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
 }
 
-.btn-decline {
-    background: #dc2626; /* Red */
-    color: white;
-    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
-}
-
-.btn-decline:hover {
-    background: #b91c1c;
-    transform: translateY(-2px);
-}
-
-/* ===== MODERN SHARIAH REMARKS FORM ===== */
-.shariah-decision-section {
-    margin-top: 40px;
-    background: #f8fafc; /* Light gray background for context */
-    border-radius: 12px;
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-}
-
-.remarks-section {
+.decision-actions {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    gap: 20px;
 }
-
-.remarks-section label {
+.btn-decision {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    border: none;
     font-size: 16px;
     font-weight: 700;
-    color: #1e293b; /* Dark slate */
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-/* Optional icon for label (add <i class="fas fa-pen"></i> in HTML if desired) */
-.remarks-section label i {
-    color: #64748b;
-    font-size: 14px;
-}
-
-.remarks-section textarea {
-    width: 100%;
-    padding: 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    background: white;
-    font-family: inherit;
-    font-size: 15px;
-    color: #334155;
-    line-height: 1.6;
-    resize: vertical;
-    min-height: 120px;
-    transition: all 0.2s ease;
-    outline: none;
-}
-
-.remarks-section textarea:focus {
-    border-color: #3b82f6; /* Primary Blue */
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-}
-
-.remarks-section textarea::placeholder {
-    color: #94a3b8;
-}
-
-
-/* ===== Action Buttons (Table Row) ===== */
-.actions {
-    display: inline-flex;
     justify-content: center;
+    gap: 10px;
+    transition: transform 0.1s;
 }
-
-.actions button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 6px 4px;
-    border-radius: 6px;
-    transition: background 0.2s;
-    margin-right: 4px;
-}
-
-.actions .btn-view i { color: #2563eb; }
-.actions .btn-delete i { color: #dc2626; }
-.actions .btn-more i { color: #6b7280; }
-
-.actions button:hover {
-    background: #f3f4f6;
-}
-
-.results-table td.actions {
-    padding-bottom: 16px;
-    padding-top: 16px;
-    text-align: center;
-}
-
-/* ===== Responsive Design ===== */
-@media (max-width: 1024px) {
-    .stage-content-wrapper {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .stage-image-section img {
-        width: 200px;
-        height: 200px;
-    }
-    
-    .details-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    /* main-content padding handled by base_layout.css */
-    
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .page-header h1 {
-        font-size: 20px;
-    }
-    
-    .results-table-container {
-        overflow-x: auto;
-    }
-    
-    .shariah-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .btn-approve, .btn-decline {
-        width: 100%;
-        justify-content: center;
-    }
-}
+.btn-decision:active { transform: scale(0.98); }
+.btn-decision.approve { background: #16a34a; color: white; }
+.btn-decision.decline { background: #dc2626; color: white; }
+.btn-decision.approve:hover { background: #15803d; }
+.btn-decision.decline:hover { background: #b91c1c; }

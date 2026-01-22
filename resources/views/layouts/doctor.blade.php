@@ -39,9 +39,10 @@
     <h4>Management</h4>
     <ul>
       <li><a href="{{ route('doctor.doctor_milk-request-form') }}"><i class="fa-solid fa-file-lines"></i> Create Request</a></li>
-      <li class="{{ request()->routeIs('doctor.doctor_milk-request-form') ? 'active' : '' }}">
+      <li>
         <a href="{{ route('doctor.doctor_milk-request') }}"><i class="fa-solid fa-list"></i> Request Records</a>
       </li>
+      <li><a href="{{ route('doctor.manage-milk-records') }}"><i class="fa-solid fa-baby"></i> Milk Records</a></li>
     </ul>
   </div>
 

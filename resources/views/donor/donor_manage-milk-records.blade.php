@@ -1,9 +1,9 @@
-@extends('layouts.nurse')
+@extends('layouts.donor')
 
 @section('title', 'Manage Milk Records')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/nurse_manage-milk-records.css') }}">
+<link rel="stylesheet" href="{{ asset('css/donor_manage-milk-records.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -16,7 +16,7 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         display: inline-block;
-        border: 1px solid transparent; /* Prepare for border */
+        border: 1px solid transparent;
     }
 
     /* 1. Pre-Pasteurization (Warm Orange/Yellow) */
@@ -94,7 +94,7 @@
 
             <div id="filterPanel" class="filter-panel">
                 <form id="filterForm" onsubmit="event.preventDefault();">
-                    <input id="searchInput" class="form-control" type="search" placeholder="Search by Donor name or Milk ID">
+                    <input id="searchInput" class="form-control" type="search" placeholder="Search by Milk ID">
                     <div class="filter-actions">
                         <button type="submit" class="btn">Apply</button>
                         <button type="button" class="btn">Clear</button>
@@ -104,7 +104,8 @@
 
             <div class="records-list">
                 <div class="record-header">
-                    <button class="sortable-header" data-key="donor">MILK DONOR <span class="sort-indicator"></span></button>
+                    {{-- Changed Header to MILK ID --}}
+                    <button class="sortable-header" data-key="milkId">MILK ID <span class="sort-indicator"></span></button>
                     <button class="sortable-header" data-key="status">CLINICAL STATUS <span class="sort-indicator"></span></button>
                     <button class="sortable-header" data-key="volume">VOLUME <span class="sort-indicator"></span></button>
                     <button class="sortable-header" data-key="expiry">EXPIRATION DATE <span class="sort-indicator"></span></button>
@@ -113,12 +114,11 @@
                 </div>
 
                 {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 1: PRE-PASTEURIZATION --}}
+                {{-- DUMMY RECORD 1 --}}
                 {{-- ================================================================= --}}
                 @php
                     $payload1 = [
                         'milkId' => 'M26-001',
-                        'donorName' => 'Siti Aminah',
                         'status' => 'Pre-Pasteurization',
                         'volume' => '150 mL',
                         'expiry' => '-',
@@ -136,10 +136,10 @@
                 @endphp
                 <div class="record-item" data-milk-id="1">
                     <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-bottle-droplet milk-icon"></i></div>
+                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
                         <div>
+                            {{-- Only showing Milk ID --}}
                             <span class="milk-id">M26-001</span>
-                            <span class="donor-name">Siti Aminah</span>
                         </div>
                     </div>
                     <div class="clinical-status">
@@ -154,12 +154,11 @@
                 </div>
 
                 {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 2: THAWING --}}
+                {{-- DUMMY RECORD 2 --}}
                 {{-- ================================================================= --}}
                 @php
                     $payload2 = [
                         'milkId' => 'M26-002',
-                        'donorName' => 'Nurul Huda',
                         'status' => 'Thawing',
                         'volume' => '200 mL',
                         'expiry' => '-',
@@ -177,10 +176,9 @@
                 @endphp
                 <div class="record-item" data-milk-id="2">
                     <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-snowflake milk-icon"></i></div>
+                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
                         <div>
                             <span class="milk-id">M26-002</span>
-                            <span class="donor-name">Nurul Huda</span>
                         </div>
                     </div>
                     <div class="clinical-status">
@@ -195,12 +193,11 @@
                 </div>
 
                 {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 3: PASTEURIZATION --}}
+                {{-- DUMMY RECORD 3 --}}
                 {{-- ================================================================= --}}
                 @php
                     $payload3 = [
                         'milkId' => 'M26-003',
-                        'donorName' => 'Aishah Ahmad',
                         'status' => 'Pasteurization',
                         'volume' => '120 mL',
                         'expiry' => '2026-07-22',
@@ -218,10 +215,9 @@
                 @endphp
                 <div class="record-item" data-milk-id="3">
                     <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-fire-burner milk-icon"></i></div>
+                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
                         <div>
                             <span class="milk-id">M26-003</span>
-                            <span class="donor-name">Aishah Ahmad</span>
                         </div>
                     </div>
                     <div class="clinical-status">
@@ -236,12 +232,11 @@
                 </div>
 
                 {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 4: MICROBIOLOGY --}}
+                {{-- DUMMY RECORD 4 --}}
                 {{-- ================================================================= --}}
                 @php
                     $payload4 = [
                         'milkId' => 'M26-004',
-                        'donorName' => 'Fatima Zahra',
                         'status' => 'Microbiology Test',
                         'volume' => '180 mL',
                         'expiry' => '2026-07-20',
@@ -259,14 +254,13 @@
                 @endphp
                 <div class="record-item" data-milk-id="4">
                     <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-microscope milk-icon"></i></div>
+                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
                         <div>
                             <span class="milk-id">M26-004</span>
-                            <span class="donor-name">Fatima Zahra</span>
                         </div>
                     </div>
                     <div class="clinical-status">
-                        <span class="status-tag status-pending" style="color:#333; border:1px solid #ccc;">Microbiology</span>
+                        <span class="status-tag status-microbiology">Microbiology Test</span>
                     </div>
                     <div class="volume-data">180 mL</div>
                     <div class="expiry-date">Jul 20, 2026</div>
@@ -277,17 +271,16 @@
                 </div>
 
                 {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 5: POST-PASTEURIZATION (READY) --}}
+                {{-- DUMMY RECORD 5 --}}
                 {{-- ================================================================= --}}
                 @php
                     $payload5 = [
                         'milkId' => 'M26-005',
-                        'donorName' => 'Mariam Isa',
                         'status' => 'Post-Pasteurization',
                         'volume' => '200 mL',
                         'expiry' => '2026-07-15',
                         'shariah' => 'Approved',
-                        'location' => 'Freezer 2 - Drawer A01', // Important for Nurse
+                        'location' => 'Freezer 2 - Drawer A01',
                         'quality' => 'Passed / Safe',
                         'timeline' => [
                             ['stage' => 'Pre-Pasteurization', 'status' => 'Completed', 'date' => '2026-01-15'],
@@ -300,14 +293,13 @@
                 @endphp
                 <div class="record-item" data-milk-id="5">
                     <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-check-circle milk-icon" style="color:green;"></i></div>
+                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
                         <div>
                             <span class="milk-id">M26-005</span>
-                            <span class="donor-name">Mariam Isa</span>
                         </div>
                     </div>
                     <div class="clinical-status">
-                        <span class="status-tag status-approved">Post-Pasteurization</span>
+                        <span class="status-tag status-post-pasteurization">Post-Pasteurization</span>
                     </div>
                     <div class="volume-data">200 mL</div>
                     <div class="expiry-date">Jul 15, 2026</div>
@@ -324,7 +316,7 @@
 </div>
 
 {{-- ======================================================== --}}
-{{-- VIEW MODAL (Simplified for Nurse) --}}
+{{-- VIEW MODAL --}}
 {{-- ======================================================== --}}
 <div id="viewMilkModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 600px;">
@@ -341,11 +333,7 @@
                         <small style="color: #64748b;">Milk ID</small>
                         <h3 id="view-milk-id" style="margin:0; color:#1A5F7A;">-</h3>
                     </div>
-                    <div style="text-align: right;">
-                        <small style="color: #64748b;">Donor Name</small>
-                        <h4 id="view-donor-name" style="margin:0;">-</h4>
                     </div>
-                </div>
             </div>
 
             {{-- 2. VITAL INFO --}}
@@ -360,7 +348,7 @@
                 </div>
             </div>
 
-            {{-- 3. CURRENT LOCATION (Crucial for Nurse) --}}
+            {{-- 3. CURRENT LOCATION --}}
             <div style="margin-bottom: 20px; padding: 10px; border: 2px dashed #cbd5e1; border-radius: 8px; text-align: center;">
                 <label style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Current Storage Location</label>
                 <div id="view-location" style="font-size: 18px; font-weight: bold; color: #1e293b; margin-top: 5px;">-</div>
@@ -371,7 +359,7 @@
             {{-- 4. SIMPLIFIED TIMELINE --}}
             <h3 style="font-size: 16px; margin-bottom: 15px;">Processing Timeline</h3>
             <div id="timeline-container">
-                </div>
+            </div>
 
         </div>
     </div>
@@ -408,7 +396,6 @@ document.addEventListener("DOMContentLoaded", function () {
 function openViewMilkModal(data) {
     // Populate Basic Info
     document.getElementById('view-milk-id').textContent = data.milkId || '-';
-    document.getElementById('view-donor-name').textContent = data.donorName || '-';
     document.getElementById('view-volume').textContent = data.volume || '-';
     
     // Logic for Expiry color
@@ -420,7 +407,7 @@ function openViewMilkModal(data) {
     // Shariah
     document.getElementById('view-shariah').textContent = data.shariah || '-';
     
-    // Nurse Specific: Location & Quality
+    // Location & Quality
     document.getElementById('view-location').textContent = data.location || 'Unknown';
     
     const qualityEl = document.getElementById('view-quality');

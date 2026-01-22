@@ -61,6 +61,7 @@
     <h4>Management</h4>
     <ul>
       <li><a href="{{ route('donor.appointments') }}"><i class="fa-solid fa-file-lines"></i> My Appointments</a></li>
+      <li><a href="{{ route('donor.manage-milk-records') }}"><i class="fa-solid fa-baby"></i> Milk Records</a></li>
     </ul>
   </div>
 
