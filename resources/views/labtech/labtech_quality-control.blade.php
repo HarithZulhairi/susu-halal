@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 {{-- ========================================================= --}}
-{{-- DUMMY DATA: Only Post-Pasteurization (Stored) Batches --}}
+{{-- DUMMY DATA --}}
 {{-- ========================================================= --}}
 @php
     $batches = [
@@ -80,9 +80,7 @@
                         </div>
 
                         <div>{{ $batch->location }}</div>
-                        
                         <div class="expiry-date">{{ $batch->expiry }}</div>
-                        
                         <div>{{ date('Y-m-d') }}</div> 
 
                         <div class="clinical-status">
@@ -111,7 +109,7 @@
 {{-- QC TESTING MODAL --}}
 {{-- ========================================================= --}}
 <div id="qcModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content" style="max-width: 1200px;">
         <div class="modal-header">
             <h2><i class="fas fa-microscope"></i> Batch Quality Control</h2>
             <button class="modal-close-btn" onclick="closeQCModal()">Close</button>
@@ -139,9 +137,9 @@
                 <thead>
                     <tr>
                         <th>Bottle ID</th>
-                        <th>Total Viable <br><small>(Limit: &lt; 100,000)</small></th>
-                        <th>Enterobacteriaceae <br><small>(Limit: &lt; 10,000)</small></th>
-                        <th>Staphylococcus <br><small>(Limit: &lt; 10,000)</small></th>
+                        <th>Total Viable <br><small>(Limit: < 100,000)</small></th>
+                        <th>Enterobacteriaceae <br><small>(Limit: < 10,000)</small></th>
+                        <th>Staphylococcus <br><small>(Limit: < 10,000)</small></th>
                         <th>Result</th>
                     </tr>
                 </thead>
@@ -173,8 +171,8 @@
     .qc-input:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1); }
     
     /* Validation Colors */
-    .qc-input.safe { border-color: #22c55e; background-color: #f0fdf4; color: #15803d; }
     .qc-input.danger { border-color: #ef4444; background-color: #fef2f2; color: #b91c1c; }
+    /* REMOVED: .qc-input.safe (Green color removed as requested) */
 
     .badge-result { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
     .badge-safe { background: #dcfce7; color: #166534; }
@@ -195,19 +193,23 @@
         
         const statusEl = document.getElementById('modal-batch-status');
         statusEl.textContent = batch.status;
-        statusEl.style.color = batch.status === 'Safe' ? 'green' : (batch.status === 'Contaminated' ? 'red' : 'orange');
+        
+        if(batch.status === 'Safe') statusEl.style.color = "#16a34a";
+        else if(batch.status === 'Contaminated') statusEl.style.color = "#dc2626";
+        else statusEl.style.color = "#d97706";
         
         const tbody = document.getElementById('qc-bottle-list');
         tbody.innerHTML = '';
 
         batch.bottles.forEach((bottle, index) => {
             const tr = document.createElement('tr');
+            tr.setAttribute('data-bottle-id', bottle.id);
             tr.innerHTML = `
                 <td style="font-weight:600; color:#334155;">${bottle.id}</td>
-                <td><input type="number" class="qc-input inp-tvc" data-idx="${index}" oninput="validateRow(${index})"></td>
-                <td><input type="number" class="qc-input inp-entero" data-idx="${index}" oninput="validateRow(${index})"></td>
-                <td><input type="number" class="qc-input inp-staph" data-idx="${index}" oninput="validateRow(${index})"></td>
-                <td id="res-${index}"><span class="badge-result" style="background:#f1f5f9; color:#64748b;">-</span></td>
+                <td><input type="number" class="qc-input inp-tvc" data-idx="${index}" oninput="checkContamination(${index})" placeholder="-"></td>
+                <td><input type="number" class="qc-input inp-entero" data-idx="${index}" oninput="checkContamination(${index})" placeholder="-"></td>
+                <td><input type="number" class="qc-input inp-staph" data-idx="${index}" oninput="checkContamination(${index})" placeholder="-"></td>
+                <td id="res-${index}"><span class="badge-result" style="background:#f1f5f9; color:#64748b;">Pending</span></td>
             `;
             tbody.appendChild(tr);
         });
@@ -219,88 +221,96 @@
         document.getElementById('qcModal').style.display = 'none';
     }
 
-    // Logic: Validate inputs per row. 
-    // If ANY input exceeds limit => Row is Contaminated => Whole Batch is Contaminated
-    function validateRow(idx) {
-        const tvcInput = document.querySelector(`.inp-tvc[data-idx="${idx}"]`);
-        const enteroInput = document.querySelector(`.inp-entero[data-idx="${idx}"]`);
-        const staphInput = document.querySelector(`.inp-staph[data-idx="${idx}"]`);
-        const resCell = document.getElementById(`res-${idx}`);
+    // ==========================================
+    // SIMPLIFIED VALIDATION LOGIC (FROM PROCESS MILK PAGE)
+    // ==========================================
+    function checkContamination(idx) {
+        const row = document.querySelector(`tr[data-bottle-id]`).parentElement.rows[idx];
+        
+        // Get values (default to 0 if empty)
+        const totalViable = parseFloat(row.querySelector('.inp-tvc').value) || 0;
+        const entero = parseFloat(row.querySelector('.inp-entero').value) || 0;
+        const staph = parseFloat(row.querySelector('.inp-staph').value) || 0;
+        
+        const resultCell = document.getElementById(`res-${idx}`);
+        
+        // Visual feedback for inputs
+        setInputColor(row.querySelector('.inp-tvc'), totalViable, LIMIT_TVC);
+        setInputColor(row.querySelector('.inp-entero'), entero, LIMIT_ENTERO);
+        setInputColor(row.querySelector('.inp-staph'), staph, LIMIT_STAPH);
 
-        const tvc = parseFloat(tvcInput.value) || 0;
-        const entero = parseFloat(enteroInput.value) || 0;
-        const staph = parseFloat(staphInput.value) || 0;
-
-        // Visual Validation for Inputs
-        setInputColor(tvcInput, tvc, LIMIT_TVC);
-        setInputColor(enteroInput, entero, LIMIT_ENTERO);
-        setInputColor(staphInput, staph, LIMIT_STAPH);
-
-        // Row Result Logic
-        const isFail = (tvc >= LIMIT_TVC) || (entero >= LIMIT_ENTERO) || (staph >= LIMIT_STAPH);
-
-        // Only show result if at least one input has value to avoid clutter
-        if (tvcInput.value || enteroInput.value || staphInput.value) {
-            if (isFail) {
-                resCell.innerHTML = `<span class="badge-result badge-contaminated"><i class="fas fa-exclamation-triangle"></i> Contaminated</span>`;
-                // If ONE row fails, batch fails immediately
-                updateBatchStatus(true); 
-            } else {
-                // If this row is safe so far
-                resCell.innerHTML = `<span class="badge-result badge-safe"><i class="fas fa-check"></i> Safe</span>`;
-                // Re-check ALL rows to see if batch is safe or still failed elsewhere
-                checkAllRows(); 
-            }
-        } else {
-            resCell.innerHTML = `<span class="badge-result" style="background:#f1f5f9; color:#64748b;">-</span>`;
+        // Check conditions
+        let isContaminated = false;
+        if (totalViable >= LIMIT_TVC || entero >= LIMIT_ENTERO || staph >= LIMIT_STAPH) {
+            isContaminated = true;
         }
+
+        // Update UI - IMMEDIATE result display (no waiting for all fields)
+        if (isContaminated) {
+            resultCell.innerHTML = `<span class="badge-result badge-contaminated"><i class="fas fa-times-circle"></i> Contaminated</span>`;
+            resultCell.setAttribute('data-status', 'fail');
+        } else {
+            // Check if at least one field has a value (not just default 0)
+            const hasSomeValue = row.querySelector('.inp-tvc').value !== '' || 
+                                row.querySelector('.inp-entero').value !== '' || 
+                                row.querySelector('.inp-staph').value !== '';
+            
+            if (hasSomeValue) {
+                resultCell.innerHTML = `<span class="badge-result badge-safe"><i class="fas fa-check-circle"></i> Safe</span>`;
+                resultCell.setAttribute('data-status', 'safe');
+            } else {
+                resultCell.innerHTML = `<span class="badge-result" style="background:#f1f5f9; color:#64748b;">Pending</span>`;
+                resultCell.removeAttribute('data-status');
+            }
+        }
+
+        checkBatchStatus();
     }
 
     function setInputColor(input, value, limit) {
-        if (!input.value) {
-            input.className = 'qc-input';
-            return;
-        }
+        // Only apply red if value exceeds limit
         if (value >= limit) {
-            input.className = 'qc-input danger';
+            input.classList.add('danger');
         } else {
-            input.className = 'qc-input safe';
+            input.classList.remove('danger');
         }
     }
 
-    function updateBatchStatus(isFail) {
-        const statusEl = document.getElementById('modal-batch-status');
-        if (isFail) {
-            statusEl.textContent = "CONTAMINATED";
-            statusEl.style.color = "#dc2626"; // Red
-            statusEl.style.fontWeight = "bold";
-        } else {
-            statusEl.textContent = "Safe";
-            statusEl.style.color = "#16a34a"; // Green
-            statusEl.style.fontWeight = "bold";
-        }
-    }
+    function checkBatchStatus() {
+        const resultCells = document.querySelectorAll('[id^="res-"]');
+        let batchContaminated = false;
+        let allRowsHaveStatus = true;
+        let allRowsSafe = true;
 
-    function checkAllRows() {
-        const rows = document.querySelectorAll('#qc-bottle-list tr');
-        let anyFail = false;
-        let allFilled = true; // Optional: track if form is complete
-
-        rows.forEach((row, idx) => {
-            const tvc = parseFloat(row.querySelector('.inp-tvc').value) || 0;
-            const entero = parseFloat(row.querySelector('.inp-entero').value) || 0;
-            const staph = parseFloat(row.querySelector('.inp-staph').value) || 0;
+        resultCells.forEach(cell => {
+            const status = cell.getAttribute('data-status');
             
-            // Check limits again for every row
-            if ((tvc >= LIMIT_TVC) || (entero >= LIMIT_ENTERO) || (staph >= LIMIT_STAPH)) {
-                anyFail = true;
+            if (status === 'fail') {
+                batchContaminated = true;
+                allRowsSafe = false;
+            }
+            
+            // Check if this row has any status
+            if (!status) {
+                allRowsHaveStatus = false;
             }
         });
 
-        if (anyFail) {
-            updateBatchStatus(true);
+        updateBatchStatusUI(batchContaminated, allRowsHaveStatus, allRowsSafe);
+    }
+
+    function updateBatchStatusUI(isContaminated, allRowsHaveStatus, allRowsSafe) {
+        const statusEl = document.getElementById('modal-batch-status');
+        
+        if (isContaminated) {
+            statusEl.textContent = "CONTAMINATED";
+            statusEl.style.color = "#dc2626"; // Red
+        } else if (allRowsHaveStatus && allRowsSafe) {
+            statusEl.textContent = "Safe";
+            statusEl.style.color = "#16a34a"; // Green
         } else {
-            updateBatchStatus(false);
+            statusEl.textContent = "Pending...";
+            statusEl.style.color = "#d97706"; // Orange
         }
     }
 
@@ -308,29 +318,26 @@
         const statusText = document.getElementById('modal-batch-status').textContent;
         const isContaminated = statusText === "CONTAMINATED";
 
-        if(statusText === '-' || statusText === 'Pending QC') {
-             Swal.fire('Incomplete', 'Please fill in test results or ensure status is determined.', 'warning');
-             return;
+        if(statusText === 'Pending...' || statusText === '-' || statusText === 'Pending QC') {
+            Swal.fire('Incomplete', 'Please enter test results for all bottles.', 'warning');
+            return;
         }
 
         Swal.fire({
             title: isContaminated ? 'Mark Batch as Contaminated?' : 'Confirm Safe Batch?',
-            text: isContaminated 
-                ? 'This will discard the entire batch from inventory due to contamination.' 
-                : 'This batch will remain in inventory as Safe.',
+            text: isContaminated ? 'Discard batch due to contamination.' : 'Batch remains in inventory.',
             icon: isContaminated ? 'error' : 'success',
             showCancelButton: true,
             confirmButtonColor: isContaminated ? '#d33' : '#10b981',
             confirmButtonText: 'Yes, Submit Result'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Here: AJAX call to save would go here
                 Swal.fire('Saved!', 'QC Results have been updated.', 'success').then(() => {
                     closeQCModal();
-                    // location.reload(); // In real app
                 });
             }
         });
     }
 </script>
+
 @endsection

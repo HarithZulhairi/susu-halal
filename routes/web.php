@@ -20,6 +20,7 @@ Route::view('/doctor/manage-milk-records', 'doctor.doctor_manage-milk-records')-
 Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.view-milk-processing');
 Route::view('/donor/manage-milk-records', 'donor.donor_manage-milk-records')->name('donor.manage-milk-records');
 Route::view('/labtech/inventory-quality-control', 'labtech.labtech_quality-control')->name('labtech.quality-control');
+Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
 
 // Load Laravel Breeze/Fortify auth routes (login, logout, password reset, etc.)
 // Only guests can access login/register

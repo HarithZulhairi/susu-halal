@@ -3,13 +3,166 @@
 @section('title', "My Infant's Milk Requests")
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/hmmc_list-of-infants.css') }}">
+<link rel="stylesheet" href="{{ asset('css/parent_my-infant-request.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
     .swal2-container { z-index: 9999 !important; }
     .modal-overlay { z-index: 2000; }
+    
+    /* Custom styles for new detailed modal */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+    .detail-item label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #64748b;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .detail-item p {
+        font-size: 14px;
+        color: #334155;
+        font-weight: 500;
+        margin: 0;
+    }
+    .allocation-list {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    .allocation-list th {
+        text-align: left;
+        background: #f1f5f9;
+        padding: 8px;
+        color: #475569;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+    .allocation-list td {
+        padding: 8px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+    }
+    .badge-method {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge-kinship { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-no-kinship { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 5px;
+    }
+    /* PDF Icon Style */
+    .btn-pdf {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        transition: transform 0.2s;
+    }
+    .btn-pdf:hover {
+        background-color: #fee2e2;
+        border-radius: 6px;
+        transform: scale(1.1);
+    }
+    .btn-pdf i {
+        color: #dc2626; /* Red for PDF */
+        font-size: 18px;
 </style>
+
+{{-- DUMMY DATA SETUP --}}
+@php
+    // Simulate a parent/infant record
+    $infant = (object)[
+        'id' => 'P-2024-001',
+        'name' => 'Baby Adam',
+        'nicu' => 'NICU-A1',
+        'last_updated' => '2026-01-22 09:30 AM',
+        'current_weight' => 2.5,
+        'requests' => [
+            (object)[
+                'req_id' => 101,
+                'total_allocated_vol' => 60, // 30ml + 30ml
+                // Detailed data for modal
+                'details' => (object)[
+                    'donor_id' => 'D-2024-055',
+                    'donor_name' => 'Sarah Connor',
+                    'consent' => 'Consent Granted (Full)',
+                    'method' => 'Milk Kinship', // or 'No Milk Kinship'
+                    'schedule' => 'Every 3 Hours',
+                    'start_time' => '2026-01-22 08:00 AM',
+                    'doctor_id' => 'DR-007',
+                    'doctor_name' => 'Dr. Strange',
+                    // List of actual milk packs given
+                    'allocations' => [
+                        (object)[
+                            'milk_id' => 'M26-001',
+                            'volume' => 30,
+                            'time' => '2026-01-22 08:15 AM',
+                            'nurse_id' => 'N-101',
+                            'nurse_name' => 'Nurse Joy'
+                        ],
+                        (object)[
+                            'milk_id' => 'M26-002',
+                            'volume' => 30,
+                            'time' => '2026-01-22 11:15 AM',
+                            'nurse_id' => 'N-102',
+                            'nurse_name' => 'Nurse Carla'
+                        ]
+                    ]
+                ]
+            ],
+            // Another request example
+            (object)[
+                'req_id' => 102,
+                'total_allocated_vol' => 30,
+                'details' => (object)[
+                    'donor_id' => 'D-2024-088',
+                    'donor_name' => 'Jane Doe',
+                    'consent' => 'Consent Granted (Restricted)',
+                    'method' => 'No Milk Kinship',
+                    'schedule' => 'Every 4 Hours',
+                    'start_time' => '2026-01-23 10:00 AM',
+                    'doctor_id' => 'DR-009',
+                    'doctor_name' => 'Dr. House',
+                    'allocations' => [
+                        (object)[
+                            'milk_id' => 'M26-005',
+                            'volume' => 30,
+                            'time' => '2026-01-23 10:05 AM',
+                            'nurse_id' => 'N-101',
+                            'nurse_name' => 'Nurse Joy'
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ];
+@endphp
 
 <div class="container">
     <div class="main-content">
@@ -31,7 +184,7 @@
                     <tr>
                         <th onclick="sortTable(0)">Patient Name <i class="fas fa-sort-down sort-icon sort-active"></i></th>
                         <th onclick="sortTable(1)">NICU Cubicle No. <i class="fas fa-sort sort-icon"></i></th>
-                        <th onclick="sortTable(2)">Milk Allocation <i class="fas fa-sort sort-icon"></i></th>
+                        <th onclick="sortTable(2)">Total Milk Allocation <i class="fas fa-sort sort-icon"></i></th>
                         <th onclick="sortTable(3)">Last Updated Weight <i class="fas fa-sort sort-icon"></i></th>
                         <th onclick="sortTable(4)">Current Weight <i class="fas fa-sort sort-icon"></i></th>
                         <th>Actions</th>
@@ -39,85 +192,48 @@
                 </thead>
 
                 <tbody>
-
                     <tr>
-                        <td data-order="{{ $parent->pr_ID }}">
+                        <td>
                             <div class="patient-info">
                                 <div class="patient-avatar"><i class="fa-solid fa-baby"></i></div>
                                 <div class="patient-details">
-                                    <strong>#P{{ $parent->pr_ID }}</strong>
-                                    <span>{{ $parent->pr_BabyName }}</span>
+                                    <strong>#{{ $infant->id }}</strong>
+                                    <span>{{ $infant->name }}</span>
                                 </div>
                             </div>
                         </td>
 
-                        <td data-order="{{ $parent->pr_NICU }}">
-                            {{ $parent->pr_NICU }}
-                        </td>
+                        <td>{{ $infant->nicu }}</td>
 
-                        <td data-order="{{ $parent->requests->pluck('allocation')->flatten()->count() }}">
+                        <td>
                             <div class="milk-badge-container">
-
-                                @php $hasMilk = false; @endphp
-
-                                @foreach($parent->requests as $req)
-                                    @foreach($req->allocation as $alloc)
-                                        @if($alloc->milk)
-                                            @php
-                                                $hasMilk = true;
-                                                $jsonString = is_array($alloc->allocation_milk_date_time)
-                                                    ? json_encode($alloc->allocation_milk_date_time)
-                                                    : $alloc->allocation_milk_date_time;
-                                            @endphp
-
-                                            <span class="milk-badge"
-                                                onclick="openMilkDetailModal(
-                                                    '{{ $alloc->milk->formatted_id ?? 'M-'.$alloc->milk->milk_ID }}',
-                                                    '{{ $alloc->milk->milk_volume }}',
-                                                    '{{ addslashes($jsonString) }}'
-                                                )">
-                                                <i class="fas fa-flask"></i>
-                                                {{ $alloc->milk->formatted_id ?? 'M-'.$alloc->milk->milk_ID }}
-                                            </span>
-                                        @endif
-                                    @endforeach
+                                @foreach($infant->requests as $req)
+                                    <span class="milk-badge" style="cursor: pointer;"
+                                          onclick='openAllocationModal(@json($req->details), {{ $req->total_allocated_vol }})'>
+                                        <i class="fas fa-flask"></i> {{ $req->total_allocated_vol }} ml
+                                    </span>
                                 @endforeach
-
-                                @if(!$hasMilk)
-                                    <span class="no-data">No allocations yet</span>
-                                @endif
                             </div>
                         </td>
 
-                        <td data-order="{{ $parent->updated_at ? $parent->updated_at->timestamp : 0 }}">
-                            {{ $parent->updated_at?->format('d-m-Y h:i A') ?? '-' }}
-                        </td>
+                        <td>{{ $infant->last_updated }}</td>
 
-                        <td data-order="{{ $parent->pr_BabyCurrentWeight }}">
+                        <td>
                             <div class="weight-display">
                                 <i class="fa-solid fa-weight-scale"></i>
-                                <span>{{ $parent->pr_BabyCurrentWeight }} kg</span>
+                                <span>{{ $infant->current_weight }} kg</span>
                             </div>
                         </td>
 
-                        <td class="actions">
-                            <button class="btn-view" title="View"
-                                onclick="openViewModal(
-                                    '{{ '#P'.$parent->pr_ID }}',
-                                    '{{ $parent->pr_BabyName }}',
-                                    '{{ $parent->pr_NICU }}',
-                                    '{{ $parent->updated_at?->format('d-m-Y h:i A') }}',
-                                    '{{ $parent->pr_BabyCurrentWeight }}'
-                                )">
-                                <i class="fa-solid fa-eye"></i>
+                       <td class="actions">
+                            {{-- UPDATED: Replaced Eye Icon with Download PDF Icon --}}
+                            <button class="btn-pdf" title="Download Report" onclick="downloadReport('{{ $infant->id }}')">
+                                <i class="fa-solid fa-file-pdf"></i>
                             </button>
                         </td>
                     </tr>
-
                 </tbody>
             </table>
-
-            {{-- No pagination for a single infant --}}
         </div>
 
     </div>
@@ -125,136 +241,138 @@
 
 {{-- ======================= MODALS ======================= --}}
 
-{{-- View Infant Modal --}}
-<div id="viewInfantModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content">
-        <div class="modal-header"><h2>Infant Information</h2><button class="modal-close-btn" onclick="closeViewModal()">Close</button></div>
-        <div class="modal-body">
-            <p><strong>Patient ID:</strong> <span id="viewPatientId">-</span></p>
-            <p><strong>Name:</strong> <span id="viewPatientName">-</span></p>
-            <p><strong>NICU Cubicle:</strong> <span id="viewCubicle">-</span></p>
-            <hr>
-            <p><strong>Last Updated:</strong> <span id="viewLastUpdated">-</span></p>
-            <p><strong>Current Weight:</strong> <span id="viewWeight">-</span></p>
+{{-- Milk Allocation Detail Modal --}}
+<div id="allocationDetailModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:700px;">
+        <div class="modal-header">
+            <h2><i class="fas fa-file-medical-alt"></i> Milk Allocation Details</h2>
+            <button class="modal-close-btn" onclick="closeAllocationModal()">Close</button>
         </div>
-    </div>
-</div>
-
-{{-- Milk Detail Modal --}}
-<div id="milkDetailModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:600px;">
-        <div class="modal-header"><h2>Milk Allocation Details</h2><button class="modal-close-btn" onclick="closeMilkDetailModal()">Close</button></div>
         <div class="modal-body">
-            <div style="background:#f0f9ff;padding:15px;border-radius:8px;margin-bottom:20px;">
-                <h3 id="modalMilkId" style="margin:0;color:#0369a1;">-</h3>
-                <span style="font-size:13px;color:#64748b;">Milk Unit ID</span>
+            
+            {{-- 1. Donor & Milk Info --}}
+            <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Donor Name</label>
+                    <p id="modalDonorName">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Donor ID</label>
+                    <p id="modalDonorId">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Donor Consent Status</label>
+                    <p id="modalConsent" style="color:#166534; font-weight:700;">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Total Allocated Volume</label>
+                    <p id="modalTotalVol" style="color:#0369a1; font-weight:800; font-size:16px;">-</p>
+                </div>
             </div>
 
-            <div class="modal-section">
-                <label style="font-size:12px;color:#64748b;font-weight:600;">VOLUME</label>
-                <p id="modalMilkVolume" style="font-size:18px;font-weight:700;color:#334155;margin-top:0;">-</p>
+            {{-- 2. Dispensing Method & Doctor --}}
+            <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Dispensing & Assignment</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Dispensing Method</label>
+                    <div id="modalMethodBadge"></div>
+                </div>
+                <div class="detail-item">
+                    <label>Feeding Schedule</label>
+                    <p id="modalSchedule">-</p>
+                    <small id="modalStartTime" style="color:#64748b;">-</small>
+                </div>
+                <div class="detail-item">
+                    <label>Assigned By (Doctor)</label>
+                    <p id="modalDoctorName">-</p>
+                    <small id="modalDoctorId" style="color:#64748b;">-</small>
+                </div>
             </div>
 
-            <div class="modal-section">
-                <label style="font-size:12px;color:#64748b;font-weight:600;">ALLOCATION DATE & TIME</label>
-                <p id="modalMilkDate" style="font-size:16px;color:#334155;margin-top:0;">-</p>
-            </div>
+            {{-- 3. Allocation History Table --}}
+            <div class="section-title"><i class="fas fa-history"></i> Allocation History (Nurse Records)</div>
+            <table class="allocation-list">
+                <thead>
+                    <tr>
+                        <th>Milk Unit ID</th>
+                        <th>Volume</th>
+                        <th>Allocation Time</th>
+                        <th>Allocated By (Nurse)</th>
+                    </tr>
+                </thead>
+                <tbody id="allocationTableBody">
+                    {{-- Rows injected via JS --}}
+                </tbody>
+            </table>
+
         </div>
     </div>
 </div>
 
 <script>
-    /* === Sorting Logic === */
-    let sortDirection = { 0: false };
 
-    function sortTable(columnIndex) {
-        const table = document.getElementById("infantsTable");
-        const tbody = table.tBodies[0];
-        const rows = Array.from(tbody.rows);
-        const headers = table.querySelectorAll('th');
-
-        sortDirection[columnIndex] = !sortDirection[columnIndex];
-        const asc = sortDirection[columnIndex];
-
-        rows.sort((a, b) => {
-            const A = a.cells[columnIndex].getAttribute('data-order');
-            const B = b.cells[columnIndex].getAttribute('data-order');
-
-            return asc
-                ? (A > B ? 1 : -1)
-                : (A < B ? 1 : -1);
-        });
-
-        tbody.append(...rows);
-
-        headers.forEach((th, idx) => {
-            const icon = th.querySelector('.sort-icon');
-            if (!icon) return;
-
-            icon.className = 'fas fa-sort sort-icon';
-
-            if (idx === columnIndex) {
-                icon.classList.add('sort-active');
-                icon.classList.remove('fa-sort');
-                icon.classList.add(asc ? 'fa-sort-up' : 'fa-sort-down');
-            }
-        });
-    }
-
-    /* === SEARCH FUNCTION === */
-    document.getElementById("searchBox").addEventListener("input", function () {
-        const term = this.value.toLowerCase().trim();
-        const table = document.getElementById("infantsTable");
-        const rows = table.tBodies[0].rows;
-
-        for (let row of rows) {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(term) ? "" : "none";
+    function downloadReport(patientId) {
+            // In a real app, you would pass the ID to the route: 
+            // window.open(`/parent/report-pdf/${patientId}`, '_blank');
+            
+            // For this demo, we assume a static route or view
+            // Ensure you create the route in web.php pointing to the new file below
+            window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
         }
-    });
 
-    /* === Infant Modal === */
-    function openViewModal(id, name, nicu, updated, weight) {
-        document.getElementById('viewPatientId').textContent = id;
-        document.getElementById('viewPatientName').textContent = name;
-        document.getElementById('viewCubicle').textContent = nicu;
-        document.getElementById('viewLastUpdated').textContent = updated;
-        document.getElementById('viewWeight').textContent = weight + " kg";
-        document.getElementById('viewInfantModal').style.display = 'flex';
+    function openAllocationModal(details, totalVol) {
+        // 1. Populate Basic Info
+        document.getElementById('modalDonorName').textContent = details.donor_name;
+        document.getElementById('modalDonorId').textContent = details.donor_id;
+        document.getElementById('modalConsent').textContent = details.consent;
+        document.getElementById('modalTotalVol').textContent = totalVol + " ml";
+        
+        // 2. Method Badge
+        const badgeDiv = document.getElementById('modalMethodBadge');
+        if(details.method === 'Milk Kinship') {
+            badgeDiv.innerHTML = `<span class="badge-method badge-kinship"><i class="fas fa-check"></i> Milk Kinship</span>`;
+        } else {
+            badgeDiv.innerHTML = `<span class="badge-method badge-no-kinship"><i class="fas fa-ban"></i> No Milk Kinship</span>`;
+        }
+
+        // 3. Schedule & Doctor
+        document.getElementById('modalSchedule').textContent = details.schedule;
+        document.getElementById('modalStartTime').textContent = "Start: " + details.start_time;
+        document.getElementById('modalDoctorName').textContent = details.doctor_name;
+        document.getElementById('modalDoctorId').textContent = details.doctor_id;
+
+        // 4. Populate Table
+        const tbody = document.getElementById('allocationTableBody');
+        tbody.innerHTML = '';
+        
+        details.allocations.forEach(alloc => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:600; color:#0f172a;">${alloc.milk_id}</td>
+                <td>${alloc.volume} ml</td>
+                <td>${alloc.time}</td>
+                <td>
+                    <strong>${alloc.nurse_name}</strong><br>
+                    <span style="color:#64748b; font-size:11px;">${alloc.nurse_id}</span>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('allocationDetailModal').style.display = 'flex';
     }
 
-    function closeViewModal() {
-        document.getElementById('viewInfantModal').style.display = 'none';
+    function closeAllocationModal() {
+        document.getElementById('allocationDetailModal').style.display = 'none';
     }
 
-    /* === Milk Detail Modal === */
-    function openMilkDetailModal(id, volume, jsonDate) {
-        document.getElementById('modalMilkId').textContent = id;
-        document.getElementById('modalMilkVolume').textContent = volume + " ml";
-
-        let formatted = "N/A";
-        try {
-            let parsed = JSON.parse(jsonDate);
-            if (parsed.datetime) {
-                formatted = new Date(parsed.datetime)
-                    .toLocaleString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                        hour12: true
-                    });
-            }
-        } catch(e) {}
-
-        document.getElementById('modalMilkDate').textContent = formatted;
-        document.getElementById('milkDetailModal').style.display = 'flex';
+    function openInfantProfile() {
+        Swal.fire('Info', 'This would open the full infant profile view.', 'info');
     }
-
-    function closeMilkDetailModal() {
-        document.getElementById('milkDetailModal').style.display = 'none';
-    }
+    
+    // Sort logic (Simple placeholder)
+    function sortTable(n) { console.log("Sorting column " + n); }
 </script>
 
 @endsection
