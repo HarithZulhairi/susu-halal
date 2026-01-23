@@ -349,3 +349,123 @@ nav[role="navigation"] {
     from { opacity: 0; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Modal Content Width Override */
+.modal-content {
+    max-width: 700px;
+    width: 90%;
+}
+
+/* Info Section Styles */
+.info-section {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.info-section h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #1A5F7A;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+    gap: 16px;
+}
+
+.info-item label {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.info-item p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.info-item p.highlight {
+    font-weight: 700;
+    color: #0ea5e9;
+    font-size: 16px;
+}
+
+/* Consent Badges */
+.consent-grid {
+    display: flex;
+    gap: 15px;
+}
+
+.consent-badge {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.consent-badge.approved {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+/* Method Box */
+.method-box {
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.method-box h4 {
+    margin: 0 0 5px 0;
+    color: #1e293b;
+}
+
+.method-box hr {
+    border: 0;
+    border-top: 1px dashed #cbd5e1;
+    margin: 10px 0;
+}
+
+/* Modal Footer */
+.modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.btn-primary {
+    background: #1A5F7A;
+    color: white;
+}
