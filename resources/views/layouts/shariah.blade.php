@@ -37,6 +37,7 @@
     <ul>
       <li><a href="{{ route('shariah.shariah_manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records Approval</a></li>
       <li><a href="{{ route('shariah.infant-request') }}"><i class="fa-solid fa-gear"></i> Infant Milk Request</a></li> 
+      <li><a href="{{ route('shariah.infants-request') }}"><i class="fa-solid fa-route"></i> Milk Traceability</a></li>
     </ul>
   </div>
 

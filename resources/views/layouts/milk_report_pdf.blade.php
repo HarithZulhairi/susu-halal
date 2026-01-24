@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px; /* Slightly smaller font to fit more columns */
             margin: 0;
             padding: 20px;
             color: #000;
@@ -16,35 +16,35 @@
             text-align: center;
             font-weight: bold;
             font-size: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-transform: uppercase;
             text-decoration: none;
         }
-
-        /* NEW STYLE FOR LOGO */
+        
         .logo {
             display: block;
-            margin: 0 auto 10px auto; /* Center horizontally, margin bottom */
-            max-width: 400px; /* Adjust width as needed */
+            margin: 0 auto 10px auto; 
+            max-width: 300px; 
             height: auto;
         }
         
-        /* Layout for Patient Info Header */
+        /* Patient Info Header */
         .info-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
             border: 2px solid #000;
+            font-size: 12px;
         }
         .info-table td {
             border: 1px solid #000;
-            padding: 4px 8px;
+            padding: 6px 8px;
             vertical-align: middle;
         }
         .label {
             font-weight: bold;
             background-color: #f0f0f0;
-            width: 15%;
+            width: 18%;
         }
         
         /* Main Data Table */
@@ -56,33 +56,32 @@
         .data-table th {
             border: 1px solid #000;
             background-color: #e0e0e0;
-            padding: 8px;
+            padding: 6px 4px;
             text-align: center;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px; /* Smaller header font */
+            vertical-align: middle;
         }
         .data-table td {
             border: 1px solid #000;
-            padding: 6px;
+            padding: 4px;
             text-align: center;
-            font-size: 12px;
-            height: 25px; /* Min height for handwriting lines */
+            font-size: 11px;
+            height: 25px; 
         }
         
-        /* Specific Column Widths from image approximation */
-        .col-date { width: 15%; }
-        .col-batch { width: 15%; }
-        .col-freq { width: 10%; }
-        .col-amt { width: 10%; }
-        .col-sig { width: 15%; }
+        /* Adjusted Column Widths for 9 Columns */
+        .col-date   { width: 10%; }
+        .col-batch  { width: 10%; }
+        .col-donor  { width: 10%; } /* New */
+        .col-consent{ width: 10%; } /* New */
+        .col-freq   { width: 8%; }
+        .col-amt    { width: 8%; }
+        .col-sig    { width: 12%; }
         .col-remark { width: 20%; }
 
-        .red-line {
-            border-bottom: 2px solid red;
-        }
-        .text-red {
-            color: red;
-        }
+        .red-line { border-bottom: 2px solid red; }
+        .text-red { color: red; }
 
         /* Footer */
         .footer {
@@ -126,31 +125,27 @@
     <table class="info-table">
         <tr>
             <td class="label">NAME</td>
-            <td colspan="3" style="font-weight: bold; font-size: 14px;">BABY ADAM</td>
+            <td style="width: 30%; font-weight: bold;">BABY ADAM</td>
+            <td class="label">PATIENT ID (MRN)</td>
+            <td style="font-weight: bold;">P-2024-001</td>
         </tr>
         <tr>
-            <td class="label">DOB/TOB</td>
-            <td style="width: 35%;">15-01-2026 / 08:30 AM</td>
+            <td class="label">DOB / TOB</td>
+            <td>15-01-2026 / 08:30 AM</td>
+            <td class="label">NICU LOCATION</td>
+            <td>NICU-A1</td>
+        </tr>
+        <tr>
             <td class="label">GESTATIONAL AGE</td>
             <td>32 Weeks</td>
-            <td class="label">CGA</td>
-            <td></td>
-        </tr>
-        <tr>
-            <td class="label">BWT</td>
-            <td>1.84 KG</td>
-            <td class="label">CWT</td>
-            <td>2.5 KG</td>
-            <td class="label">WWT</td>
-            <td>1.84 KG</td>
-        </tr>
-        <tr>
-            <td class="label">TFI</td>
-            <td>60 cc/kg/DAY</td>
-            <td class="label">SATISFIED FEEDING</td>
-            <td>15.8 ml</td>
             <td class="label">DAY OF LIFE</td>
             <td>7</td>
+        </tr>
+        <tr>
+            <td class="label">DISPENSING METHOD</td>
+            <td>Milk Kinship (Full Nursing)</td>
+            <td class="label">FEEDING SCHEDULE</td>
+            <td>Every 3 Hours</td>
         </tr>
     </table>
 
@@ -159,7 +154,9 @@
             <tr>
                 <th class="col-date">DATE/TIME</th>
                 <th class="col-batch">BATCH NO</th>
-                <th class="col-freq">FREQUENCY</th>
+                <th class="col-donor">DONOR ID</th>
+                <th class="col-consent">CONSENT<br>(KINSHIP)</th>
+                <th class="col-freq">FREQ</th>
                 <th class="col-amt">AMOUNT</th>
                 <th class="col-sig">INCHARGE</th>
                 <th class="col-sig">WITNESS</th>
@@ -170,6 +167,8 @@
             <tr>
                 <td>21/01/26<br>08:00 H</td>
                 <td>M26-001</td>
+                <td>D-2024-55</td>
+                <td>YES</td>
                 <td>3 H</td>
                 <td>30 mls</td>
                 <td>Nurse Joy</td>
@@ -179,6 +178,8 @@
             <tr>
                 <td>21/01/26<br>11:00 H</td>
                 <td>M26-002</td>
+                <td>D-2024-55</td>
+                <td>YES</td>
                 <td>3 H</td>
                 <td>30 mls</td>
                 <td>Nurse Joy</td>
@@ -188,6 +189,8 @@
             <tr>
                 <td>21/01/26<br>14:00 H</td>
                 <td>M26-005</td>
+                <td>D-2024-88</td>
+                <td>NO</td>
                 <td>3 H</td>
                 <td>30 mls</td>
                 <td>Nurse Joy</td>
@@ -196,7 +199,7 @@
             </tr>
             
             <tr>
-                <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL:</td>
+                <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL:</td>
                 <td class="text-red" style="font-weight: bold; border-bottom: 2px solid red;">90 mls</td>
                 <td colspan="3"></td>
             </tr>
@@ -204,6 +207,8 @@
             @for($i = 0; $i < 15; $i++)
             <tr>
                 <td>&nbsp;</td>
+                <td></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -221,10 +226,8 @@
     </div>
 
     <script>
-        // Auto-print when opened
         window.onload = function() {
             // setTimeout(() => window.print(), 500);
         };
     </script>
 </body>
-</html>

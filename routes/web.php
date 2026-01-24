@@ -21,6 +21,11 @@ Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processi
 Route::view('/donor/manage-milk-records', 'donor.donor_manage-milk-records')->name('donor.manage-milk-records');
 Route::view('/labtech/inventory-quality-control', 'labtech.labtech_quality-control')->name('labtech.quality-control');
 Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
+Route::view('/hmmc/infants-request', 'hmmc.hmmc_infants-request')->name('hmmc.infants-request');
+Route::view('/nurse/infants-request', 'nurse.nurse_infants-request')->name('nurse.infants-request');
+Route::view('/doctor/infants-request', 'doctor.doctor_infants-request')->name('doctor.infants-request');
+Route::view('/shariah/infants-request', 'shariah.shariah_infants-request')->name('shariah.infants-request');
+Route::view('/donor/infants-request', 'donor.donor_infants-request')->name('donor.infants-request');
 
 // Load Laravel Breeze/Fortify auth routes (login, logout, password reset, etc.)
 // Only guests can access login/register

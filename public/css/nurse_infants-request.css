@@ -1,0 +1,292 @@
+@import url("base_layout.css");
+@import url("modal.css");
+
+/* ========== Card Container ========== */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+/* ========== Card Header ========== */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.card-header .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.card-header .btn {
+  background: #f3f4f6;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.card-header .btn:hover {
+  background: #e5e7eb;
+}
+
+.card-header .btn i {
+  font-size: 14px;
+}
+
+.card-header .btn-more {
+  padding: 8px 12px;
+}
+
+/* ========== Table Styles ========== */
+.infants-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.infants-table thead {
+  background: #f9fafb;
+}
+
+.infants-table th {
+  text-align: left;
+  padding: 14px 24px;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.infants-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.2s;
+}
+
+.infants-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.infants-table td {
+  padding: 20px 24px;
+  vertical-align: middle;
+}
+
+/* ========== Patient Info ========== */
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.patient-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.patient-avatar i {
+  font-size: 20px;
+  color: #9ca3af;
+}
+
+.patient-details strong {
+  display: block;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.patient-details span {
+  display: block;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ========== NICU Cubicle ========== */
+.infants-table td:nth-child(2) {
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* ========== Last Updated ========== */
+.infants-table td:nth-child(3) {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.infants-table td:nth-child(4) {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ========== Current Weight Badge ========== */
+/* ========== Current Weight Display (Redesigned) ========== */
+.weight-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #e0f2fe;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0369a1;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.weight-display i {
+  color: #0284c7;
+  font-size: 16px;
+}
+
+/* ========== Updated Action Buttons ========== */
+/* ========== Actions Column (Compact Icons) ========== */
+.actions {
+  display: inline-block;
+}
+
+.actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  margin-right: 4px;
+}
+
+.actions button:first-child {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.actions button:last-child {
+  margin-right: 0;
+}
+
+/* Icon Colors */
+.actions .btn-view i {
+  color: #16a34a; /* Green */
+}
+
+.actions .btn-edit i {
+  color: #eab308; /* Amber */
+}
+
+.actions .btn-more i {
+  color: #6b7280; /* Gray */
+}
+
+/* Hover */
+.actions button:hover {
+  background: #f3f4f6;
+}
+
+/* Add padding inside the Actions cell for better alignment */
+.infants-table td.actions {
+  padding-top: 28px;
+  padding-bottom: 18px;
+}
+
+/* Milk Badge Styling */
+.milk-badge-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 250px; /* Limit width to prevent table stretching */
+}
+
+.milk-badge {
+    background-color: #e0f2fe; /* Light Blue */
+    color: #0284c7; /* Dark Blue text */
+    border: 1px solid #bae6fd;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.milk-badge i {
+    font-size: 9px;
+}
+
+.no-data {
+    color: #94a3b8;
+    font-size: 12px;
+    font-style: italic;
+}
+
+
+/* ========== Responsive Design ========== */
+@media (max-width: 1200px) {
+
+  .infants-table th,
+  .infants-table td {
+    padding: 16px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .card-header .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .infants-table {
+    font-size: 13px;
+  }
+  
+  .infants-table th,
+  .infants-table td {
+    padding: 12px 16px;
+  }
+  
+  .patient-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .patient-avatar i {
+    font-size: 16px;
+  }
+}
