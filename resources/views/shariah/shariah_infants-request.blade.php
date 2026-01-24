@@ -3,7 +3,7 @@
 @section('title', "Infant Milk Traceability")
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/shariah_infants-request.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hmmc_infants-request.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -110,14 +110,25 @@
                     'req_id' => 101,
                     'total_allocated_vol' => 60, 
                     'details' => (object)[
+                        // Patient Info (Passed via JS)
+                        'patient_name' => 'Baby Adam',
+                        'patient_id' => 'P-2024-001',
+                        'patient_nicu' => 'NICU-A1',
+                        'parent_consent' => 'Consent Granted',
+                        
+                        // Donor Info
                         'donor_id' => 'D-2024-055',
                         'donor_name' => 'Sarah Connor',
                         'consent' => 'Consent Granted (Full)',
+                        
+                        // Dispensing
                         'method' => 'Milk Kinship', 
                         'schedule' => 'Every 3 Hours',
                         'start_time' => '2026-01-22 08:00 AM',
                         'doctor_id' => 'DR-007',
                         'doctor_name' => 'Dr. Strange',
+                        
+                        // Allocations
                         'allocations' => [
                             (object)[ 'milk_id' => 'M26-001', 'volume' => 30, 'time' => '2026-01-22 08:15 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ],
                             (object)[ 'milk_id' => 'M26-002', 'volume' => 30, 'time' => '2026-01-22 11:15 AM', 'nurse_id' => 'N-102', 'nurse_name' => 'Nurse Carla' ]
@@ -128,6 +139,11 @@
                     'req_id' => 102,
                     'total_allocated_vol' => 30,
                     'details' => (object)[
+                        'patient_name' => 'Baby Adam',
+                        'patient_id' => 'P-2024-001',
+                        'patient_nicu' => 'NICU-A1',
+                        'parent_consent' => 'Consent Granted',
+                        
                         'donor_id' => 'D-2024-088',
                         'donor_name' => 'Jane Doe',
                         'consent' => 'Consent Granted (Restricted)',
@@ -154,6 +170,11 @@
                     'req_id' => 201,
                     'total_allocated_vol' => 120,
                     'details' => (object)[
+                        'patient_name' => 'Baby Sarah',
+                        'patient_id' => 'P-2024-005',
+                        'patient_nicu' => 'NICU-B3',
+                        'parent_consent' => 'Consent Granted',
+                        
                         'donor_id' => 'D-2024-099',
                         'donor_name' => 'Emily Blunt',
                         'consent' => 'Consent Granted (Full)',
@@ -183,6 +204,11 @@
                     'req_id' => 301,
                     'total_allocated_vol' => 45,
                     'details' => (object)[
+                        'patient_name' => 'Baby Mikail',
+                        'patient_id' => 'P-2024-012',
+                        'patient_nicu' => 'NICU-C2',
+                        'parent_consent' => 'Consent Granted',
+                        
                         'donor_id' => 'D-2024-055',
                         'donor_name' => 'Sarah Connor',
                         'consent' => 'Consent Granted (Full)',
@@ -264,7 +290,7 @@
                         </td>
 
                         <td class="actions">
-                            {{-- UPDATED: Download PDF Icon --}}
+                            {{-- Download PDF Icon --}}
                             <button class="btn-pdf" title="Download Traceability Report" onclick="downloadReport('{{ $infant->id }}')">
                                 <i class="fa-solid fa-file-pdf"></i>
                             </button>
@@ -289,7 +315,28 @@
         </div>
         <div class="modal-body">
             
-            {{-- 1. Donor & Milk Info --}}
+            {{-- 1. NEW: Patient & Consent Info --}}
+            <div class="section-title"><i class="fas fa-baby"></i> Patient & Consent Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Patient Name</label>
+                    <p id="modalPatientName">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Patient ID</label>
+                    <p id="modalPatientId">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>NICU Location</label>
+                    <p id="modalNICU">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Parent Consent</label>
+                    <p id="modalParentConsent" style="color:#166534; font-weight:700;">-</p>
+                </div>
+            </div>
+
+            {{-- 2. Donor & Milk Info --}}
             <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -310,7 +357,7 @@
                 </div>
             </div>
 
-            {{-- 2. Dispensing Method & Doctor --}}
+            {{-- 3. Dispensing Method & Doctor --}}
             <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Dispensing & Assignment</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -329,7 +376,7 @@
                 </div>
             </div>
 
-            {{-- 3. Allocation History Table --}}
+            {{-- 4. Allocation History Table --}}
             <div class="section-title"><i class="fas fa-history"></i> Allocation History (Nurse Records)</div>
             <table class="allocation-list">
                 <thead>
@@ -352,18 +399,23 @@
 <script>
 
     function downloadReport(patientId) {
-            // In a real app, you would pass the ID to the route
             window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
         }
 
     function openAllocationModal(details, totalVol) {
-        // 1. Populate Basic Info
+        // 1. Populate Patient Info
+        document.getElementById('modalPatientName').textContent = details.patient_name;
+        document.getElementById('modalPatientId').textContent = details.patient_id;
+        document.getElementById('modalNICU').textContent = details.patient_nicu;
+        document.getElementById('modalParentConsent').textContent = details.parent_consent;
+
+        // 2. Populate Donor Info
         document.getElementById('modalDonorName').textContent = details.donor_name;
         document.getElementById('modalDonorId').textContent = details.donor_id;
         document.getElementById('modalConsent').textContent = details.consent;
         document.getElementById('modalTotalVol').textContent = totalVol + " ml";
         
-        // 2. Method Badge
+        // 3. Method Badge
         const badgeDiv = document.getElementById('modalMethodBadge');
         if(details.method === 'Milk Kinship') {
             badgeDiv.innerHTML = `<span class="badge-method badge-kinship"><i class="fas fa-check"></i> Milk Kinship</span>`;
@@ -371,13 +423,13 @@
             badgeDiv.innerHTML = `<span class="badge-method badge-no-kinship"><i class="fas fa-ban"></i> No Milk Kinship</span>`;
         }
 
-        // 3. Schedule & Doctor
+        // 4. Schedule & Doctor
         document.getElementById('modalSchedule').textContent = details.schedule;
         document.getElementById('modalStartTime').textContent = "Start: " + details.start_time;
         document.getElementById('modalDoctorName').textContent = details.doctor_name;
         document.getElementById('modalDoctorId').textContent = details.doctor_id;
 
-        // 4. Populate Table
+        // 5. Populate Table
         const tbody = document.getElementById('allocationTableBody');
         tbody.innerHTML = '';
         
