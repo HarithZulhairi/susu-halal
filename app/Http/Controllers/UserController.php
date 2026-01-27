@@ -272,8 +272,20 @@ class UserController extends Controller
                 'infection_risk' => 'nullable|string|max:500',
                 'medication' => 'nullable|string|max:500',
                 'recent_illness' => 'nullable|string|max:500',
+                'smoking_status' => 'nullable|string|max:255',
+                'physical_health' => 'nullable|string|max:255',
+                'mental_health' => 'nullable|string|max:255',
                 'tobacco_alcohol' => 'nullable|boolean',
                 'dietary_alerts' => 'nullable|string|max:500',
+                'marital_status' => 'nullable|string|max:50',
+                'husband_consent' => 'nullable|string|max:10',
+                'donation_type' => 'nullable|string|max:20',
+                'religion' => 'nullable|string|max:50',
+                'excess_breast_milk' => 'nullable|string|max:10',
+                'milk_quantity' => 'nullable|numeric|min:0',
+                'milk_unit' => 'nullable|string|in:ml,l,oz',
+                'parity' => 'nullable|integer|min:0',
+                'delivery_details' => 'nullable|array',
             ]);
         }
 
@@ -452,9 +464,25 @@ class UserController extends Controller
         // Donor fields
         if ($role === 'donor') {
             $updateData['dn_DOB'] = $validated['dob'] ?? null;
+            $updateData['dn_MaritalStatus'] = $validated['marital_status'] ?? null;
+            $updateData['dn_HusbandConsent'] = $validated['husband_consent'] ?? null;
+            $updateData['dn_DonationType'] = $validated['donation_type'] ?? null;
+            $updateData['dn_Religion'] = $validated['religion'] ?? null;
+            $updateData['dn_ExcessBreastMilk'] = $validated['excess_breast_milk'] ?? null;
+            if (isset($validated['milk_quantity']) || isset($validated['milk_unit'])) {
+                $updateData['dn_MilkQuantity'] = json_encode([
+                    'quantity' => $validated['milk_quantity'] ?? null,
+                    'unit'     => $validated['milk_unit'] ?? null
+                ]);
+            }
+            $updateData['dn_Parity'] = $validated['parity'] ?? null;
+            $updateData['dn_DeliveryDetails'] = $validated['delivery_details'] ?? null;
             $updateData['dn_InfectionDeseaseRisk'] = $validated['infection_risk'] ?? null;
             $updateData['dn_Medication'] = $validated['medication'] ?? null;
             $updateData['dn_RecentIllness'] = $validated['recent_illness'] ?? null;
+            $updateData['dn_SmokingStatus'] = $validated['smoking_status'] ?? null;
+            $updateData['dn_PhysicalHealth'] = $validated['physical_health'] ?? null;
+            $updateData['dn_MentalHealth'] = $validated['mental_health'] ?? null;
             $updateData['dn_TobaccoAlcohol'] = $validated['tobacco_alcohol'] ?? false;
             $updateData['dn_DietaryAlerts'] = $validated['dietary_alerts'] ?? null;
         }
@@ -599,6 +627,7 @@ class UserController extends Controller
                         'pr_BabyGender'        => $request->baby_gender ?? null,
                         'pr_BabyBirthWeight'   => $request->baby_birth_weight ?? null,
                         'pr_BabyCurrentWeight' => $request->baby_current_weight ?? null,
+                        'pr_ConsentStatus'     => 'Pending',
                         'created_at'           => now(),
                         'updated_at'           => now(),
                     ]);
@@ -613,12 +642,27 @@ class UserController extends Controller
                         'dn_Email'              => $request->email,
                         'dn_Contact'            => $request->contact ?? null,
                         'dn_Address'            => $request->address ?? null,
+                        'dn_MaritalStatus'      => $request->marital_status ?? null,
+                        'dn_HusbandConsent'     => $request->husband_consent ?? null,
+                        'dn_DonationType'       => $request->donation_type ?? null,
+                        'dn_Religion'           => $request->religion ?? null,
+                        'dn_ExcessBreastMilk'   => $request->excess_breast_milk ?? null,
+                        'dn_MilkQuantity'       => json_encode([
+                            'quantity' => $request->milk_quantity ?? null,
+                            'unit' => $request->milk_unit ?? null
+                        ]),
+                        'dn_Parity'             => $request->parity ?? null,
+                        'dn_DeliveryDetails'    => $request->delivery_details ?? null,
                         'dn_DOB'                => $request->dob ?? null,
                         'dn_InfectionDeseaseRisk' => $request->infection_risk ?? null,
                         'dn_Medication'         => $request->medication ?? null,
                         'dn_RecentIllness'      => $request->recent_illness ?? null,
+                        'dn_SmokingStatus'      => $request->smoking_status ?? null,
+                        'dn_PhysicalHealth'     => $request->physical_health ?? null,
+                        'dn_MentalHealth'       => $request->mental_health ?? null,
                         'dn_TobaccoAlcohol'     => $request->tobacco_alcohol ?? false,
                         'dn_DietaryAlerts'      => $request->dietary_alerts ?? null,
+                        'dn_ConsentStatus'      => 'Pending',
                         'created_at'            => now(),
                         'updated_at'            => now(),
                     ]);

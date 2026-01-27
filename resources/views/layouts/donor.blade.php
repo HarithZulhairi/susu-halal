@@ -41,9 +41,10 @@
     }
 </style>
 
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-  <div class="container">
+  <div class="dashboard-container">
     <aside class="sidebar">
   <div class="logo">
     <img src="{{ asset('images/hmmc_logo_clear.png') }}" alt="HALIMATUSSAADIA Mother's Milk Centre Logo" style="width: 270px; height: auto;">

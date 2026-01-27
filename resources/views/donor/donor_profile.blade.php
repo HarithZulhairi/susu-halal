@@ -5,6 +5,7 @@
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/donor_profile.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @if(session('success'))
     <div id="success-toast" class="toast-success">
@@ -202,38 +203,94 @@
                 {{-- ========================================================= --}}
                 {{-- NEW: GENERAL MILK KINSHIP NOTIFICATION CARD --}}
                 {{-- ========================================================= --}}
-                <div class="profile-section" style="border-left: 4px solid #f59e0b;">
+                <div class="profile-section">
                     <div class="section-header">
-                        <h3 style="display:flex; align-items:center; gap:10px;">
-                            <i class="fas fa-handshake" style="color:#f59e0b;"></i> 
+                        <h3 style="display:flex; align-items:center; gap:10px;"> 
                             Milk Kinship (Mahram) Confirmation
                         </h3>
-                        <span class="status-badge processing">Action Required</span>
+                        @if(isset($profile->consent_status) && ($profile->consent_status === 'Accepted' || $profile->consent_status === 'Declined'))
+                            <span x-data>
+                                <button type="button" 
+                                    style="background-color: transparent; border: none; cursor: pointer;" 
+                                    x-on:click.prevent="$dispatch('open-modal', 'editKinshipModal')">
+                                    <i class="fa-regular fa-pen-to-square" style="font-size:20px; color:blue;"></i>
+                                </button>
+                            </span>
+                        @else
+                            <span class="status-badge processing">Action Required</span>
+                        @endif
                     </div>
 
                     <div class="kinship-list">
                         {{-- GENERALIZED QUESTION --}}
-                        <div class="kinship-item" id="request-generic">
-                            <div class="kinship-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="kinship-details">
-                                <h4>Do you consent to establish Milk Kinship?</h4>
-                                <p class="kinship-note" style="margin-top:10px; line-height:1.5;">
-                                    <small><em>By accepting, you acknowledge that you will become the <strong>Milk Mother (Ibu Susuan)</strong> to the recipient infant(s) associated with this batch, establishing a permanent Mahram relationship in accordance with Shariah law.</em></small>
-                                </p>
-                            </div>
-                            <div class="kinship-actions">
-                                <button type="button" class="btn-kinship reject" onclick="handleKinshipDecision('generic', 'reject')">
-                                    <i class="fas fa-times"></i> Decline
-                                </button>
-                                <button type="button" class="btn-kinship approve" onclick="handleKinshipDecision('generic', 'approve')">
-                                    <i class="fas fa-check"></i> I Accept & Confirm
-                                </button>
-                            </div>
+                        <div class="kinship-item" id="request-generic" style="display:flex; align-items:center; justify-content:center;gap:10px;">
+                            @if(isset($profile->consent_status) && $profile->consent_status === 'Accepted')
+                                <div class="kinship-icon" style="color:#22c55d;">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="kinship-actions" style="justify-content: flex-start; color:#22c55d;">
+                                    <h4>Accepted - Milk Kinship Established</h4>
+                                </div>
+                            @elseif(isset($profile->consent_status) && $profile->consent_status === 'Declined')
+                                <div class="kinship-icon" style="color:#ef4444;">
+                                    <i class="fas fa-circle-exclamation"></i>
+                                </div>
+                                <div class="kinship-actions" style="justify-content: flex-start; color:#ef4444;">
+                                    <h4>Declined - Milk Kinship Not Established</h4>
+                                </div>
+                            @else
+                                <div class="kinship-details">
+                                    <h4>Do you consent to establish Milk Kinship?</h4>
+                                    <p class="kinship-note" style="margin-top:10px; line-height:1.5;">
+                                        <small><em>By accepting, you acknowledge that you will become the <strong>Milk Mother (Ibu Susuan)</strong> to the recipient infant(s) associated with this batch, establishing a permanent Mahram relationship in accordance with Shariah law.</em></small>
+                                    </p>
+                                </div>
+                                <form id="kinship-form" method="POST" action="{{ route('donor.kinship') }}">
+                                    @csrf
+                                    <input type="hidden" name="decision" id="kinship-decision">
+                                    <div class="kinship-actions">
+                                        <button type="button" class="btn-kinship reject" onclick="handleKinshipDecision('generic', 'reject')">
+                                            <i class="fas fa-times"></i> Decline
+                                        </button>
+                                        <button type="button" class="btn-kinship approve" onclick="handleKinshipDecision('generic', 'approve')">
+                                            <i class="fas fa-check"></i> I Accept & Confirm
+                                        </button>
+                                    </div>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>
+
+                {{-- Edit Modal --}}
+                <x-modal name="editKinshipModal" focusable>
+                    <div class="p-6">
+                        <h2 class="text-lg font-medium text-gray-900" style="margin-bottom: 20px;">
+                            Update Kinship Decision
+                        </h2>
+                        
+                        <p class="mb-6 text-sm text-gray-600" style="margin-bottom: 20px;">
+                            Do you want to update your kinship consent status?
+                        </p>
+
+                        <form action="{{ route('edit.kinship') }}" method="POST" id="edit-kinship-form">
+                            @csrf
+                            <input type="hidden" name="decision" id="edit-kinship-decision">
+                            
+                            <div class="kinship-actions" style="justify-content: flex-end; gap: 10px;">
+                                <button type="button" class="btn-kinship reject" onclick="closeModal('editKinshipModal')">
+                                    Cancel
+                                </button>
+                                <button type="button" class="btn-kinship reject" onclick="handleEditKinshipDecision('reject')">
+                                    <i class="fas fa-times"></i> Decline
+                                </button>
+                                <button type="button" class="btn-kinship approve" onclick="handleEditKinshipDecision('approve')">
+                                    <i class="fas fa-check"></i> Accept
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </x-modal>
 
                 <!-- Certifications & Qualifications -->
                 <div class="profile-section">
@@ -417,23 +474,43 @@
             confirmButtonText: btnText
         }).then((result) => {
             if (result.isConfirmed) {
-                // Simulate backend success
-                Swal.fire(
-                    isApprove ? 'Accepted!' : 'Declined!',
-                    isApprove ? 'You are now recorded as the Milk Mother.' : 'Request removed.',
-                    'success'
-                );
-
-                // Animate removal
-                const item = document.getElementById('request-' + requestId);
-                if(item) {
-                    item.style.transition = 'all 0.5s ease';
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateX(20px)';
-                    setTimeout(() => item.remove(), 500);
-                }
+                // Set the decision value in the hidden input
+                document.getElementById('kinship-decision').value = action;
+                
+                // Submit the form
+                document.getElementById('kinship-form').submit();
             }
         });
+    }
+
+    // Handle Edit Kinship Modal Actions
+    function handleEditKinshipDecision(action) {
+        const isApprove = action === 'approve';
+        const titleText = isApprove ? 'Confirm Acceptance?' : 'Confirm Decline?';
+        const bodyText = isApprove 
+            ? 'You are confirming your acceptance of the Milk Kinship.' 
+            : 'Are you sure you want to change your status to Declined?';
+        const confirmColor = isApprove ? '#16a34a' : '#ef4444';
+        const btnText = isApprove ? 'Yes, Confirm' : 'Yes, Decline';
+
+        Swal.fire({
+            title: titleText,
+            text: bodyText,
+            icon: isApprove ? 'question' : 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmColor,
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: btnText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('edit-kinship-decision').value = action;
+                document.getElementById('edit-kinship-form').submit();
+            }
+        });
+    }
+
+    function closeModal(modalName) {
+        window.dispatchEvent(new CustomEvent('close-modal', { detail: modalName }));
     }
 </script>
 @endsection

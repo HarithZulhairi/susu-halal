@@ -284,6 +284,7 @@ class ProfileController extends Controller
             $formatted['baby_gender'] = $profile->pr_BabyGender ?? null;
             $formatted['baby_birth_weight'] = $profile->pr_BabyBirthWeight ?? null;
             $formatted['baby_current_weight'] = $profile->pr_BabyCurrentWeight ?? null;
+            $formatted['consent_status'] = $profile->pr_ConsentStatus ?? 'Pending';
         }
 
         // Donor-specific fields
@@ -294,6 +295,7 @@ class ProfileController extends Controller
             $formatted['recent_illness'] = $profile->dn_RecentIllness ?? null;
             $formatted['tobacco_alcohol'] = $profile->dn_TobaccoAlcohol ?? false;
             $formatted['dietary_alerts'] = $profile->dn_DietaryAlerts ?? null;
+            $formatted['consent_status'] = $profile->dn_ConsentStatus ?? 'Pending';
         }
 
         // Admin-specific fields
@@ -403,5 +405,84 @@ class ProfileController extends Controller
             \Log::error('Account deletion error: ' . $e->getMessage());
             return back()->with('error', 'Error deleting account: ' . $e->getMessage());
         }
+    }
+
+    public function kinship(Request $request)
+    {
+        // 1. Validate the input
+        $request->validate([
+            'decision' => 'required|in:approve,reject',
+        ]);
+
+        // 2. Get the currently authenticated donor
+        $user = Auth::user();
+        
+        // Ensure we find the donor record associated with this user
+        $donor = Donor::where('user_id', $user->id)->first(); 
+        $parent = ParentModel::where('user_id', $user->id)->first();
+
+        if (!$donor && !$parent) {
+            return back()->with('error', 'Donor or Parent profile not found.');
+        }
+
+        // 3. Update the status based on decision
+        if ($donor) {
+            if($request->decision === 'approve') {
+                $donor->dn_ConsentStatus = 'Accepted';
+                $message = 'You have successfully accepted the Milk Kinship.';
+            } else {
+                $donor->dn_ConsentStatus = 'Declined';
+                $message = 'You have declined the Milk Kinship request.';
+            }
+            $donor->save();
+        }
+        else{
+            if($request->decision === 'approve') {
+                $parent->pr_ConsentStatus = 'Accepted';
+                $message = 'You have successfully accepted the Milk Kinship.';
+            } else {
+                $parent->pr_ConsentStatus = 'Declined';
+                $message = 'You have declined the Milk Kinship request.';
+            }
+            $parent->save();
+        }
+
+        // 4. Redirect back with success message
+        return back()->with('success', $message);
+    }
+
+    public function editKinship(Request $request){
+        // 1. Get the currently authenticated donor
+        $user = Auth::user();
+        
+        // 2. Ensure we find the donor record associated with this user
+        $donor = Donor::where('user_id', $user->id)->first(); 
+        $parent = ParentModel::where('user_id', $user->id)->first();
+
+        if (!$donor && !$parent) {
+            return back()->with('error', 'Donor or Parent profile not found.');
+        }
+
+        // 3. Validate input
+        $request->validate([
+            'decision' => 'required|in:approve,reject',
+        ]);
+
+        $status = ($request->decision === 'approve') ? 'Accepted' : 'Declined';
+        $message = ($status === 'Accepted') 
+            ? 'Milk kinship accepted successfully.' 
+            : 'Milk kinship declined successfully.';
+
+        // 4. Update status
+        if($donor){
+            $donor->dn_ConsentStatus = $status;
+            $donor->save();
+        } else {
+            $parent->pr_ConsentStatus = $status;
+            $parent->save();
+        }
+
+        // 5. Redirect back with success message
+        return back()->with('success', $message);
     }
 }

@@ -1378,6 +1378,13 @@ function submitAllData() {
         const smokingStatus = document.querySelector('input[name="smokingStatus"]:checked')?.value;
         const physicalHealth = document.querySelector('input[name="physicalHealth"]:checked')?.value;
         const mentalHealth = document.querySelector('input[name="mentalHealth"]:checked')?.value;
+        const marital_status = document.querySelector('input[name="marital_status"]:checked')?.value;
+        const husband_consent = document.querySelector('input[name="husband_consent"]:checked')?.value;
+        const donation_type = document.querySelector('input[name="donation_type"]:checked')?.value;
+        const religion = document.querySelector('#religion').value;
+        const has_excess_milk = document.querySelector('input[name="has_excess_milk"]:checked')?.value;
+        const milk_unit = document.querySelector('input[name="milk_unit"]:checked')?.value;
+        const milk_quantity = document.querySelector('#milk_quantity').value;
         
         if (!smokingStatus || !physicalHealth || !mentalHealth || !infectiousRiskOption || !medicationOption || !recentIllnessOption || !tobaccoAlcoholOption || !dietaryAlertsOption) {
             throw new Error('Please fill all health and lifestyle information');
@@ -1435,7 +1442,20 @@ function submitAllData() {
         formData.append('availableDays', JSON.stringify(availableDays));
         formData.append('timeSlots', JSON.stringify(timeSlots));
         formData.append('smokingStatus', smokingStatus);
-i
+        formData.append('marital_status', marital_status);
+        if (marital_status === 'married') {
+             formData.append('husband_consent', husband_consent);
+        }
+        formData.append('donation_type', donation_type);
+        formData.append('religion', religion);
+        formData.append('has_excess_milk', has_excess_milk);
+        if (has_excess_milk === 'yes') {
+            formData.append('milk_unit', milk_unit);
+            formData.append('milk_quantity', milk_quantity);
+        }
+        formData.append('physicalHealth', physicalHealth);
+        formData.append('mentalHealth', mentalHealth);
+
 
         console.log('Form data collected, making AJAX request...');
         console.log('Terms accepted:', termsChecked);
