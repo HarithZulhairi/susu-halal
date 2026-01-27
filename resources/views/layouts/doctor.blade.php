@@ -43,6 +43,7 @@
         <a href="{{ route('doctor.doctor_milk-request') }}"><i class="fa-solid fa-list"></i> Request Records</a>
       </li>
       <li><a href="{{ route('doctor.manage-milk-records') }}"><i class="fa-solid fa-baby"></i> Milk Records</a></li>
+      <li><a href="{{ route('doctor.infants-request') }}"><i class="fa-solid fa-route"></i> Milk Traceability</a></li>
     </ul>
   </div>
 

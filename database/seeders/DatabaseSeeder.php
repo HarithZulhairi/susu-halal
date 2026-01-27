@@ -22,7 +22,6 @@ class DatabaseSeeder extends Seeder
     {
         // 1️⃣ Admin
         HmmcAdmin::create([
-            // 'ad_Admin' => 'HMMC Admin', // REMOVED: This is an auto-incrementing ID
             'ad_NRIC' => '900101010101',
             'ad_Name' => 'HMMC Administrator',
             'ad_Username' => 'hmmc_admin',
@@ -49,7 +48,7 @@ class DatabaseSeeder extends Seeder
             'dr_YearsOfExperience' => 8,
         ]);
 
-        // 3️⃣ Donor (fixed)
+        // 3️⃣ Donor
         Donor::create([
             'dn_NRIC' => '920202020202',
             'dn_FullName' => 'Default Donor',
@@ -141,4 +140,3 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
-

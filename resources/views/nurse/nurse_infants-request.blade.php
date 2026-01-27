@@ -1,9 +1,9 @@
-@extends('layouts.parent')
+@extends('layouts.nurse')
 
-@section('title', "My Infant's Milk Requests")
+@section('title', "Infant Milk Traceability")
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/parent_my-infant-request.css') }}">
+<link rel="stylesheet" href="{{ asset('css/hmmc_infants-request.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -76,6 +76,7 @@
         border-bottom: 2px solid #f1f5f9;
         padding-bottom: 5px;
     }
+
     /* PDF Icon Style */
     .btn-pdf {
         background: none;
@@ -92,70 +93,132 @@
     .btn-pdf i {
         color: #dc2626; /* Red for PDF */
         font-size: 18px;
+    }
 </style>
 
 {{-- DUMMY DATA SETUP --}}
 @php
-    // Simulate a parent/infant record
-    $infant = (object)[
-        'id' => 'P-2024-001',
-        'name' => 'Baby Adam',
-        'nicu' => 'NICU-A1',
-        'last_updated' => '2026-01-22 09:30 AM',
-        'current_weight' => 2.5,
-        'requests' => [
-            (object)[
-                'req_id' => 101,
-                'total_allocated_vol' => 60, // 30ml + 30ml
-                // Detailed data for modal
-                'details' => (object)[
-                    'donor_id' => 'D-2024-055',
-                    'donor_name' => 'Sarah Connor',
-                    'consent' => 'Consent Granted (Full)',
-                    'method' => 'Milk Kinship', // or 'No Milk Kinship'
-                    'schedule' => 'Every 3 Hours',
-                    'start_time' => '2026-01-22 08:00 AM',
-                    'doctor_id' => 'DR-007',
-                    'doctor_name' => 'Dr. Strange',
-                    // List of actual milk packs given
-                    'allocations' => [
-                        (object)[
-                            'milk_id' => 'M26-001',
-                            'volume' => 30,
-                            'time' => '2026-01-22 08:15 AM',
-                            'nurse_id' => 'N-101',
-                            'nurse_name' => 'Nurse Joy'
-                        ],
-                        (object)[
-                            'milk_id' => 'M26-002',
-                            'volume' => 30,
-                            'time' => '2026-01-22 11:15 AM',
-                            'nurse_id' => 'N-102',
-                            'nurse_name' => 'Nurse Carla'
+    $infants = [
+        (object)[
+            'id' => 'P-2024-001',
+            'name' => 'Baby Adam',
+            'nicu' => 'NICU-A1',
+            'last_updated' => '2026-01-22 09:30 AM',
+            'current_weight' => 2.5,
+            'requests' => [
+                (object)[
+                    'req_id' => 101,
+                    'total_allocated_vol' => 60, 
+                    'details' => (object)[
+                        // Patient Info (Passed via JS)
+                        'patient_name' => 'Baby Adam',
+                        'patient_id' => 'P-2024-001',
+                        'patient_nicu' => 'NICU-A1',
+                        'parent_consent' => 'Consent Granted',
+                        
+                        // Donor Info
+                        'donor_id' => 'D-2024-055',
+                        'donor_name' => 'Sarah Connor',
+                        'consent' => 'Consent Granted (Full)',
+                        
+                        // Dispensing
+                        'method' => 'Milk Kinship', 
+                        'schedule' => 'Every 3 Hours',
+                        'start_time' => '2026-01-22 08:00 AM',
+                        'doctor_id' => 'DR-007',
+                        'doctor_name' => 'Dr. Strange',
+                        
+                        // Allocations
+                        'allocations' => [
+                            (object)[ 'milk_id' => 'M26-001', 'volume' => 30, 'time' => '2026-01-22 08:15 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ],
+                            (object)[ 'milk_id' => 'M26-002', 'volume' => 30, 'time' => '2026-01-22 11:15 AM', 'nurse_id' => 'N-102', 'nurse_name' => 'Nurse Carla' ]
+                        ]
+                    ]
+                ],
+                (object)[
+                    'req_id' => 102,
+                    'total_allocated_vol' => 30,
+                    'details' => (object)[
+                        'patient_name' => 'Baby Adam',
+                        'patient_id' => 'P-2024-001',
+                        'patient_nicu' => 'NICU-A1',
+                        'parent_consent' => 'Consent Granted',
+                        
+                        'donor_id' => 'D-2024-088',
+                        'donor_name' => 'Jane Doe',
+                        'consent' => 'Consent Granted (Restricted)',
+                        'method' => 'No Milk Kinship',
+                        'schedule' => 'Every 4 Hours',
+                        'start_time' => '2026-01-23 10:00 AM',
+                        'doctor_id' => 'DR-009',
+                        'doctor_name' => 'Dr. House',
+                        'allocations' => [
+                            (object)[ 'milk_id' => 'M26-005', 'volume' => 30, 'time' => '2026-01-23 10:05 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ]
                         ]
                     ]
                 ]
-            ],
-            // Another request example
-            (object)[
-                'req_id' => 102,
-                'total_allocated_vol' => 30,
-                'details' => (object)[
-                    'donor_id' => 'D-2024-088',
-                    'donor_name' => 'Jane Doe',
-                    'consent' => 'Consent Granted (Restricted)',
-                    'method' => 'No Milk Kinship',
-                    'schedule' => 'Every 4 Hours',
-                    'start_time' => '2026-01-23 10:00 AM',
-                    'doctor_id' => 'DR-009',
-                    'doctor_name' => 'Dr. House',
-                    'allocations' => [
-                        (object)[
-                            'milk_id' => 'M26-005',
-                            'volume' => 30,
-                            'time' => '2026-01-23 10:05 AM',
-                            'nurse_id' => 'N-101',
-                            'nurse_name' => 'Nurse Joy'
+            ]
+        ],
+        (object)[
+            'id' => 'P-2024-005',
+            'name' => 'Baby Sarah',
+            'nicu' => 'NICU-B3',
+            'last_updated' => '2026-01-24 08:00 AM',
+            'current_weight' => 3.1,
+            'requests' => [
+                (object)[
+                    'req_id' => 201,
+                    'total_allocated_vol' => 120,
+                    'details' => (object)[
+                        'patient_name' => 'Baby Sarah',
+                        'patient_id' => 'P-2024-005',
+                        'patient_nicu' => 'NICU-B3',
+                        'parent_consent' => 'Consent Granted',
+                        
+                        'donor_id' => 'D-2024-099',
+                        'donor_name' => 'Emily Blunt',
+                        'consent' => 'Consent Granted (Full)',
+                        'method' => 'Milk Kinship',
+                        'schedule' => 'Every 2 Hours',
+                        'start_time' => '2026-01-24 07:00 AM',
+                        'doctor_id' => 'DR-007',
+                        'doctor_name' => 'Dr. Strange',
+                        'allocations' => [
+                            (object)[ 'milk_id' => 'M26-010', 'volume' => 30, 'time' => '2026-01-24 07:15 AM', 'nurse_id' => 'N-103', 'nurse_name' => 'Nurse Wendy' ],
+                            (object)[ 'milk_id' => 'M26-011', 'volume' => 30, 'time' => '2026-01-24 09:15 AM', 'nurse_id' => 'N-103', 'nurse_name' => 'Nurse Wendy' ],
+                            (object)[ 'milk_id' => 'M26-012', 'volume' => 30, 'time' => '2026-01-24 11:15 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ],
+                            (object)[ 'milk_id' => 'M26-013', 'volume' => 30, 'time' => '2026-01-24 01:15 PM', 'nurse_id' => 'N-102', 'nurse_name' => 'Nurse Carla' ]
+                        ]
+                    ]
+                ]
+            ]
+        ],
+        (object)[
+            'id' => 'P-2024-012',
+            'name' => 'Baby Mikail',
+            'nicu' => 'NICU-C2',
+            'last_updated' => '2026-01-23 05:45 PM',
+            'current_weight' => 1.9,
+            'requests' => [
+                 (object)[
+                    'req_id' => 301,
+                    'total_allocated_vol' => 45,
+                    'details' => (object)[
+                        'patient_name' => 'Baby Mikail',
+                        'patient_id' => 'P-2024-012',
+                        'patient_nicu' => 'NICU-C2',
+                        'parent_consent' => 'Consent Granted',
+                        
+                        'donor_id' => 'D-2024-055',
+                        'donor_name' => 'Sarah Connor',
+                        'consent' => 'Consent Granted (Full)',
+                        'method' => 'Milk Kinship',
+                        'schedule' => 'Every 3 Hours',
+                        'start_time' => '2026-01-23 06:00 PM',
+                        'doctor_id' => 'DR-005',
+                        'doctor_name' => 'Dr. Who',
+                        'allocations' => [
+                            (object)[ 'milk_id' => 'M26-020', 'volume' => 45, 'time' => '2026-01-23 06:10 PM', 'nurse_id' => 'N-105', 'nurse_name' => 'Nurse Jackie' ]
                         ]
                     ]
                 ]
@@ -168,14 +231,14 @@
     <div class="main-content">
 
         <div class="page-header">
-            <h1>My Infant's Milk Requests</h1>
+            <h1>Infant Milk Traceability</h1>
         </div>
 
         <div class="card">
             <div class="card-header">
                 <h2>Infant Milk Information</h2>
                 <div class="actions">
-                    <input type="text" class="form-control" placeholder="Search..." id="searchBox" style="padding:6px;font-size:14px;">
+                    <input type="text" class="form-control" placeholder="Search Patient Name or ID..." id="searchBox" style="padding:6px;font-size:14px;">
                 </div>
             </div>
 
@@ -192,6 +255,7 @@
                 </thead>
 
                 <tbody>
+                    @foreach($infants as $infant)
                     <tr>
                         <td>
                             <div class="patient-info">
@@ -225,13 +289,14 @@
                             </div>
                         </td>
 
-                       <td class="actions">
-                            {{-- UPDATED: Replaced Eye Icon with Download PDF Icon --}}
-                            <button class="btn-pdf" title="Download Report" onclick="downloadReport('{{ $infant->id }}')">
+                        <td class="actions">
+                            {{-- Download PDF Icon --}}
+                            <button class="btn-pdf" title="Download Traceability Report" onclick="downloadReport('{{ $infant->id }}')">
                                 <i class="fa-solid fa-file-pdf"></i>
                             </button>
                         </td>
                     </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -250,7 +315,28 @@
         </div>
         <div class="modal-body">
             
-            {{-- 1. Donor & Milk Info --}}
+            {{-- 1. NEW: Patient & Consent Info --}}
+            <div class="section-title"><i class="fas fa-baby"></i> Patient & Consent Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Patient Name</label>
+                    <p id="modalPatientName">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Patient ID</label>
+                    <p id="modalPatientId">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>NICU Location</label>
+                    <p id="modalNICU">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Parent Consent</label>
+                    <p id="modalParentConsent" style="color:#166534; font-weight:700;">-</p>
+                </div>
+            </div>
+
+            {{-- 2. Donor & Milk Info --}}
             <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -271,7 +357,7 @@
                 </div>
             </div>
 
-            {{-- 2. Dispensing Method & Doctor --}}
+            {{-- 3. Dispensing Method & Doctor --}}
             <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Dispensing & Assignment</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -290,7 +376,7 @@
                 </div>
             </div>
 
-            {{-- 3. Allocation History Table --}}
+            {{-- 4. Allocation History Table --}}
             <div class="section-title"><i class="fas fa-history"></i> Allocation History (Nurse Records)</div>
             <table class="allocation-list">
                 <thead>
@@ -313,22 +399,23 @@
 <script>
 
     function downloadReport(patientId) {
-            // In a real app, you would pass the ID to the route: 
-            // window.open(`/parent/report-pdf/${patientId}`, '_blank');
-            
-            // For this demo, we assume a static route or view
-            // Ensure you create the route in web.php pointing to the new file below
             window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
         }
 
     function openAllocationModal(details, totalVol) {
-        // 1. Populate Basic Info
+        // 1. Populate Patient Info
+        document.getElementById('modalPatientName').textContent = details.patient_name;
+        document.getElementById('modalPatientId').textContent = details.patient_id;
+        document.getElementById('modalNICU').textContent = details.patient_nicu;
+        document.getElementById('modalParentConsent').textContent = details.parent_consent;
+
+        // 2. Populate Donor Info
         document.getElementById('modalDonorName').textContent = details.donor_name;
         document.getElementById('modalDonorId').textContent = details.donor_id;
         document.getElementById('modalConsent').textContent = details.consent;
         document.getElementById('modalTotalVol').textContent = totalVol + " ml";
         
-        // 2. Method Badge
+        // 3. Method Badge
         const badgeDiv = document.getElementById('modalMethodBadge');
         if(details.method === 'Milk Kinship') {
             badgeDiv.innerHTML = `<span class="badge-method badge-kinship"><i class="fas fa-check"></i> Milk Kinship</span>`;
@@ -336,13 +423,13 @@
             badgeDiv.innerHTML = `<span class="badge-method badge-no-kinship"><i class="fas fa-ban"></i> No Milk Kinship</span>`;
         }
 
-        // 3. Schedule & Doctor
+        // 4. Schedule & Doctor
         document.getElementById('modalSchedule').textContent = details.schedule;
         document.getElementById('modalStartTime').textContent = "Start: " + details.start_time;
         document.getElementById('modalDoctorName').textContent = details.doctor_name;
         document.getElementById('modalDoctorId').textContent = details.doctor_id;
 
-        // 4. Populate Table
+        // 5. Populate Table
         const tbody = document.getElementById('allocationTableBody');
         tbody.innerHTML = '';
         
@@ -367,12 +454,54 @@
         document.getElementById('allocationDetailModal').style.display = 'none';
     }
 
-    function openInfantProfile() {
-        Swal.fire('Info', 'This would open the full infant profile view.', 'info');
+    /* === Sorting Logic === */
+    let sortDirection = { 0: false };
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById("infantsTable");
+        const tbody = table.tBodies[0];
+        const rows = Array.from(tbody.rows);
+        const headers = table.querySelectorAll('th');
+
+        sortDirection[columnIndex] = !sortDirection[columnIndex];
+        const asc = sortDirection[columnIndex];
+
+        rows.sort((a, b) => {
+            const A = a.cells[columnIndex].innerText.trim();
+            const B = b.cells[columnIndex].innerText.trim();
+
+            return asc
+                ? (A.localeCompare(B))
+                : (B.localeCompare(A));
+        });
+
+        tbody.append(...rows);
+
+        headers.forEach((th, idx) => {
+            const icon = th.querySelector('.sort-icon');
+            if (!icon) return;
+
+            icon.className = 'fas fa-sort sort-icon';
+
+            if (idx === columnIndex) {
+                icon.classList.add('sort-active');
+                icon.classList.remove('fa-sort');
+                icon.classList.add(asc ? 'fa-sort-up' : 'fa-sort-down');
+            }
+        });
     }
-    
-    // Sort logic (Simple placeholder)
-    function sortTable(n) { console.log("Sorting column " + n); }
+
+    /* === SEARCH FUNCTION === */
+    document.getElementById("searchBox").addEventListener("input", function () {
+        const term = this.value.toLowerCase().trim();
+        const table = document.getElementById("infantsTable");
+        const rows = table.tBodies[0].rows;
+
+        for (let row of rows) {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(term) ? "" : "none";
+        }
+    });
 </script>
 
 @endsection
