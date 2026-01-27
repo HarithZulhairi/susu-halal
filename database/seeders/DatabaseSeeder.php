@@ -11,7 +11,7 @@ use App\Models\LabTech;
 use App\Models\Nurse;
 use App\Models\ParentModel;
 use App\Models\ShariahCommittee;
-// use App\Models\User; // Uncomment if you still want to seed the default User
+use App\Models\User; // Uncomment if you still want to seed the default User
 
 class DatabaseSeeder extends Seeder
 {
