@@ -9,55 +9,45 @@ class Milk extends Model
 {
     use HasFactory;
 
-    // Specify the table name (since it's not plural)
     protected $table = 'milk';
-
-    // Primary key
     protected $primaryKey = 'milk_ID';
 
-    // Allow mass assignment for these fields
     protected $fillable = [
         'dn_ID',
-        'pr_ID',
+        
         'milk_volume',
-        'milk_expiryDate',
+        'milk_Status',
+        
         'milk_shariahApproval',
         'milk_shariahApprovalDate',
         'milk_shariahRemarks',
-        'milk_Status',
 
-        'milk_stage1StartDate',
-        'milk_stage1EndDate',
-        'milk_stage1StartTime',
-        'milk_stage1EndTime',
-        'milk_stage1Result',
-
-        'milk_stage2StartDate',
-        'milk_stage2EndDate',
-        'milk_stage2StartTime',
-        'milk_stage2EndTime',
-
-        'milk_stage3StartDate',
-        'milk_stage3EndDate',
-        'milk_stage3EndTime',
-        'milk_stage3StartTime',
+        // Keep Stage Dates/Times for the Batch Timeline
+        'milk_stage1StartDate', 'milk_stage1EndDate',
+        'milk_stage2StartDate', 'milk_stage2EndDate',
+        'milk_stage3StartDate', 'milk_stage3EndDate',
+        'milk_stage4StartDate', 'milk_stage4EndDate',
+        'milk_stage5StartDate', 'milk_stage5EndDate',
     ];
 
-    // Accessor for custom display ID
     public function getFormattedIdAttribute()
     {
         return '#M' . $this->milk_ID;
     }
 
-    // Each milk record belongs to a donor
+    // Relationships
     public function donor()
     {
         return $this->belongsTo(Donor::class, 'dn_ID', 'dn_ID');
     }
 
-    // Each milk record may belong to a parent (nullable)
-    public function parent()
+    public function preBottles()
     {
-        return $this->belongsTo(ParentModel::class, 'pr_ID', 'pr_ID');
+        return $this->hasMany(PreBottle::class, 'milk_ID', 'milk_ID');
+    }
+
+    public function postBottles()
+    {
+        return $this->hasMany(PostBottle::class, 'milk_ID', 'milk_ID');
     }
 }

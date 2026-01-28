@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Donor;
 use App\Models\Milk;
 use Carbon\Carbon;
+use App\Models\PreBottle;
+use App\Models\PostBottle;
 
 class MilkController extends Controller
 {
@@ -294,7 +296,6 @@ class MilkController extends Controller
     {
         $request->validate([
             'milk_volume' => 'required|numeric|min:0',
-            'milk_expiryDate' => 'required|date',
             'milk_shariahApprovalDate' => 'nullable|date',
             'milk_shariahRemarks' => 'nullable|string'
         ]);
@@ -322,43 +323,44 @@ class MilkController extends Controller
 
     public function storeMilkRecord(Request $request)
     {
+        // 1. Validation
         $request->validate([
-            'dn_ID'          => 'required|exists:donor,dn_ID',
-            'milk_volume'    => 'required|numeric|min:0.1',
-            'milk_expiryDate'=> 'required|date|after:yesterday',
+            'dn_ID'       => 'required|exists:donor,dn_ID',
+            'milk_volume' => 'required|numeric|min:0.1',
         ]);
 
+        // 2. Create Record (Initializing all 5 Stages)
         Milk::create([
-            'dn_ID'               => $request->dn_ID,
-            'pr_ID'               => null, // will be assigned later when given to a baby/parent
+            'dn_ID'           => $request->dn_ID,
+            'milk_volume'     => $request->milk_volume,
+            'milk_Status'     => 'Not Yet Started', 
 
-            'milk_volume'         => $request->milk_volume,
-            'milk_expiryDate'     => $request->milk_expiryDate,
-
-            // New simplified fields
-            'milk_shariahApproval' => null, // or null if you prefer, but false is clearer
+            // Shariah Info
+            'milk_shariahApproval'     => null,
             'milk_shariahApprovalDate' => null,
-            'milk_shariahRemarks' => null,
-            'milk_Status'         => null, // Overall status
+            'milk_shariahRemarks'      => null,
 
-            // Stage 1: Screening (starts immediately when milk is received)
+            // Stage 1: Screening
             'milk_stage1StartDate' => null,
             'milk_stage1EndDate'   => null,
-            'milk_stage1StartTime'   => null,
+            'milk_stage1StartTime' => null,
             'milk_stage1EndTime'   => null,
-            'milk_stage1Result'    => null,
-
-            // Stage 2: Processing (Homogenization + Pasteurization)
+            
+            // Stage 2: Thawing
             'milk_stage2StartDate' => null,
             'milk_stage2EndDate'   => null,
-            'milk_stage2StartTime'   => null,
-            'milk_stage2EndTime'   => null,
 
-            // Stage 3: Labelling & Storage
+            // Stage 3: Pasteurization
             'milk_stage3StartDate' => null,
             'milk_stage3EndDate'   => null,
-            'milk_stage3StartTime'   => null,
-            'milk_stage3EndTime'   => null,
+
+            // Stage 4: Microbiology (Added)
+            'milk_stage4StartDate' => null,
+            'milk_stage4EndDate'   => null,
+
+            // Stage 5: Storage (Added)
+            'milk_stage5StartDate' => null,
+            'milk_stage5EndDate'   => null,
         ]);
 
         if ($request->wantsJson() || $request->ajax()) {
@@ -375,8 +377,8 @@ class MilkController extends Controller
 
     public function processMilk(Milk $milk)
     {
-        // Load donor + any related data
-        $milk->load('donor');
+        // Load donor, preBottles (Stage 1-2), and postBottles (Stage 3-5)
+        $milk->load(['donor', 'preBottles', 'postBottles']);
 
         return view('labtech.labtech_process-milk', compact('milk'));
     }
@@ -526,6 +528,155 @@ class MilkController extends Controller
 
             return redirect()->back()->with('error', 'Failed to delete milk record.');
         }
+    }
+
+    public function saveStage1(Request $request, $id)
+    {
+        $request->validate([
+            'milk_stage1StartDate' => 'required|date',
+            'milk_stage1StartTime' => 'required',
+            'bottles' => 'required|array|min:1',
+            'bottles.*.volume' => 'required|numeric|min:0',
+        ]);
+
+        $milk = Milk::findOrFail($id);
+
+        // --- VALIDATION: Check Total Volume ---
+        $totalInputVolume = collect($request->bottles)->sum('volume');
+        
+        // Allow a tiny margin of error for floating point math, or strict comparison
+        if ($totalInputVolume > $milk->milk_volume) {
+            return response()->json([
+                'success' => false, 
+                'message' => "Total bottle volume ($totalInputVolume ml) exceeds the raw milk volume ($milk->milk_volume ml)."
+            ], 422);
+        }
+        // --------------------------------------
+
+        $milk->update([
+            'milk_stage1StartDate' => $request->milk_stage1StartDate,
+            'milk_stage1StartTime' => $request->milk_stage1StartTime,
+            'milk_stage1EndDate' => $request->milk_stage1StartDate, 
+            'milk_stage1EndTime' => $request->milk_stage1StartTime,
+            'milk_Status' => 'Labelling Completed'
+        ]);
+
+        $milk->preBottles()->delete();
+
+        foreach ($request->bottles as $b) {
+            PreBottle::create([
+                'milk_ID' => $milk->milk_ID,
+                'pre_bottle_code' => $b['bottle_id'],
+                'pre_volume' => $b['volume'],
+                'pre_is_thawed' => false
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveStage2(Request $request, $id)
+    {
+        $request->validate(['bottles' => 'required|array']);
+        
+        // Update thawing status for each bottle
+        foreach ($request->bottles as $b) {
+            PreBottle::where('milk_ID', $id)
+                ->where('pre_bottle_code', $b['bottle_id'])
+                ->update(['pre_is_thawed' => $b['is_thawed']]);
+        }
+
+        $milk = Milk::findOrFail($id);
+        $milk->update([
+            'milk_stage2StartDate' => now(), 
+            'milk_Status' => 'Thawing Completed'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveStage3(Request $request, $id)
+    {
+        $request->validate(['bottles' => 'required|array|min:1']);
+        
+        $milk = Milk::findOrFail($id);
+
+        // --- VALIDATION: Check Total Volume ---
+        $totalInputVolume = collect($request->bottles)->sum('volume');
+
+        if ($totalInputVolume > $milk->milk_volume) {
+            return response()->json([
+                'success' => false, 
+                'message' => "Total pasteurized volume ($totalInputVolume ml) exceeds the raw milk volume ($milk->milk_volume ml)."
+            ], 422);
+        }
+        // --------------------------------------
+
+        $milk->postBottles()->delete();
+
+        foreach ($request->bottles as $b) {
+            PostBottle::create([
+                'milk_ID' => $id,
+                'post_bottle_code' => $b['bottle_id'],
+                'post_volume' => $b['volume'], 
+                'post_pasteurization_date' => $b['pasteurization_date'],
+                'post_expiry_date' => $b['expiry_date'],
+                'post_micro_status' => 'Pending'
+            ]);
+        }
+
+        $milk->update([
+            'milk_stage3StartDate' => now(),
+            'milk_Status' => 'Pasteurization Completed'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveStage4(Request $request, $id)
+    {
+        $request->validate(['bottles' => 'required|array']);
+
+        foreach ($request->bottles as $b) {
+            PostBottle::where('milk_ID', $id)
+                ->where('post_bottle_code', $b['bottle_id'])
+                ->update([
+                    'post_micro_total_viable' => $b['total_viable'],
+                    'post_micro_entero' => $b['entero'],
+                    'post_micro_staph' => $b['staph'],
+                    'post_micro_status' => $b['result'] // 'Contaminated' or 'Not Contaminated'
+                ]);
+        }
+
+        $milk = Milk::findOrFail($id);
+        $milk->update([
+            'milk_stage4StartDate' => now(),
+            'milk_Status' => 'Microbiology Completed'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveStage5(Request $request, $id)
+    {
+        $request->validate([
+            'bottles' => 'required|array',
+            'drawer_id' => 'required|string'
+        ]);
+
+        foreach ($request->bottles as $b) {
+            PostBottle::where('milk_ID', $id)
+                ->where('post_bottle_code', $b['bottle_id'])
+                ->update(['post_storage_location' => $request->drawer_id]);
+        }
+
+        $milk = Milk::findOrFail($id);
+        $milk->update([
+            'milk_stage5StartDate' => now(),
+            'milk_Status' => 'Storage Completed'
+        ]);
+
+        return response()->json(['success' => true]);
     }
 
 }

@@ -14,7 +14,9 @@ use App\Models\nurse;
 use App\Models\Milk;
 use App\Models\DonorToBe;
 use App\Models\Donor;
+use App\Models\PostBottle;
 use Carbon\Carbon;
+
 
 class DashboardController extends Controller
 {
@@ -199,46 +201,49 @@ class DashboardController extends Controller
     // ============================
     public function labtech()
     {
-        // Total milk samples
+        // 1. Total Milk Batches (Raw Donations)
         $totalSamples = Milk::count();
 
-        // Processed samples (Screening completed)
-        $processedSamples = Milk::whereNotNull('milk_stage1Result')->count();
+        // 2. Processed Batches (Completed Stage 1: Labelling)
+        $processedSamples = Milk::whereNotNull('milk_stage1EndDate')->count();
 
-        // Pending pasteurization (Stage 1 completed but Stage 2 not started)
-        $pendingPasteurization = Milk::whereNotNull('milk_stage1Result')
-                                    ->whereNull('milk_stage2StartDate')
+        // 3. Pending Pasteurization (Completed Stage 2: Thawing, Not started Stage 3)
+        $pendingPasteurization = Milk::whereNotNull('milk_stage2EndDate')
+                                    ->whereNull('milk_stage3StartDate')
                                     ->count();
 
-        // Storage used (example, replace with actual calculation if needed)
-        $storageUsed = '78%';
+        // 4. Storage Used (Count of finalized Post-Pasteurization Bottles)
+        // We count individual bottles in storage, not just batches
+        $bottlesInStorage = PostBottle::whereNotNull('post_storage_location')->count();
+        $storageUsed = $bottlesInStorage . ' Bottles';
 
-        // Chart data for the last 12 months
+        // 5. Chart Data (Last 12 Months)
         $months = [];
-        $processedMonthly = [];
-        $dispatchedMonthly = [];
-        $currentYear = date('Y');
+        $processedMonthly = []; // Batches labeled
+        $dispatchedMonthly = []; // Batches fully completed (Stage 5)
 
-        for ($i = 0; $i < 12; $i++) {
-            $month = Carbon::now()->subMonths(11 - $i);
-            $months[] = $month->format('M'); // Short month name
+        for ($i = 11; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $months[] = $date->format('M');
+            $month = $date->month;
+            $year = $date->year;
 
-            // Processed: Stage 1 completed
-            $processedMonthly[] = Milk::whereYear('milk_stage1EndDate', $month->year)
-                                    ->whereMonth('milk_stage1EndDate', $month->month)
+            // Processed: Based on Stage 1 End Date
+            $processedMonthly[] = Milk::whereYear('milk_stage1EndDate', $year)
+                                    ->whereMonth('milk_stage1EndDate', $month)
                                     ->count();
 
-            // Dispatched: Stage 3 completed
-            $dispatchedMonthly[] = Milk::whereYear('milk_stage3EndDate', $month->year)
-                                    ->whereMonth('milk_stage3EndDate', $month->month)
+            // Dispatched/Stored: Based on Stage 5 End Date
+            $dispatchedMonthly[] = Milk::whereYear('milk_stage5EndDate', $year)
+                                    ->whereMonth('milk_stage5EndDate', $month)
                                     ->count();
         }
 
-            // Fetch milk records for the table
-            $milks = Milk::with('donor')
-                ->orderByDesc('created_at')
-                ->take(10) // optional: limit number shown on dashboard
-                ->get();
+        // 6. Recent Records Table
+        $milks = Milk::with('donor')
+                    ->orderByDesc('created_at')
+                    ->take(10)
+                    ->get();
 
         return view('labtech.labtech_dashboard', compact(
             'totalSamples',

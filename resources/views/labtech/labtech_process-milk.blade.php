@@ -67,18 +67,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- Load existing bottles or Default Row --}}
-                    @php
-                        $bottles = $milk->milk_stage1Result ? json_decode($milk->milk_stage1Result, true) : [];
-                    @endphp
-                    @if(count($bottles) > 0)
-                        @foreach($bottles as $idx => $b)
-                        <tr>
-                            <td>{{ $idx + 1 }}</td>
-                            <td contenteditable="true" class="volume-cell">{{ $b['volume'] }}</td>
-                            <td>{{ $milk->formatted_id }}-B{{ $idx + 1 }}</td>
-                            <td class="actions"><button type="button" onclick="deleteRow(this)"><i class="fas fa-trash"></i></button></td>
-                        </tr>
+                    @if($milk->preBottles->count() > 0)
+                        @foreach($milk->preBottles as $index => $bottle)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                
+                                <td contenteditable="true" class="volume-cell">{{ $bottle->pre_volume }}</td>
+                                
+                                <td>{{ $bottle->pre_bottle_code }}</td>
+                                
+                                <td class="actions">
+                                    <button type="button" onclick="deleteRow(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
                         @endforeach
                     @else
                         <tr>
@@ -89,11 +90,17 @@
                         </tr>
                     @endif
                 </tbody>
-                <tfoot>
+                <tfoot style="padding: 10px;">
                     <tr style="background-color: #f8fafc; font-weight:bold;">
                         <td colspan="1" style="text-align:right;">Total Volume:</td>
-                        <td id="total-volume-display">0 ml</td>
-                        <td colspan="2"></td>
+                        <td>
+                            <span id="total-volume-display">0</span> / {{ $milk->milk_volume }} ml
+                        </td>
+                        <td colspan="2">
+                            <small id="volume-warning" class="text-danger" style="display:none;">
+                                Exceeds Limit!
+                            </small>
+                        </td>
                     </tr>
                 </tfoot>
             </table>
@@ -107,7 +114,7 @@
       </form>
 
       <div class="button-row">
-        <a href="{{ route('labtech.labtech_manage-milk-records') }}" class="btn-back-nav"><i class="fas fa-arrow-left"></i> Back</a>
+        <a href="{{ route('labtech.labtech_manage-milk-records') }}" class="btn-back-nav text"><i class="fas fa-arrow-left"></i> Back</a>
         <button class="btn-next" onclick="switchStage('stage2')">Next Stage <i class="fas fa-arrow-right"></i></button>
       </div>
     </div>
@@ -135,11 +142,37 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr id="no-bottles-msg">
-                        <td colspan="3" style="padding: 20px; color: #64748b;">
-                            No bottles found. Please add bottles in Stage 1 first.
-                        </td>
-                    </tr>
+                    @if($milk->preBottles->count() > 0)
+                        @foreach($milk->preBottles as $bottle)
+                            <tr data-bottle-id="{{ $bottle->pre_bottle_code }}">
+                                <td style="font-weight:bold; color:#1A5F7A;">{{ $bottle->pre_bottle_code }}</td>
+                                <td>{{ $bottle->pre_volume }} ml</td>
+                                <td>
+                                    <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+                                        <label class="switch">
+                                            <input type="checkbox" 
+                                                onchange="toggleThaw('{{ $bottle->pre_bottle_code }}', this)" 
+                                                {{ $bottle->pre_is_thawed ? 'checked' : '' }}>
+                                            <span class="slider round"></span>
+                                        </label>
+                                        <span id="status-text-{{ $bottle->pre_bottle_code }}">
+                                            @if($bottle->pre_is_thawed)
+                                                <span class="text-success fw-bold">Yes</span>
+                                            @else
+                                                <span class="text-muted">No</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr id="no-bottles-msg">
+                            <td colspan="3" style="padding: 20px; color: #64748b;">
+                                No bottles found. Please add bottles in Stage 1 first.
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -188,10 +221,36 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- Rows generated by JS --}}
-                    <tr id="pasteur-empty-msg">
-                        <td colspan="5" class="text-muted" style="padding:20px;">No pasteurized bottles added yet.</td>
-                    </tr>
+                    @if($milk->postBottles->count() > 0)
+                        @foreach($milk->postBottles as $bottle)
+                            <tr>
+                                <td style="font-weight:bold; color:#1A5F7A;">{{ $bottle->post_bottle_code }}</td>
+                                
+                                <td>
+                                    <input type="number" value="{{ $bottle->post_volume }}" readonly 
+                                        style="border:none; background:transparent; text-align:center; font-weight:bold; width:50px;"> ml
+                                </td>
+                                
+                                <td>
+                                    <input type="date" value="{{ $bottle->post_pasteurization_date ? \Carbon\Carbon::parse($bottle->post_pasteurization_date)->format('Y-m-d') : '' }}" 
+                                        readonly style="border:none; background:transparent; text-align:center;">
+                                </td>
+                                
+                                <td>
+                                    <input type="date" value="{{ $bottle->post_expiry_date ? \Carbon\Carbon::parse($bottle->post_expiry_date)->format('Y-m-d') : '' }}" 
+                                        readonly style="border:none; background:transparent; text-align:center; color:#dc2626; font-weight:bold;">
+                                </td>
+                                
+                                <td class="actions">
+                                    <button type="button" onclick="deletePasteurRow(this)"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr id="pasteur-empty-msg">
+                            <td colspan="5" class="text-muted" style="padding:20px;">No pasteurized bottles added yet.</td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -248,11 +307,47 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr id="micro-empty-msg">
-                        <td colspan="5" class="text-muted" style="padding:20px;">
-                            No pasteurized bottles found. Complete Stage 3 first.
-                        </td>
-                    </tr>
+                    @if($milk->postBottles->count() > 0)
+                        @foreach($milk->postBottles as $bottle)
+                            <tr data-bottle-id="{{ $bottle->post_bottle_code }}">
+                                <td style="font-weight:bold; color:#1A5F7A;">{{ $bottle->post_bottle_code }}</td>
+                                
+                                <td>
+                                    <input type="number" class="cfu-input total-viable" 
+                                        value="{{ $bottle->post_micro_total_viable }}" 
+                                        placeholder="0" min="0" oninput="checkContamination(this)">
+                                </td>
+                                
+                                <td>
+                                    <input type="number" class="cfu-input entero" 
+                                        value="{{ $bottle->post_micro_entero }}" 
+                                        placeholder="0" min="0" oninput="checkContamination(this)">
+                                </td>
+                                
+                                <td>
+                                    <input type="number" class="cfu-input staph" 
+                                        value="{{ $bottle->post_micro_staph }}" 
+                                        placeholder="0" min="0" oninput="checkContamination(this)">
+                                </td>
+                                
+                                <td class="result-cell">
+                                    @if($bottle->post_micro_status == 'Contaminated' || $bottle->post_micro_status == 'Failed')
+                                        <span class="badge-status badge-fail"><i class="fas fa-times-circle"></i> Contaminated</span>
+                                    @elseif($bottle->post_micro_status == 'Not Contaminated' || $bottle->post_micro_status == 'Passed')
+                                        <span class="badge-status badge-pass"><i class="fas fa-check-circle"></i> Not Contaminated</span>
+                                    @else
+                                        <span class="badge-status badge-pending">Pending Input</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr id="micro-empty-msg">
+                            <td colspan="5" class="text-muted" style="padding:20px;">
+                                No pasteurized bottles found. Complete Stage 3 first.
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -283,6 +378,11 @@
 
     <form method="POST" action="#">
         @csrf
+
+        @php
+            // Try to get existing drawer ID from the first post bottle
+            $existingDrawer = $milk->postBottles->first()->post_storage_location ?? '';
+        @endphp
         
         {{-- 1. DRAWER ID INPUT --}}
         <div style="max-width: 300px; margin: 0 auto 30px; text-align: center;">
@@ -303,19 +403,32 @@
                 </small>
             </div>
             <table class="data-table" id="storage-table">
-                <thead>
-                    <tr>
-                        <th>Bottle ID</th>
-                        <th>Expiry Date <br><small>(From Stage 3)</small></th>
-                        <th>Quality Status <br><small>(From Stage 4)</small></th>
-                    </tr>
-                </thead>
+                <thead>...</thead>
                 <tbody>
-                    <tr id="storage-empty-msg">
-                        <td colspan="3" class="text-muted" style="padding:20px;">
-                            No approved bottles found yet. Please complete Microbiology test (Stage 4).
-                        </td>
-                    </tr>
+                    @php $approvedCount = 0; @endphp
+                    @foreach($milk->postBottles as $bottle)
+                        {{-- Only show bottles that passed Micro test --}}
+                        @if(in_array($bottle->post_micro_status, ['Passed', 'Not Contaminated']))
+                            @php $approvedCount++; @endphp
+                            <tr>
+                                <td style="font-weight:bold; color:#1A5F7A;">{{ $bottle->post_bottle_code }}</td>
+                                <td style="color:#dc2626; font-weight:bold;">{{ $bottle->post_expiry_date }}</td>
+                                <td>
+                                    <span class="badge-status badge-pass">
+                                        <i class="fas fa-check-circle"></i> Safe / Not Contaminated
+                                    </span>
+                                </td>
+                            </tr>
+                        @endif
+                    @endforeach
+
+                    @if($approvedCount === 0)
+                        <tr id="storage-empty-msg">
+                            <td colspan="3" class="text-muted" style="padding:20px;">
+                                No approved bottles found yet.
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -347,41 +460,76 @@
     // 0. GLOBAL VARIABLES & STATE
     // ==========================================
     const milkIdFormatted = "{{ $milk->formatted_id }}";
+    const saveRouteBase = "/labtech/process-milk/{{ $milk->milk_ID }}/"; 
+    // START NEW: Store the max volume
+    const maxMilkVolume = {{ $milk->milk_volume }}; 
+    // END NEW
     
-    // Global state for Stage 2 timers
-    // Key = Bottle ID, Value = { startTime, endTime, status, volume }
     let bottleState = {}; 
 
     // ==========================================
-    // 1. NAVIGATION & TAB LOGIC
+    // 1. INITIALIZATION & RESTORE STATE
     // ==========================================
+    // ==========================================
+    // 1. INITIALIZATION & RESTORE STATE
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        calculateTotalVolume();
+
+        // --- NEW: AUTO-CALCULATE MICRO STATUS ON LOAD ---
+        // This ensures the badge matches the numbers loaded from the database
+        const microRows = document.querySelectorAll('#micro-table tbody tr');
+        microRows.forEach(row => {
+            // Skip the "empty" message row
+            if(row.id === 'micro-empty-msg') return;
+            
+            // Find one of the inputs to trigger the check function
+            const input = row.querySelector('.cfu-input');
+            if(input) {
+                checkContamination(input);
+            }
+        });
+        // ------------------------------------------------
+
+        const savedStage = sessionStorage.getItem('reloadStage');
+        const savedMessage = sessionStorage.getItem('reloadMessage');
+
+        if (savedStage) {
+            switchStage(savedStage);
+            if (savedMessage) {
+                Swal.fire({
+                    icon: 'success', title: 'Saved', text: savedMessage,
+                    timer: 2000, showConfirmButton: false
+                });
+            }
+            sessionStorage.removeItem('reloadStage');
+            sessionStorage.removeItem('reloadMessage');
+        }
+    });
+
+    // ... [KEEP NAVIGATION LOGIC (switchStage) AS IS] ...
     function switchStage(stageId) {
-        // Remove active class from all contents and tabs
         document.querySelectorAll('.stage-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.stage-tab').forEach(el => el.classList.remove('active'));
         
-        // Add active class to target
-        document.getElementById(stageId + '-content').classList.add('active');
-        document.querySelector(`[data-stage="${stageId}"]`).classList.add('active');
+        const content = document.getElementById(stageId + '-content');
+        const tab = document.querySelector(`[data-stage="${stageId}"]`);
+
+        if(content) content.classList.add('active');
+        if(tab) tab.classList.add('active');
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // [NEW LOGIC] When entering Stage 2, load the bottles from Stage 1
-        if(stageId === 'stage2') {
-            loadStage2Bottles();
-        }
+        if(stageId === 'stage2') loadStage2Bottles();
+        if(stageId === 'stage4') loadStage4Bottles();
+        if(stageId === 'stage5') loadStage5Bottles();
     }
-
-    // Attach click events to tabs
+    
     document.querySelectorAll('.stage-tab').forEach(btn => {
-        btn.addEventListener('click', function() {
-            switchStage(this.dataset.stage);
-        });
+        btn.addEventListener('click', function() { switchStage(this.dataset.stage); });
     });
 
-    // ==========================================
-    // 2. STAGE 1: BOTTLING LOGIC
-    // ==========================================
+    // ... [KEEP ROW ADD/DELETE LOGIC AS IS] ...
     function addBottleRow() {
         const tbody = document.querySelector('#bottle-table tbody');
         const count = tbody.rows.length + 1;
@@ -399,8 +547,6 @@
         const row = btn.closest('tr');
         const table = row.closest('table');
         row.remove();
-        
-        // Renumber logic depends on table type
         if(table.id === 'bottle-table') {
             renumberBottles();
             calculateTotalVolume();
@@ -415,50 +561,61 @@
         });
     }
 
-    // Monitor volume changes in Stage 1
     document.querySelector('#bottle-table').addEventListener('input', function(e) {
         if(e.target.classList.contains('volume-cell')) {
             calculateTotalVolume();
         }
     });
 
+    // UPDATED: Volume Calculation with Limit Check
     function calculateTotalVolume() {
         let total = 0;
         document.querySelectorAll('.volume-cell').forEach(cell => {
             const val = parseFloat(cell.innerText) || 0;
             total += val;
         });
-        document.getElementById('total-volume-display').innerText = total + ' ml';
+        
+        const display = document.getElementById('total-volume-display');
+        const warning = document.getElementById('volume-warning');
+        
+        display.innerText = total;
+
+        if (total > maxMilkVolume) {
+            display.style.color = '#dc2626'; // Red
+            display.style.fontWeight = 'bold';
+            if(warning) warning.style.display = 'inline';
+        } else {
+            display.style.color = '#334155'; // Normal
+            display.style.fontWeight = 'normal';
+            if(warning) warning.style.display = 'none';
+        }
+        return total;
     }
 
-    // ==========================================
-    // 3. STAGE 2: THAWING LOGIC (UPDATED)
-    // ==========================================
-    
-    // Global state to remember which bottles are checked
-    let thawingState = {}; 
+    // ... [KEEP STAGE 2 UTILS AS IS] ...
+    function toggleThaw(bottleId, checkbox) {
+        const textSpan = document.getElementById(`status-text-${bottleId}`);
+        if(checkbox.checked) {
+            textSpan.innerHTML = '<span class="text-success fw-bold">Yes</span>';
+        } else {
+            textSpan.innerHTML = '<span class="text-muted">No</span>';
+        }
+    }
 
     function loadStage2Bottles() {
         const stage1Rows = document.querySelectorAll('#bottle-table tbody tr');
         const stage2Body = document.querySelector('#thawing-table tbody');
-        
-        // Clear existing rows
-        stage2Body.innerHTML = '';
+        const existingRows = stage2Body.querySelectorAll('tr');
+        if(existingRows.length > 0 && existingRows[0].id !== 'no-bottles-msg') return;
 
+        stage2Body.innerHTML = '';
         if(stage1Rows.length === 0) {
             stage2Body.innerHTML = `<tr><td colspan="3" class="text-muted" style="padding:20px;">No bottles found in Stage 1.</td></tr>`;
             return;
         }
-
         stage1Rows.forEach(row => {
-            const bottleId = row.cells[2].innerText.trim(); // Get ID from Stage 1
-            const volume = row.cells[1].innerText.trim();   // Get Volume from Stage 1
-
-            // Check if previously marked as thawed
-            const isChecked = thawingState[bottleId] === true ? 'checked' : '';
-            const statusText = thawingState[bottleId] === true ? '<span class="text-success fw-bold">Yes</span>' : '<span class="text-muted">No</span>';
-
-            // Create Row
+            const bottleId = row.cells[2].innerText.trim(); 
+            const volume = row.cells[1].innerText.trim(); 
             const tr = document.createElement('tr');
             tr.setAttribute('data-bottle-id', bottleId);
             tr.innerHTML = `
@@ -467,10 +624,10 @@
                 <td>
                     <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
                         <label class="switch">
-                            <input type="checkbox" onchange="toggleThaw('${bottleId}', this)" ${isChecked}>
+                            <input type="checkbox" onchange="toggleThaw('${bottleId}', this)">
                             <span class="slider round"></span>
                         </label>
-                        <span id="status-text-${bottleId}">${statusText}</span>
+                        <span id="status-text-${bottleId}"><span class="text-muted">No</span></span>
                     </div>
                 </td>
             `;
@@ -478,126 +635,31 @@
         });
     }
 
-    function toggleThaw(bottleId, checkbox) {
-        // Update State
-        thawingState[bottleId] = checkbox.checked;
-
-        // Update Text Label
-        const textSpan = document.getElementById(`status-text-${bottleId}`);
-        if(checkbox.checked) {
-            textSpan.innerHTML = '<span style="color:#10b981; font-weight:bold;">Yes</span>';
-        } else {
-            textSpan.innerHTML = '<span style="color:#64748b;">No</span>';
-        }
-    }
-
-    function saveStage2Data() {
-        // Convert thawingState object to array for saving
-        const rows = document.querySelectorAll('#thawing-table tbody tr');
-        let data = [];
-        let allThawed = true;
-
-        if(rows.length === 0 || (rows.length === 1 && rows[0].innerText.includes('No bottles'))) {
-             Swal.fire('Error', 'No bottles to save.', 'error');
-             return;
-        }
-
-        rows.forEach(row => {
-            const bottleId = row.getAttribute('data-bottle-id');
-            const isThawed = thawingState[bottleId] === true;
-            
-            if(!isThawed) allThawed = false;
-
-            data.push({
-                bottle_id: bottleId,
-                is_thawed: isThawed
-            });
-        });
-
-        if(!allThawed) {
-            Swal.fire({
-                title: 'Warning',
-                text: 'Some bottles are marked as "No" (Not Thawed). Continue anyway?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save status'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log("Saving Stage 2 Data:", data);
-                    Swal.fire('Saved', 'Thawing status updated!', 'success');
-                }
-            });
-        } else {
-            console.log("Saving Stage 2 Data:", data);
-            Swal.fire('Saved', 'All bottles marked as Thawed!', 'success');
-        }
-    }
-
-    // ==========================================
-    // 3.5 STAGE 3: PASTEURIZATION BOTTLE LOGIC
-    // ==========================================
-
-    // Helper to format Date to YYYY-MM-DD
+    // ... [KEEP STAGE 3 UTILS] ...
     function formatDate(date) {
         const d = new Date(date);
-        let month = '' + (d.getMonth() + 1);
-        let day = '' + d.getDate();
-        const year = d.getFullYear();
-
+        let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
         if (month.length < 2) month = '0' + month;
         if (day.length < 2) day = '0' + day;
-
         return [year, month, day].join('-');
     }
 
     function addPasteurBottleRow() {
         const tbody = document.querySelector('#pasteur-table tbody');
-        
-        // Remove empty message if it exists
         const emptyMsg = document.getElementById('pasteur-empty-msg');
         if(emptyMsg) emptyMsg.remove();
-
-        // Calculate count based on current rows
         const count = tbody.rows.length + 1;
-        
-        // --- 1. SET VOLUME ---
         const fixedVolume = 30;
-
-        // --- 2. SET DATES ---
         const today = new Date();
-        const expiry = new Date();
-        // Add 6 months to today
-        expiry.setMonth(today.getMonth() + 6);
-
-        const todayStr = formatDate(today);
-        const expiryStr = formatDate(expiry);
-
-        // --- 3. CREATE ROW ---
-        // We use "-P" to distinguish Pasteurization bottles from Stage 1 bottles
-        const bottleId = `${milkIdFormatted}-P${count}`;
-
+        const expiry = new Date(); expiry.setMonth(today.getMonth() + 6);
+        
         const row = tbody.insertRow();
         row.innerHTML = `
-            <td style="font-weight:bold; color:#1A5F7A;">${bottleId}</td>
-            
-            <td>
-                <input type="number" value="${fixedVolume}" readonly 
-                       style="border:none; background:transparent; text-align:center; font-weight:bold; width:50px;"> ml
-            </td>
-            
-            <td>
-                <input type="date" value="${todayStr}" readonly 
-                       style="border:none; background:transparent; text-align:center;">
-            </td>
-            
-            <td>
-                <input type="date" value="${expiryStr}" readonly 
-                       style="border:none; background:transparent; text-align:center; color:#dc2626; font-weight:bold;">
-            </td>
-            
-            <td class="actions">
-                <button type="button" onclick="deletePasteurRow(this)"><i class="fas fa-trash"></i></button>
-            </td>
+            <td style="font-weight:bold; color:#1A5F7A;">${milkIdFormatted}-P${count}</td>
+            <td><input type="number" value="${fixedVolume}" readonly style="border:none; background:transparent; text-align:center; font-weight:bold; width:50px;"> ml</td>
+            <td><input type="date" value="${formatDate(today)}" readonly style="border:none; background:transparent; text-align:center;"></td>
+            <td><input type="date" value="${formatDate(expiry)}" readonly style="border:none; background:transparent; text-align:center; color:#dc2626; font-weight:bold;"></td>
+            <td class="actions"><button type="button" onclick="deletePasteurRow(this)"><i class="fas fa-trash"></i></button></td>
         `;
     }
 
@@ -605,12 +667,9 @@
         const row = btn.closest('tr');
         const tbody = row.closest('tbody');
         row.remove();
-        
-        // If table empty, show message
         if(tbody.rows.length === 0) {
             tbody.innerHTML = `<tr id="pasteur-empty-msg"><td colspan="5" class="text-muted" style="padding:20px;">No pasteurized bottles added yet.</td></tr>`;
         } else {
-            // Optional: Renumber P1, P2...
             renumberPasteurBottles();
         }
     }
@@ -618,96 +677,35 @@
     function renumberPasteurBottles() {
         const rows = document.querySelectorAll('#pasteur-table tbody tr');
         rows.forEach((row, index) => {
-            // Skip if it's the empty message row
             if(row.id === 'pasteur-empty-msg') return;
-            
-            const newIndex = index + 1;
-            // Update First Column text
-            row.cells[0].innerText = `${milkIdFormatted}-P${newIndex}`;
+            row.cells[0].innerText = `${milkIdFormatted}-P${index + 1}`;
         });
     }
 
-    function saveStage3Data() {
-        const rows = document.querySelectorAll('#pasteur-table tbody tr');
-        let data = [];
-        
-        rows.forEach(row => {
-            if(row.id === 'pasteur-empty-msg') return;
-
-            // Extract data from inputs or text
-            data.push({
-                bottle_id: row.cells[0].innerText,
-                volume: 30,
-                pasteurization_date: row.querySelector('input[type="date"]').value, // 1st date input
-                expiry_date: row.querySelectorAll('input[type="date"]')[1].value    // 2nd date input
-            });
-        });
-
-        if(data.length === 0) {
-            Swal.fire('Warning', 'Please add at least one pasteurized bottle.', 'warning');
-            return;
-        }
-
-        console.log("Saving Stage 3 (Pasteurization) Data:", data);
-        Swal.fire('Saved', 'Pasteurization records saved with generated Expiry Dates!', 'success');
-    }
-
-    // ==========================================
-    // 4. STAGE 4: MICROBIOLOGY LOGIC (UPDATED)
-    // ==========================================
-
-    // Updated Switch Stage to load data when entering Stage 4
-    function switchStage(stageId) {
-        document.querySelectorAll('.stage-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.stage-tab').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(stageId + '-content').classList.add('active');
-        document.querySelector(`[data-stage="${stageId}"]`).classList.add('active');
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        if(stageId === 'stage2') loadStage2Bottles();
-        if(stageId === 'stage4') loadStage4Bottles(); // Add this line
-    }
-
+    // ... [KEEP STAGE 4 & 5 UTILS AS IS] ...
     function loadStage4Bottles() {
-        // Source: Stage 3 (Pasteurization) Table
         const sourceRows = document.querySelectorAll('#pasteur-table tbody tr');
         const targetBody = document.querySelector('#micro-table tbody');
-        
-        targetBody.innerHTML = ''; // Clear existing
+        const existingRows = targetBody.querySelectorAll('tr');
+        if(existingRows.length > 0 && existingRows[0].id !== 'micro-empty-msg') return;
 
-        // Check if source is empty
-        const isSourceEmpty = (sourceRows.length === 0) || (sourceRows.length === 1 && sourceRows[0].id === 'pasteur-empty-msg');
-
-        if(isSourceEmpty) {
+        targetBody.innerHTML = '';
+        if((sourceRows.length === 0) || (sourceRows.length === 1 && sourceRows[0].id === 'pasteur-empty-msg')) {
             targetBody.innerHTML = `<tr id="micro-empty-msg"><td colspan="5" class="text-muted" style="padding:20px;">No pasteurized bottles found in Stage 3.</td></tr>`;
             return;
         }
 
         sourceRows.forEach(row => {
             if(row.id === 'pasteur-empty-msg') return;
-
             const bottleId = row.cells[0].innerText;
-
             const tr = document.createElement('tr');
             tr.setAttribute('data-bottle-id', bottleId);
-            
-            // We use oninput="checkContamination(this)" to trigger calc immediately when typing
             tr.innerHTML = `
                 <td style="font-weight:bold; color:#1A5F7A;">${bottleId}</td>
-                <td>
-                    <input type="number" class="cfu-input total-viable" placeholder="0" min="0" oninput="checkContamination(this)">
-                </td>
-                <td>
-                    <input type="number" class="cfu-input entero" placeholder="0" min="0" oninput="checkContamination(this)">
-                </td>
-                <td>
-                    <input type="number" class="cfu-input staph" placeholder="0" min="0" oninput="checkContamination(this)">
-                </td>
-                <td class="result-cell">
-                    <span class="badge-status badge-pending">Pending Input</span>
-                </td>
+                <td><input type="number" class="cfu-input total-viable" placeholder="0" min="0" oninput="checkContamination(this)"></td>
+                <td><input type="number" class="cfu-input entero" placeholder="0" min="0" oninput="checkContamination(this)"></td>
+                <td><input type="number" class="cfu-input staph" placeholder="0" min="0" oninput="checkContamination(this)"></td>
+                <td class="result-cell"><span class="badge-status badge-pending">Pending Input</span></td>
             `;
             targetBody.appendChild(tr);
         });
@@ -715,35 +713,23 @@
 
     function checkContamination(inputElement) {
         const row = inputElement.closest('tr');
-        
-        // Get values (default to 0 if empty)
         const totalViable = parseFloat(row.querySelector('.total-viable').value) || 0;
         const entero = parseFloat(row.querySelector('.entero').value) || 0;
         const staph = parseFloat(row.querySelector('.staph').value) || 0;
-        
         const resultCell = row.querySelector('.result-cell');
-
-        // THRESHOLDS based on the image provided:
-        // Total Viable >= 10^5 (100,000)
-        // Enterobacteriaceae >= 10^4 (10,000)
-        // Staphylococcus >= 10^4 (10,000)
 
         const limitTotal = 100000;
         const limitEntero = 10000;
         const limitStaph = 10000;
 
         let isContaminated = false;
-
-        // Check conditions
         if (totalViable >= limitTotal || entero >= limitEntero || staph >= limitStaph) {
             isContaminated = true;
         }
 
-        // Update UI
         if (isContaminated) {
             resultCell.innerHTML = `<span class="badge-status badge-fail"><i class="fas fa-times-circle"></i> Contaminated</span>`;
         } else {
-            // Check if inputs are actually filled to show "Passed", otherwise keep pending/neutral if 0
             if(row.querySelector('.total-viable').value !== '') {
                 resultCell.innerHTML = `<span class="badge-status badge-pass"><i class="fas fa-check-circle"></i> Not Contaminated</span>`;
             } else {
@@ -752,153 +738,206 @@
         }
     }
 
-    function saveStage4Data() {
-        const rows = document.querySelectorAll('#micro-table tbody tr');
-        let data = [];
-        let hasErrors = false;
-
-        rows.forEach(row => {
-            if(row.id === 'micro-empty-msg') return;
-
-            const resultText = row.querySelector('.badge-status').innerText;
-            
-            // Simple validation
-            if(resultText.includes('Pending')) {
-                hasErrors = true;
-            }
-
-            data.push({
-                bottle_id: row.cells[0].innerText,
-                total_viable: row.querySelector('.total-viable').value,
-                entero: row.querySelector('.entero').value,
-                staph: row.querySelector('.staph').value,
-                result: resultText
-            });
-        });
-
-        if(hasErrors) {
-            Swal.fire('Incomplete', 'Please enter values for all bottles.', 'warning');
-            return;
-        }
-
-        if(data.length === 0) {
-            Swal.fire('Warning', 'No data to save.', 'warning');
-            return;
-        }
-
-        console.log("Saving Stage 4 Data:", data);
-        Swal.fire('Saved', 'Microbiology results recorded successfully!', 'success');
-    }
-
-    // ==========================================
-    // 5. STAGE 5: STORAGE LOGIC (UPDATED)
-    // ==========================================
-
-    // Updated switchStage to include Stage 5 loading
-    function switchStage(stageId) {
-        document.querySelectorAll('.stage-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.stage-tab').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(stageId + '-content').classList.add('active');
-        document.querySelector(`[data-stage="${stageId}"]`).classList.add('active');
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        if(stageId === 'stage2') loadStage2Bottles();
-        if(stageId === 'stage4') loadStage4Bottles();
-        if(stageId === 'stage5') loadStage5Bottles(); // Add this line
-    }
-
     function loadStage5Bottles() {
         const microRows = document.querySelectorAll('#micro-table tbody tr');
         const pasteurRows = document.querySelectorAll('#pasteur-table tbody tr');
         const targetBody = document.querySelector('#storage-table tbody');
-        
-        targetBody.innerHTML = ''; // Clear existing
+        const existingRows = targetBody.querySelectorAll('tr');
+        if(existingRows.length > 0 && existingRows[0].id !== 'storage-empty-msg') return;
 
-        // 1. Create a Map of [BottleID] -> [ExpiryDate] from Stage 3
+        targetBody.innerHTML = '';
         let expiryMap = {};
         pasteurRows.forEach(row => {
             if(row.id === 'pasteur-empty-msg') return;
-            const id = row.cells[0].innerText; // Bottle ID column
-            // Expiry date is the 4th column (index 3), inside an input
+            const id = row.cells[0].innerText;
             const expiryInput = row.cells[3].querySelector('input'); 
-            if(expiryInput) {
-                expiryMap[id] = expiryInput.value;
-            }
+            if(expiryInput) expiryMap[id] = expiryInput.value;
         });
 
         let approvedCount = 0;
-
-        // 2. Filter Stage 4 Rows
         microRows.forEach(row => {
             if(row.id === 'micro-empty-msg') return;
-
-            // Check if the badge indicates pass (Not Contaminated)
             const passBadge = row.querySelector('.badge-pass');
-            
             if(passBadge) {
                 approvedCount++;
-                const bottleId = row.dataset.bottleId; // We stored this in data attribute in Stage 4
+                const bottleId = row.dataset.bottleId;
                 const expiry = expiryMap[bottleId] || 'N/A';
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="font-weight:bold; color:#1A5F7A;">${bottleId}</td>
                     <td style="color:#dc2626; font-weight:bold;">${expiry}</td>
-                    <td>
-                        <span class="badge-status badge-pass">
-                            <i class="fas fa-check-circle"></i> Safe / Not Contaminated
-                        </span>
-                    </td>
+                    <td><span class="badge-status badge-pass"><i class="fas fa-check-circle"></i> Safe / Not Contaminated</span></td>
                 `;
                 targetBody.appendChild(tr);
             }
         });
 
-        // 3. Show message if no bottles passed or no data
         if(approvedCount === 0) {
-            targetBody.innerHTML = `
-                <tr id="storage-empty-msg">
-                    <td colspan="3" class="text-muted" style="padding:20px;">
-                        No bottles approved for storage. All bottles either contaminated or not tested yet.
-                    </td>
-                </tr>`;
+            targetBody.innerHTML = `<tr id="storage-empty-msg"><td colspan="3" class="text-muted" style="padding:20px;">No approved bottles found yet.</td></tr>`;
         }
+    }
+
+    // ==========================================
+    // 4. SAVE & RELOAD FUNCTIONS
+    // ==========================================
+
+    function reloadOnStage(stageName, message) {
+        sessionStorage.setItem('reloadStage', stageName);
+        sessionStorage.setItem('reloadMessage', message);
+        location.reload();
+    }
+
+    // UPDATED: SAVE STAGE 1 WITH VALIDATION
+    function saveStage1Data() {
+        const date = document.querySelector('input[name="milk_stage1StartDate"]').value;
+        const time = document.querySelector('input[name="milk_stage1StartTime"]').value;
+        const rows = document.querySelectorAll('#bottle-table tbody tr');
+        let bottles = [];
+        let totalVol = 0;
+
+        rows.forEach(row => {
+            if(row.cells.length < 3) return;
+            const vol = parseFloat(row.querySelector('.volume-cell').innerText);
+            const id = row.cells[2].innerText;
+            if(vol >= 0) {
+                bottles.push({ bottle_id: id, volume: vol });
+                totalVol += vol;
+            }
+        });
+
+        if(bottles.length === 0) return Swal.fire('Error', 'Add at least one bottle.', 'error');
+
+        // Check Limit
+        if(totalVol > maxMilkVolume) {
+            return Swal.fire('Limit Exceeded', `Total volume (${totalVol} ml) exceeds the milk batch limit (${maxMilkVolume} ml).`, 'error');
+        }
+
+        fetch("{{ route('labtech.save-stage1', $milk->milk_ID) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ milk_stage1StartDate: date, milk_stage1StartTime: time, bottles: bottles })
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                reloadOnStage('stage1', 'Labelling data saved successfully!');
+            } else {
+                Swal.fire('Error', data.message || 'Failed to save', 'error');
+            }
+        });
+    }
+
+    // ... [KEEP STAGE 2 SAVE AS IS] ...
+    function saveStage2Data() {
+        const rows = document.querySelectorAll('#thawing-table tbody tr');
+        let bottles = [];
+        rows.forEach(row => {
+            if(row.id === 'no-bottles-msg') return;
+            const id = row.dataset.bottleId;
+            const isThawed = row.querySelector('input[type="checkbox"]').checked;
+            bottles.push({ bottle_id: id, is_thawed: isThawed });
+        });
+
+        if(bottles.length === 0) return Swal.fire('Error', 'No bottles to save', 'error');
+
+        fetch("{{ route('labtech.save-stage2', $milk->milk_ID) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ bottles: bottles })
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                reloadOnStage('stage2', 'Thawing status saved successfully!');
+            }
+        });
+    }
+
+    // UPDATED: SAVE STAGE 3 WITH VALIDATION
+    function saveStage3Data() {
+        const rows = document.querySelectorAll('#pasteur-table tbody tr');
+        let bottles = [];
+        let totalVol = 0;
+
+        rows.forEach(row => {
+            if(row.id === 'pasteur-empty-msg') return;
+            const id = row.cells[0].innerText;
+            const pDate = row.cells[2].querySelector('input').value;
+            const eDate = row.cells[3].querySelector('input').value;
+            // Assuming volume is fixed 30 or read from input
+            const volInput = row.cells[1].querySelector('input');
+            const vol = volInput ? parseFloat(volInput.value) : 30; 
+            
+            bottles.push({ bottle_id: id, volume: vol, pasteurization_date: pDate, expiry_date: eDate });
+            totalVol += vol;
+        });
+
+        if(bottles.length === 0) return Swal.fire('Error', 'Add pasteurized bottles first', 'error');
+
+        // Check Limit
+        if(totalVol > maxMilkVolume) {
+            return Swal.fire('Limit Exceeded', `Total pasteurized volume (${totalVol} ml) exceeds the milk batch limit (${maxMilkVolume} ml).`, 'error');
+        }
+
+        fetch("{{ route('labtech.save-stage3', $milk->milk_ID) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ bottles: bottles })
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                reloadOnStage('stage3', 'Pasteurization data saved successfully!');
+            } else {
+                Swal.fire('Error', data.message || 'Failed to save', 'error');
+            }
+        });
+    }
+
+    // ... [KEEP STAGE 4 & 5 SAVE AS IS] ...
+    function saveStage4Data() {
+        const rows = document.querySelectorAll('#micro-table tbody tr');
+        let bottles = [];
+        rows.forEach(row => {
+            if(row.id === 'micro-empty-msg') return;
+            const id = row.cells[0].innerText;
+            const total = row.querySelector('.total-viable').value;
+            const entero = row.querySelector('.entero').value;
+            const staph = row.querySelector('.staph').value;
+            const result = row.querySelector('.badge-status').innerText.trim();
+            bottles.push({ bottle_id: id, total_viable: total, entero: entero, staph: staph, result: result });
+        });
+
+        fetch("{{ route('labtech.save-stage4', $milk->milk_ID) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ bottles: bottles })
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                reloadOnStage('stage4', 'Microbiology results saved successfully!');
+            }
+        });
     }
 
     function saveStage5Data() {
-        const drawerId = document.getElementById('drawer-id').value.trim();
+        const drawer = document.getElementById('drawer-id').value;
         const rows = document.querySelectorAll('#storage-table tbody tr');
-        
-        if(!drawerId) {
-            Swal.fire('Missing Info', 'Please enter a Storage Drawer ID.', 'warning');
-            return;
-        }
-
-        let data = [];
+        let bottles = [];
         rows.forEach(row => {
             if(row.id === 'storage-empty-msg') return;
-            data.push({
-                bottle_id: row.cells[0].innerText,
-                expiry_date: row.cells[1].innerText,
-                drawer_id: drawerId
-            });
+            bottles.push({ bottle_id: row.cells[0].innerText });
         });
 
-        if(data.length === 0) {
-            Swal.fire('Error', 'No valid bottles to store.', 'error');
-            return;
-        }
+        if(!drawer) return Swal.fire('Error', 'Enter Drawer ID', 'error');
 
-        console.log("Saving Stage 5 Data:", data);
-        Swal.fire('Process Complete!', 'Milk record finalized and stored.', 'success').then(() => {
-            // Optional: Redirect
-            // window.location.href = "{{ route('labtech.labtech_manage-milk-records') }}";
+        fetch("{{ route('labtech.save-stage5', $milk->milk_ID) }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ drawer_id: drawer, bottles: bottles })
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                Swal.fire({
+                    icon: 'success', title: 'Completed', text: 'Process Finished!',
+                    timer: 2000, showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "{{ route('labtech.labtech_manage-milk-records') }}";
+                });
+            }
         });
     }
-
-    // Initial run
-    calculateTotalVolume();
 </script>
 @endsection

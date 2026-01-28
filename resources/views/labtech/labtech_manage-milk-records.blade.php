@@ -80,9 +80,6 @@
                     <button class="sortable-header" data-key="volume" title="Sort by Volume">
                         VOLUME <span class="sort-indicator"></span>
                     </button>
-                    <button class="sortable-header" data-key="expiry" title="Sort by Expiration Date">
-                        EXPIRATION DATE <span class="sort-indicator"></span>
-                    </button>
                     <button class="sortable-header" data-key="shariah" title="Sort by Shariah Approval">
                         SHARIAH APPROVAL <span class="sort-indicator"></span>
                     </button>
@@ -93,8 +90,7 @@
                     <div class="record-item" 
                             data-milk-id="{{ $milk->milk_ID }}"
                             data-name="{{ strtolower($milk->donor?->dn_FullName ?? '') }}"
-                            data-status="{{ strtolower($milk->milk_Status ?? 'not yet started') }}"
-                            data-volume="{{ $milk->milk_volume }}"
+                            data-status="{{ strtolower($milk->milk_Status ?? 'not yet started') }}" 
                             data-expiry="{{ $milk->milk_expiryDate }}"
                             data-shariah="{{ strtolower($milk->milk_shariahApproval ?? 'not yet reviewed') }}"
                             data-shariah-date="{{ $milk->milk_shariahApprovalDate ?? '' }}"
@@ -124,17 +120,6 @@
 
                         <div class="volume-data">{{ $milk->milk_volume }} mL</div>
 
-                        <div class="expiry-date">
-                            @if($milk->milk_expiryDate)
-                                {{ \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') }}
-                                @if(\Carbon\Carbon::parse($milk->milk_expiryDate)->isPast())
-                                    <span class="expired-text">(expired)</span>
-                                @endif
-                            @else
-                                -
-                            @endif
-                        </div>
-
                         <!-- SHARIAH APPROVAL COLUMN -->
                         <div class="shariah-status">
                             @php
@@ -155,7 +140,6 @@
                                     'donorName' => $milk->donor?->dn_FullName ?? 'N/A',
                                     'status' => ucfirst($milk->milk_Status ?? 'Not Yet Started'),
                                     'volume' => $milk->milk_volume . ' mL',
-                                    'expiry' => $milk->milk_expiryDate ? \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') : 'Not set',
                                     'shariah' => is_null($milk->milk_shariahApproval) ? 'Not Yet Reviewed' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected'),
                                     'shariahRemarks' => $milk->milk_shariahRemarks ?? 'N/A',
                                     'shariahApprovalDate' => $milk->milk_shariahApprovalDate ? \Carbon\Carbon::parse($milk->milk_shariahApprovalDate)->format('M d, Y') : 'N/A',
@@ -230,15 +214,6 @@
                     </label>
                     <input type="number" name="milk_volume" class="form-control" 
                            placeholder="Enter volume in ml" required min="1" step="0.1">
-                </div>
-
-                <!-- Expiry Date -->
-                <div class="modal-section">
-                    <label>
-                        <i class="fas fa-calendar-alt"></i> Expiry Date 
-                        <span class="text-danger">*</span>
-                    </label>
-                    <input type="date" name="milk_expiryDate" class="form-control" required>
                 </div>
 
                 <!-- Clinical Status -->
@@ -663,7 +638,6 @@ function openViewMilkModal(data) {
     document.getElementById('view-donor-name').textContent = data.donorName || '-';
     document.getElementById('view-status').textContent = data.status || '-';
     document.getElementById('view-volume').textContent = data.volume || '-';
-    document.getElementById('view-expiry').textContent = data.expiry || '-';
     document.getElementById('view-shariah').textContent = data.shariah || '-';
     document.getElementById('view-shariah-remarks').textContent = data.shariahRemarks || '-';
     document.getElementById('view-shariah-date').textContent = data.shariahApprovalDate || '-';
@@ -766,7 +740,7 @@ function closeViewMilkModal() {
     document.getElementById("viewMilkModal").style.display = "none";
 }
 
-// ============== AJAX FORM SUBMISSION (FIXED: ERROR SHOWS IN FRONT!) ==============
+// ============== AJAX FORM SUBMISSION  ==============
 document.getElementById('addRecordForm')?.addEventListener('submit', function (e) {
     e.preventDefault();
 

@@ -199,6 +199,14 @@ Route::middleware(['auth'])->group(function () {
         // DELETE milk record (AJAX or normal request)
         Route::delete('/manage-milk-records/{milk}', [MilkController::class, 'destroy'])
             ->name('delete-milk');
+
+        // Milk Processing Stages
+        Route::post('/process-milk/{milk}/stage1', [MilkController::class, 'saveStage1'])->name('save-stage1');
+        Route::post('/process-milk/{milk}/stage2', [MilkController::class, 'saveStage2'])->name('save-stage2');
+        Route::post('/process-milk/{milk}/stage3', [MilkController::class, 'saveStage3'])->name('save-stage3');
+        Route::post('/process-milk/{milk}/stage4', [MilkController::class, 'saveStage4'])->name('save-stage4');
+        Route::post('/process-milk/{milk}/stage5', [MilkController::class, 'saveStage5'])->name('save-stage5');
+
     });  
 
     // ====================================================================
