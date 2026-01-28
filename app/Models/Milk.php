@@ -17,6 +17,7 @@ class Milk extends Model
         
         'milk_volume',
         'milk_Status',
+        'milk_expiryDate',
         
         'milk_shariahApproval',
         'milk_shariahApprovalDate',

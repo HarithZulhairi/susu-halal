@@ -130,6 +130,7 @@ class UserController extends Controller
                 'original_table' => 'donor',
                 'screening_status' => $screeningStatus,
                 'screening_remark' => $screeningRemark,
+                'credentials_sent_at' => $donor->dn_CredentialsSentAt ?? null, 
                 'screening' => $donor->screening
             ];
         });
@@ -717,11 +718,12 @@ class UserController extends Controller
                 'username' => $username
             ]);
 
-            // Update donor password with temporary one
+            // Update donor password with temporary one AND set sent status
             DB::table('donor')
                 ->where('dn_ID', $request->donor_id)
                 ->update([
                     'dn_Password' => Hash::make($temporaryPassword),
+                    'dn_CredentialsSentAt' => now(),
                     'updated_at' => now()
                 ]);
 

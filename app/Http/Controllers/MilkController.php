@@ -134,7 +134,62 @@ class MilkController extends Controller
 
         $milks = $query->orderBy('created_at', 'desc')->get();
 
-        return view('nurse.nurse_manage-milk-records', compact('milks'));
+        return view('nurse.nurse_manage-milk-records', compact('milks', 'donors'));
+    }
+
+    public function viewMilkDonor(Request $request)
+    {
+        $dn_id = auth()->user()->role_id;
+        $query = Milk::where('dn_ID', $dn_id)->with('donor');
+
+        // Search by milk ID only (Donor shouldn't see other names, but they know their own)
+        if ($request->filled('searchInput')) {
+            $search = $request->input('searchInput');
+            $query->where('milk_ID', 'like', "%{$search}%");
+        }
+
+        // Clinical status filter
+        if ($request->filled('filterStatus')) {
+            $status = $request->input('filterStatus');
+            if (strtolower($status) === 'not yet started') {
+                $query->whereNull('milk_Status');
+            } else {
+                $query->where('milk_Status', $status);
+            }
+        }
+
+        // Volume range filter
+        if ($request->filled('volumeMin')) {
+            $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
+        }
+        if ($request->filled('volumeMax')) {
+            $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
+        }
+
+        // Expiry date range
+        if ($request->filled('expiryFrom')) {
+            $query->whereDate('milk_expiryDate', '>=', $request->input('expiryFrom'));
+        }
+        if ($request->filled('expiryTo')) {
+            $query->whereDate('milk_expiryDate', '<=', $request->input('expiryTo'));
+        }
+
+        // Shariah approval
+        if ($request->filled('filterShariah')) {
+            $sh = $request->input('filterShariah');
+            if (strtolower($sh) === 'not yet reviewed') {
+                $query->whereNull('milk_shariahApproval');
+            } elseif (strtolower($sh) === 'approved') {
+                $query->where('milk_shariahApproval', true);
+            } elseif (strtolower($sh) === 'rejected') {
+                $query->where('milk_shariahApproval', false);
+            }
+        }
+
+        $milks = $query->orderByDesc('created_at')->get();
+
+        // No donors list needed for donor view
+        return view('donor.donor_manage-milk-records', compact('milks'));
     }
 
     public function viewMilkShariah(Request $request)
