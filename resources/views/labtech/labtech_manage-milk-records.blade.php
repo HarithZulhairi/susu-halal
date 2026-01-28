@@ -36,23 +36,35 @@
 
                     <select id="filterStatus" name="filterStatus" class="form-control">
                         <option value="">All Clinical Status</option>
-                        <option value="Not Yet Started" {{ request('filterStatus') == 'Not Yet Started' ? 'selected' : '' }}>Not Yet Started</option>
-                        <option value="Screening" {{ request('filterStatus') == 'Screening' ? 'selected' : '' }}>Screening</option>
-                        <option value="Screening Completed" {{ request('filterStatus') == 'Screening Completed' ? 'selected' : '' }}>Screening Completed</option>
-                        <option value="Labelling" {{ request('filterStatus') == 'Labelling' ? 'selected' : '' }}>Labelling</option>
-                        <option value="Labelling Completed" {{ request('filterStatus') == 'Labelling Completed' ? 'selected' : '' }}>Labelling Completed</option>
-                        <option value="Distributing" {{ request('filterStatus') == 'Distributing' ? 'selected' : '' }}>Distributing</option>
-                        <option value="Distributing Completed" {{ request('filterStatus') == 'Distributing Completed' ? 'selected' : '' }}>Distributing Completed</option>
+                        
+                        <option value="Not Yet Started" {{ request('filterStatus') == 'Not Yet Started' ? 'selected' : '' }}>
+                            Not Yet Started
+                        </option>
+
+                        <option value="Labelling Completed" {{ request('filterStatus') == 'Labelling Completed' ? 'selected' : '' }}>
+                            Labelling Completed
+                        </option>
+
+                        <option value="Thawing Completed" {{ request('filterStatus') == 'Thawing Completed' ? 'selected' : '' }}>
+                            Thawing Completed
+                        </option>
+
+                        <option value="Pasteurization Completed" {{ request('filterStatus') == 'Pasteurization Completed' ? 'selected' : '' }}>
+                            Pasteurization Completed
+                        </option>
+
+                        <option value="Microbiology Completed" {{ request('filterStatus') == 'Microbiology Completed' ? 'selected' : '' }}>
+                            Microbiology Completed
+                        </option>
+
+                        <option value="Storage Completed" {{ request('filterStatus') == 'Storage Completed' ? 'selected' : '' }}>
+                            Storage Completed
+                        </option>
                     </select>
 
                     <div style="display:flex; gap:8px;">
                         <input id="volumeMin" name="volumeMin" value="{{ request('volumeMin') }}" class="form-control" type="number" min="0" placeholder="Min mL">
                         <input id="volumeMax" name="volumeMax" value="{{ request('volumeMax') }}" class="form-control" type="number" min="0" placeholder="Max mL">
-                    </div>
-
-                    <div style="display:flex; gap:8px;">
-                        <input id="expiryFrom" name="expiryFrom" value="{{ request('expiryFrom') }}" class="form-control" type="date">
-                        <input id="expiryTo" name="expiryTo" value="{{ request('expiryTo') }}" class="form-control" type="date">
                     </div>
 
                     <select id="filterShariah" name="filterShariah" class="form-control">
@@ -140,22 +152,15 @@
                                     'donorName' => $milk->donor?->dn_FullName ?? 'N/A',
                                     'status' => ucfirst($milk->milk_Status ?? 'Not Yet Started'),
                                     'volume' => $milk->milk_volume . ' mL',
+                                    
+                                    // Shariah Info
                                     'shariah' => is_null($milk->milk_shariahApproval) ? 'Not Yet Reviewed' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected'),
-                                    'shariahRemarks' => $milk->milk_shariahRemarks ?? 'N/A',
-                                    'shariahApprovalDate' => $milk->milk_shariahApprovalDate ? \Carbon\Carbon::parse($milk->milk_shariahApprovalDate)->format('M d, Y') : 'N/A',
-                                    'milk_stage1StartDate' => $milk->milk_stage1StartDate ?? '',
-                                    'milk_stage1StartTime' => $milk->milk_stage1StartTime ?? '',
-                                    'milk_stage1EndDate' => $milk->milk_stage1EndDate ?? '',
-                                    'milk_stage1EndTime' => $milk->milk_stage1EndTime ?? '',
-                                    'milk_stage1Result' => $milk->milk_stage1Result ?? null,
-                                    'milk_stage2StartDate' => $milk->milk_stage2StartDate ?? '',
-                                    'milk_stage2StartTime' => $milk->milk_stage2StartTime ?? '',
-                                    'milk_stage2EndDate' => $milk->milk_stage2EndDate ?? '',
-                                    'milk_stage2EndTime' => $milk->milk_stage2EndTime ?? '',
-                                    'milk_stage3StartDate' => $milk->milk_stage3StartDate ?? '',
-                                    'milk_stage3StartTime' => $milk->milk_stage3StartTime ?? '',
-                                    'milk_stage3EndDate' => $milk->milk_stage3EndDate ?? '',
-                                    'milk_stage3EndTime' => $milk->milk_stage3EndTime ?? ''
+                                    'shariahRemarks' => $milk->milk_shariahRemarks ?? '-',
+                                    'shariahApprovalDate' => $milk->milk_shariahApprovalDate ? \Carbon\Carbon::parse($milk->milk_shariahApprovalDate)->format('M d, Y') : '-',
+                                    
+                                    // NEW: Pass the Bottle Collections
+                                    'preBottles' => $milk->preBottles,
+                                    'postBottles' => $milk->postBottles
                                 ];
                             @endphp
                             <button class="btn-view" title="View" data-payload='@json($payload)'>
@@ -249,66 +254,61 @@
             </div>
 
         <div class="modal-body">
-            <p><strong>Milk ID:</strong> <span id="view-milk-id"></span></p>
-            <p><strong>Donor Name:</strong> <span id="view-donor-name"></span></p>
-
-            <hr>
-
-            <h3>Processing Information</h3>
-            <p><strong>Clinical Status:</strong> <span id="view-status"></span></p>
-            <p><strong>Volume:</strong> <span id="view-volume"></span></p>
-            <p><strong>Expiry Date:</strong> <span id="view-expiry"></span></p>
-
-            <hr>
-
-            <h3>Processing Stages</h3>
-            <div class="stage-block">
-                <div class="stage-row">
-                    <strong>Screening:</strong>
-                    <span id="view-stage1-start"></span>
-                    <span class="dash">—</span>
-                    <span id="view-stage1-end"></span>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <p><strong>Milk ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
+                    <p><strong>Donor:</strong> <span id="view-donor-name"></span></p>
+                    <p><strong>Volume:</strong> <span id="view-volume"></span></p>
+                    <p><strong>Status:</strong> <span id="view-status"></span></p>
                 </div>
             </div>
 
-            <div class="stage-block">
-                <div class="stage-row">
-                    <strong>Screening Result:</strong>
-                    <span id="view-stage1-result"></span>
-                </div>
+            <div class="view-tabs" style="display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 15px;">
+                <button class="view-tab-btn active" onclick="switchViewTab('raw')">Raw Milk (Stage 1-2)</button>
+                <button class="view-tab-btn" onclick="switchViewTab('processed')">Processed (Stage 3-5)</button>
+                <button class="view-tab-btn" onclick="switchViewTab('qc')">Quality Control</button>
             </div>
 
-            <div class="stage-block">
-                <div class="stage-row">
-                    <strong>Labelling:</strong>
-                    <span id="view-stage2-start"></span>
-                    <span class="dash">—</span>
-                    <span id="view-stage2-end"></span>
-                </div>
+            <div id="view-tab-raw" class="view-tab-content active" style="padding-top: 10px;">
+                <h3>Pre-Pasteurization Bottles</h3>
+                <table class="view-table" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <thead style="background: #f1f5f9;">
+                        <tr>
+                            <th style="padding: 8px; text-align: left;">Code</th>
+                            <th style="padding: 8px; text-align: left;">Volume (mL)</th>
+                            <th style="padding: 8px; text-align: left;">Thawed?</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-pre-bottles-list">
+                        </tbody>
+                </table>
             </div>
 
-            <div class="stage-block">
-                <div class="stage-row">
-                    <strong>Distributing:</strong>
-                    <span id="view-stage3-start"></span>
-                    <span class="dash">—</span>
-                    <span id="view-stage3-end"></span>
-                </div>
+            <div id="view-tab-processed" class="view-tab-content" style="padding-top: 10px; display: none;">
+                <h3>Pasteurized Bottles</h3>
+                <table class="view-table" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <thead style="background: #f1f5f9;">
+                        <tr>
+                            <th style="padding: 8px; text-align: left;">Code</th>
+                            <th style="padding: 8px; text-align: left;">Volume (mL)</th>
+                            <th style="padding: 8px; text-align: left;">Expiry</th>
+                            <th style="padding: 8px; text-align: left;">Micro Result</th>
+                            <th style="padding: 8px; text-align: left;">Storage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-post-bottles-list">
+                        </tbody>
+                </table>
             </div>
 
-            <hr>
-
-            <h3>Quality Control</h3>
-            <p><strong>Shariah Approval:</strong>
-                <span id="view-shariah"></span>
-            </p>
-            <p><strong>Shariah Approval Date:</strong>
-                <span id="view-shariah-date"></span>
-            </p>
-            <p><strong>Shariah Remarks:</strong>
-                <span id="view-shariah-remarks"></span>
-            </p>
+            <div id="view-tab-qc" class="view-tab-content" style="display: none; padding-top: 10px;">
+                <h3>Quality Control</h3>
+                <p><strong>Shariah Approval:</strong> <span id="view-shariah"></span></p>
+                <p><strong>Approval Date:</strong> <span id="view-shariah-date"></span></p>
+                <p><strong>Remarks:</strong> <span id="view-shariah-remarks"></span></p>
+            </div>
         </div>
+
     </div>
 </div>
 
@@ -1073,6 +1073,76 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }, 1000);
     });
+
+    function switchViewTab(tabName) {
+        // Hide all
+        document.querySelectorAll('.view-tab-content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.view-tab-btn').forEach(el => el.classList.remove('active'));
+
+        // Show target
+        document.getElementById('view-tab-' + tabName).style.display = 'block';
+        // Find button (simple heuristic: rely on onclick text or index, here purely visual for simplicity)
+        const btns = document.querySelectorAll('.view-tab-btn');
+        if(tabName === 'raw') btns[0].classList.add('active');
+        if(tabName === 'processed') btns[1].classList.add('active');
+        if(tabName === 'qc') btns[2].classList.add('active');
+    }
+
+    function openViewMilkModal(data) {
+        // 1. Basic Info
+        document.getElementById('view-milk-id').textContent = data.milkId;
+        document.getElementById('view-donor-name').textContent = data.donorName;
+        document.getElementById('view-volume').textContent = data.volume;
+        document.getElementById('view-status').textContent = data.status;
+        
+        // 2. Shariah Info
+        document.getElementById('view-shariah').textContent = data.shariah;
+        document.getElementById('view-shariah-date').textContent = data.shariahApprovalDate;
+        document.getElementById('view-shariah-remarks').textContent = data.shariahRemarks;
+
+        // 3. Populate Pre-Bottles (Raw)
+        const preList = document.getElementById('view-pre-bottles-list');
+        preList.innerHTML = '';
+        if (data.preBottles && data.preBottles.length > 0) {
+            data.preBottles.forEach(b => {
+                const thawed = b.pre_is_thawed ? '<span style="color:green">Yes</span>' : '<span style="color:gray">No</span>';
+                preList.innerHTML += `<tr>
+                    <td>${b.pre_bottle_code}</td>
+                    <td>${b.pre_volume}</td>
+                    <td>${thawed}</td>
+                </tr>`;
+            });
+        } else {
+            preList.innerHTML = '<tr><td colspan="3" class="text-muted">No raw bottles recorded.</td></tr>';
+        }
+
+        // 4. Populate Post-Bottles (Processed)
+        const postList = document.getElementById('view-post-bottles-list');
+        postList.innerHTML = '';
+        if (data.postBottles && data.postBottles.length > 0) {
+            data.postBottles.forEach(b => {
+                // Check micro status color
+                let microColor = 'gray';
+                if (b.post_micro_status === 'Passed' || b.post_micro_status === 'Not Contaminated') microColor = 'green';
+                if (b.post_micro_status === 'Failed' || b.post_micro_status === 'Contaminated') microColor = 'red';
+
+                postList.innerHTML += `<tr>
+                    <td>${b.post_bottle_code}</td>
+                    <td>${b.post_volume}</td>
+                    <td>${b.post_expiry_date || '-'}</td>
+                    <td style="color:${microColor}; font-weight:bold;">${b.post_micro_status || 'Pending'}</td>
+                    <td>${b.post_storage_location || '-'}</td>
+                </tr>`;
+            });
+        } else {
+            postList.innerHTML = '<tr><td colspan="5" class="text-muted">No processed bottles yet.</td></tr>';
+        }
+
+        // Reset to first tab
+        switchViewTab('raw');
+        
+        document.getElementById('viewMilkModal').style.display = 'flex';
+    }
     </script>
 
 @endsection

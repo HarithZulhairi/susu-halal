@@ -372,11 +372,12 @@
 
 #viewMilkModal .modal-body p {
     margin-bottom: 12px;
+    padding-left: 10px;
 }
 
 #viewMilkModal .modal-body p strong {
     display: inline-block;
-    width: 120px;
+    width: 180px;
 }
 
 /* Stage layout in view modal */
@@ -425,6 +426,18 @@
     from { transform: scale(0.85); opacity: 0;}
     to { transform: scale(1); opacity: 1;}
 }
+
+.view-tab-btn {
+    background: none; border: none; padding: 10px 15px; cursor: pointer; color: #64748b; font-weight: 600;
+    border-bottom: 2px solid transparent;
+}
+
+.view-tab-btn.active {
+    color: #0ea5e9; border-bottom-color: #0ea5e9;
+}
+
+.view-table td { border-bottom: 1px solid #e2e8f0; padding: 8px; }
+
 
 .modal-header, .modal-footer {
     display: flex;

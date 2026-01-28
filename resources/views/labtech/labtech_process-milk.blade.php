@@ -115,7 +115,7 @@
 
       <div class="button-row">
         <a href="{{ route('labtech.labtech_manage-milk-records') }}" class="btn-back-nav text"><i class="fas fa-arrow-left"></i> Back</a>
-        <button class="btn-next" onclick="switchStage('stage2')">Next Stage <i class="fas fa-arrow-right"></i></button>
+        <button class="btn-next" id="btn-next-stage1" onclick="switchStage('stage2')" disabled>Next Stage <i class="fas fa-arrow-right"></i></button>
       </div>
     </div>
 
@@ -185,7 +185,7 @@
 
         <div class="button-row">
             <button class="btn-back-stage" onclick="switchStage('stage1')"><i class="fas fa-arrow-left"></i> Previous</button>
-            <button class="btn-next" onclick="switchStage('stage3')">Next Stage <i class="fas fa-arrow-right"></i></button>
+            <button class="btn-next" id="btn-next-stage2" onclick="switchStage('stage3')" disabled>Next Stage <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 
@@ -282,7 +282,7 @@
 
     <div class="button-row">
         <button class="btn-back-stage" onclick="switchStage('stage2')"><i class="fas fa-arrow-left"></i> Previous</button>
-        <button class="btn-next" onclick="switchStage('stage4')">Next Stage <i class="fas fa-arrow-right"></i></button>
+        <button class="btn-next" id="btn-next-stage3" onclick="switchStage('stage4')" disabled>Next Stage <i class="fas fa-arrow-right"></i></button>
     </div>
     </div>
 
@@ -374,7 +374,7 @@
 
     <div class="button-row">
         <button class="btn-back-stage" onclick="switchStage('stage3')"><i class="fas fa-arrow-left"></i> Previous</button>
-        <button class="btn-next" onclick="switchStage('stage5')">Next Stage <i class="fas fa-arrow-right"></i></button>
+        <button class="btn-next" id="btn-next-stage4" onclick="switchStage('stage5')" disabled>Next Stage <i class="fas fa-arrow-right"></i></button>
     </div>
     </div>
 
@@ -416,7 +416,6 @@
                 </small>
             </div>
             <table class="data-table" id="storage-table">
-                <thead>...</thead>
                 <tbody>
                     @php $approvedCount = 0; @endphp
                     @foreach($milk->postBottles as $bottle)
@@ -458,8 +457,18 @@
     </form>
 
     <div class="button-row">
-        <button class="btn-back-stage" onclick="switchStage('stage4')"><i class="fas fa-arrow-left"></i> Previous</button>
-        <a href="{{ route('labtech.labtech_manage-milk-records') }}" class="btn-submit-stage" style="text-decoration:none; display:inline-block; width:auto; background: #64748b;">Done</a>
+        <button class="btn-back-stage" onclick="switchStage('stage4')">
+            <i class="fas fa-arrow-left"></i> Previous
+        </button>
+        
+        {{-- "Done" Button: Initially Disabled --}}
+        <button class="btn-submit-stage" 
+                id="btn-done-stage5" 
+                style="text-decoration:none; display:inline-block; width:auto; background: #64748b; cursor: not-allowed;" 
+                onclick="window.location.href='{{ route('labtech.labtech_manage-milk-records') }}'" 
+                disabled>
+            Done
+        </button>
     </div>
     </div>
 
@@ -483,12 +492,61 @@
     // ==========================================
     // 1. INITIALIZATION & RESTORE STATE
     // ==========================================
-    // ==========================================
-    // 1. INITIALIZATION & RESTORE STATE
-    // ==========================================
+
     document.addEventListener('DOMContentLoaded', function() {
         calculateTotalVolume();        // Stage 1 Calc
         calculatePasteurTotalVolume(); // Stage 3 Calc (Add this line)
+
+        // --- CHECK & UNLOCK NEXT BUTTONS BASED ON SAVED DATA ---
+        
+        // Check Stage 1 Data (Pre-Bottles exist)
+        // We use the PHP variable rendered into JS, or check the DOM table rows
+        const hasStage1Data = {{ $milk->preBottles->count() > 0 ? 'true' : 'false' }};
+        if (hasStage1Data) {
+            const btn1 = document.getElementById('btn-next-stage1');
+            if(btn1) {
+                btn1.disabled = false;
+                btn1.classList.remove('disabled'); // Optional styling class
+            }
+        }
+
+        // Check Stage 2 Data (Stage 2 End Date is set)
+        const hasStage2Data = {{ $milk->milk_stage2StartDate ? 'true' : 'false' }};
+        if (hasStage2Data) {
+            const btn2 = document.getElementById('btn-next-stage2');
+            if(btn2) btn2.disabled = false;
+        }
+
+        // Check Stage 3 Data (Post-Bottles exist)
+        const hasStage3Data = {{ $milk->postBottles->count() > 0 ? 'true' : 'false' }};
+        if (hasStage3Data) {
+            const btn3 = document.getElementById('btn-next-stage3');
+            if(btn3) btn3.disabled = false;
+        }
+
+        // Check Stage 4 Data (Stage 4 Start Date is set OR Micro results exist)
+        const hasStage4Data = {{ $milk->milk_stage4StartDate ? 'true' : 'false' }};
+        if (hasStage4Data) {
+            const btn4 = document.getElementById('btn-next-stage4');
+            if(btn4) btn4.disabled = false;
+        }
+
+        // --- CHECK STAGE 5 DATA TO UNLOCK DONE BUTTON ---
+        const hasStage5Data = {{ $milk->milk_stage5StartDate ? 'true' : 'false' }};
+        
+        if (hasStage5Data) {
+            const btn5 = document.getElementById('btn-done-stage5');
+            if(btn5) {
+                btn5.disabled = false;
+                btn5.style.cursor = 'pointer'; // Restore pointer cursor
+                // Optional: Add a visual cue that it's active
+                btn5.style.opacity = '1'; 
+            }
+        } else {
+            // Ensure it looks disabled if data is missing
+            const btn5 = document.getElementById('btn-done-stage5');
+            if(btn5) btn5.style.opacity = '0.6';
+        }
 
         // --- NEW: AUTO-CALCULATE MICRO STATUS ON LOAD ---
         // This ensures the badge matches the numbers loaded from the database
