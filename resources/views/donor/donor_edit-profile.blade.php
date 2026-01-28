@@ -64,7 +64,7 @@
                                 name="name" 
                                 value="{{ old('name', $profile->name ?? '') }}" 
                                 class="form-control @error('name') is-invalid @enderror" 
-                                required>
+                                required disabled>
                             @error('name')
                                 <span class="error-message">{{ $message }}</span>
                             @enderror
@@ -102,7 +102,8 @@
                                 id="dob" 
                                 name="dob" 
                                 value="{{ old('dob', $profile->dob ?? '') }}" 
-                                class="form-control @error('dob') is-invalid @enderror">
+                                class="form-control @error('dob') is-invalid @enderror"
+                                disabled>
                             @error('dob')
                                 <span class="error-message">{{ $message }}</span>
                             @enderror

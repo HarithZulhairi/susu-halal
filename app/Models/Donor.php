@@ -22,14 +22,24 @@ class Donor extends Model
         'dn_Contact',
         'dn_Email',
         'dn_Address',
+        'dn_MaritalStatus',
+        'dn_HusbandConsent',
+        'dn_DonationType',
+        'dn_Religion',
+        'dn_ExcessBreastMilk',
+        'dn_MilkQuantity',
         'dn_Parity',
         'dn_DeliveryDetails',
         'dn_Availability',
         'dn_InfectionDeseaseRisk',
         'dn_Medication',
         'dn_RecentIllness',
+        'dn_SmokingStatus',
+        'dn_PhysicalHealth',
+        'dn_MentalHealth',
         'dn_TobaccoAlcohol',
         'dn_DietaryAlerts',
+        'dn_ConsentStatus',
         'user_id',
     ];
 
@@ -38,6 +48,7 @@ class Donor extends Model
         'dn_DOB' => 'date',
         'dn_DeliveryDetails' => 'array',
         'dn_Availability' => 'array',
+        'dn_MilkQuantity' => 'array',
     ];
 
     // Accessor for formatted donor ID

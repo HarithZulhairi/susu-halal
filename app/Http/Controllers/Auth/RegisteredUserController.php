@@ -44,6 +44,13 @@ class RegisteredUserController extends Controller
             'email' => ['nullable', 'email', 'max:255', 'unique:donor,dn_Email'],
             'address' => ['required', 'string', 'max:500'],
             'parity' => ['required', 'integer', 'min:0'],
+            'marital_status' => ['required', 'string', 'in:single,married'],
+            'husband_consent' => ['required_if:marital_status,married', 'string', 'in:yes,no'],
+            'donation_type' => ['required', 'string', 'in:voluntary,non-voluntary'],
+            'religion' => ['required', 'string'],
+            'has_excess_milk' => ['required', 'string', 'in:yes,no'],
+            'milk_unit' => ['required_if:has_excess_milk,yes', 'string', 'in:ml,l,oz'],
+            'milk_quantity' => ['required_if:has_excess_milk,yes', 'numeric', 'min:0'],
             
             // Delivery details
             'deliveryDate' => ['nullable', 'string'],
@@ -59,6 +66,9 @@ class RegisteredUserController extends Controller
             'tobaccoAlcoholOption' => ['required', 'in:yes,no'],
             'dietaryAlertsOption' => ['required', 'in:yes,no'],
             'dietaryAlertsDetailText' => ['required_if:dietaryAlertsOption,yes', 'nullable', 'string', 'max:255'],
+            'smokingStatus' => ['required', 'string', 'in:non_smoker,passive_smoker,former_smoker,current_smoker'],
+            'physicalHealth' => ['required', 'string', 'in:good,fair,poor'],
+            'mentalHealth' => ['required', 'string', 'in:good,fair,poor'],
             
             // Availability step
             'availableDays' => ['required', 'string'],
@@ -78,7 +88,15 @@ class RegisteredUserController extends Controller
             // Prepare availability as array (parse JSON)
             $availability = $this->prepareAvailability($request);
 
-            // Create donor record
+            // Prepare milk quantity as array
+            $milkQuantity = null;
+            if ($request->has_excess_milk === 'yes') {
+                $milkQuantity = [
+                    'amount' => $request->milk_quantity,
+                    'unit' => $request->milk_unit
+                ];
+            }
+             // Create donor record
             $donor = Donor::create([
                 'dn_NRIC' => $request->nric,
                 'dn_FullName' => $request->fullname,
@@ -90,6 +108,12 @@ class RegisteredUserController extends Controller
                 'dn_Email' => $request->email,
                 'dn_Address' => $request->address,
                 'dn_Parity' => $request->parity,
+                'dn_MaritalStatus' => $request->marital_status,
+                'dn_HusbandConsent' => $request->husband_consent,
+                'dn_DonationType' => $request->donation_type,
+                'dn_Religion' => $request->religion,
+                'dn_ExcessBreastMilk' => $request->has_excess_milk === 'yes',
+                'dn_MilkQuantity' => $milkQuantity,
                 'dn_DeliveryDetails' => $deliveryDetails,
                 'dn_Availability' => $availability,
                 'dn_InfectionDeseaseRisk' => $request->infectiousRiskOption === 'yes' ? $request->infectiousRiskDetailText : null,
@@ -97,6 +121,9 @@ class RegisteredUserController extends Controller
                 'dn_RecentIllness' => $request->recentIllnessOption === 'yes' ? $request->recentIllnessDetailText : null,
                 'dn_TobaccoAlcohol' => $request->tobaccoAlcoholOption === 'yes',
                 'dn_DietaryAlerts' => $request->dietaryAlertsOption === 'yes' ? $request->dietaryAlertsDetailText : null,
+                'dn_SmokingStatus' => $request->smokingStatus,
+                'dn_PhysicalHealth' => $request->physicalHealth,
+                'dn_MentalHealth' => $request->mentalHealth,
             ]);
 
             // Create donor_to_be record for screening
@@ -109,8 +136,7 @@ class RegisteredUserController extends Controller
                 'dtb_TobaccoAlcohol' => $request->tobaccoAlcoholOption === 'yes',
                 'dtb_DietaryAlerts' => $request->dietaryAlertsOption === 'yes' ? $request->dietaryAlertsDetailText : null,
             ]);
-
-            // Create user account
+             // Create user account
             $userEmail = $request->email ?: $username . '@donor.hmmc.com';
 
             // Initialize notification variables

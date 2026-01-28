@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use App\Models\HmmcAdmin;
 use App\Models\Doctor;
 use App\Models\Donor;
@@ -11,7 +10,8 @@ use App\Models\LabTech;
 use App\Models\Nurse;
 use App\Models\ParentModel;
 use App\Models\ShariahCommittee;
-use App\Models\User; // Uncomment if you still want to seed the default User
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -58,11 +58,21 @@ class DatabaseSeeder extends Seeder
             'dn_Contact' => '0142345678',
             'dn_Email' => 'donor@hmmc.org',
             'dn_Address' => '45 Donor Avenue, Klang',
+            'dn_MaritalStatus' => 'Married',
+            'dn_HusbandConsent' => 'Yes',
+            'dn_DonationType' => 'Voluntary',
+            'dn_Religion' => 'Islam',
+            'dn_ExcessBreastMilk' => 'Yes',
+            'dn_MilkQuantity' => ['quantity' => 500, 'unit' => 'ml'], // Saved as JSON array
             'dn_InfectionDeseaseRisk' => 'None',
             'dn_Medication' => 'None',
             'dn_RecentIllness' => 'None',
-            'dn_TobaccoAlcohol' => 0, 
+            'dn_SmokingStatus' => 'Non-smoker',
+            'dn_PhysicalHealth' => 'Good',
+            'dn_MentalHealth' => 'Good',
+            'dn_TobaccoAlcohol' => 0,
             'dn_DietaryAlerts' => 'None',
+            'dn_ConsentStatus' => 'Pending',
         ]);
 
         // 4️⃣ Lab Technician
@@ -108,9 +118,9 @@ class DatabaseSeeder extends Seeder
             'pr_BabyName' => 'Baby Default',
             'pr_BabyDOB' => '2023-05-10',
             'pr_BabyGender' => 'Female',
-            'pr_NICU' => 'Wad-23',
-            'pr_BabyBirthWeight' => 3.2,
-            'pr_BabyCurrentWeight' => 5.1,
+            'pr_NICU' => 'No',
+            'pr_BabyBirthWeight' => '3.2',
+            'pr_BabyCurrentWeight' => '5.1',
         ]);
 
         // 7️⃣ Shariah Committee

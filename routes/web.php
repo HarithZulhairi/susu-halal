@@ -129,6 +129,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/kinship', [ProfileController::class, 'kinship'])->name('kinship');
+    Route::post('/edit-kinship', [ProfileController::class, 'editKinship'])->name('edit.kinship');
 
 
     // Extra Profile Views
