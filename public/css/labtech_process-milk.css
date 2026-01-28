@@ -780,3 +780,10 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+/* Match footer cell spacing to body cells so row height is identical */
+.data-table tfoot td {
+    padding: 14px 12px; 
+    color: #334155;
+    border-top: 2px solid #e2e8f0; /* Optional: Adds a separator line */
+}

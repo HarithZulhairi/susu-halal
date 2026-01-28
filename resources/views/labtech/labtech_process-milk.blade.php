@@ -90,13 +90,13 @@
                         </tr>
                     @endif
                 </tbody>
-                <tfoot style="padding: 10px;">
+                <tfoot>
                     <tr style="background-color: #f8fafc; font-weight:bold;">
-                        <td colspan="1" style="text-align:right;">Total Volume:</td>
-                        <td>
+                        <td colspan="1" style="text-align:right; padding: 14px 12px;">Total Volume:</td>
+                        <td style="padding: 14px 12px;">
                             <span id="total-volume-display">0</span> / {{ $milk->milk_volume }} ml
                         </td>
-                        <td colspan="2">
+                        <td colspan="2" style="padding: 14px 12px;">
                             <small id="volume-warning" class="text-danger" style="display:none;">
                                 Exceeds Limit!
                             </small>
@@ -252,6 +252,19 @@
                         </tr>
                     @endif
                 </tbody>
+                <tfoot>
+                    <tr style="background-color: #f8fafc; font-weight:bold;">
+                        <td style="text-align:right; padding: 14px 12px;">Total Volume:</td>
+                        <td style="padding: 14px 12px;">
+                            <span id="pasteur-total-volume-display">0</span> / {{ $milk->milk_volume }} ml
+                        </td>
+                        <td colspan="3" style="padding: 14px 12px;">
+                            <small id="pasteur-volume-warning" class="text-danger" style="display:none;">
+                                Exceeds Limit!
+                            </small>
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
 
@@ -474,7 +487,8 @@
     // 1. INITIALIZATION & RESTORE STATE
     // ==========================================
     document.addEventListener('DOMContentLoaded', function() {
-        calculateTotalVolume();
+        calculateTotalVolume();        // Stage 1 Calc
+        calculatePasteurTotalVolume(); // Stage 3 Calc (Add this line)
 
         // --- NEW: AUTO-CALCULATE MICRO STATUS ON LOAD ---
         // This ensures the badge matches the numbers loaded from the database
@@ -645,34 +659,46 @@
     }
 
     function addPasteurBottleRow() {
-        const tbody = document.querySelector('#pasteur-table tbody');
-        const emptyMsg = document.getElementById('pasteur-empty-msg');
-        if(emptyMsg) emptyMsg.remove();
-        const count = tbody.rows.length + 1;
-        const fixedVolume = 30;
-        const today = new Date();
-        const expiry = new Date(); expiry.setMonth(today.getMonth() + 6);
-        
-        const row = tbody.insertRow();
-        row.innerHTML = `
-            <td style="font-weight:bold; color:#1A5F7A;">${milkIdFormatted}-P${count}</td>
-            <td><input type="number" value="${fixedVolume}" readonly style="border:none; background:transparent; text-align:center; font-weight:bold; width:50px;"> ml</td>
-            <td><input type="date" value="${formatDate(today)}" readonly style="border:none; background:transparent; text-align:center;"></td>
-            <td><input type="date" value="${formatDate(expiry)}" readonly style="border:none; background:transparent; text-align:center; color:#dc2626; font-weight:bold;"></td>
-            <td class="actions"><button type="button" onclick="deletePasteurRow(this)"><i class="fas fa-trash"></i></button></td>
-        `;
-    }
+    const tbody = document.querySelector('#pasteur-table tbody');
+    const emptyMsg = document.getElementById('pasteur-empty-msg');
+    if(emptyMsg) emptyMsg.remove();
+    
+    const count = tbody.rows.length + 1;
+    const fixedVolume = 30; // This is your fixed volume
+    const today = new Date();
+    const expiry = new Date(); expiry.setMonth(today.getMonth() + 6);
+    
+    const row = tbody.insertRow();
+    row.innerHTML = `
+        <td style="font-weight:bold; color:#1A5F7A;">${milkIdFormatted}-P${count}</td>
+        <td>
+            {{-- This is the Volume Input we are calculating --}}
+            <input type="number" value="${fixedVolume}" readonly 
+                   style="border:none; background:transparent; text-align:center; font-weight:bold; width:50px;"> ml
+        </td>
+        <td><input type="date" value="${formatDate(today)}" readonly style="border:none; background:transparent; text-align:center;"></td>
+        <td><input type="date" value="${formatDate(expiry)}" readonly style="border:none; background:transparent; text-align:center; color:#dc2626; font-weight:bold;"></td>
+        <td class="actions"><button type="button" onclick="deletePasteurRow(this)"><i class="fas fa-trash"></i></button></td>
+    `;
+    
+    // --- CALL CALCULATION HERE ---
+    calculatePasteurTotalVolume();
+}
 
     function deletePasteurRow(btn) {
-        const row = btn.closest('tr');
-        const tbody = row.closest('tbody');
-        row.remove();
-        if(tbody.rows.length === 0) {
-            tbody.innerHTML = `<tr id="pasteur-empty-msg"><td colspan="5" class="text-muted" style="padding:20px;">No pasteurized bottles added yet.</td></tr>`;
-        } else {
-            renumberPasteurBottles();
-        }
+    const row = btn.closest('tr');
+    const tbody = row.closest('tbody');
+    row.remove();
+    
+    if(tbody.rows.length === 0) {
+        tbody.innerHTML = `<tr id="pasteur-empty-msg"><td colspan="5" class="text-muted" style="padding:20px;">No pasteurized bottles added yet.</td></tr>`;
+    } else {
+        renumberPasteurBottles();
     }
+    
+    // --- CALL CALCULATION HERE ---
+    calculatePasteurTotalVolume();
+}
 
     function renumberPasteurBottles() {
         const rows = document.querySelectorAll('#pasteur-table tbody tr');
@@ -681,6 +707,44 @@
             row.cells[0].innerText = `${milkIdFormatted}-P${index + 1}`;
         });
     }
+
+    function calculatePasteurTotalVolume() {
+    let total = 0;
+    
+    // Select all rows in the Stage 3 table body
+    const rows = document.querySelectorAll('#pasteur-table tbody tr');
+
+    rows.forEach(row => {
+        // Skip the "No bottles" message row
+        if(row.id === 'pasteur-empty-msg') return;
+
+        // Select the input specifically in the 2nd column (Volume column)
+        const volumeInput = row.querySelector('td:nth-child(2) input');
+        
+        if (volumeInput) {
+            total += parseFloat(volumeInput.value) || 0;
+        }
+    });
+
+    // Update the Footer Display
+    const display = document.getElementById('pasteur-total-volume-display');
+    const warning = document.getElementById('pasteur-volume-warning');
+
+    if (display) {
+        display.innerText = total;
+
+        // Check Limit (using your global maxMilkVolume variable)
+        if (typeof maxMilkVolume !== 'undefined' && total > maxMilkVolume) {
+            display.style.color = '#dc2626'; // Red
+            display.style.fontWeight = 'bold';
+            if(warning) warning.style.display = 'inline';
+        } else {
+            display.style.color = '#334155'; // Normal
+            display.style.fontWeight = 'normal';
+            if(warning) warning.style.display = 'none';
+        }
+    }
+}
 
     // ... [KEEP STAGE 4 & 5 UTILS AS IS] ...
     function loadStage4Bottles() {
