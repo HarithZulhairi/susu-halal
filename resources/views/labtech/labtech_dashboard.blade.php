@@ -123,7 +123,6 @@
                                     <th>MILK DONOR</th>
                                     <th>CLINICAL STATUS</th>
                                     <th>VOLUME</th>
-                                    <th>EXPIRATION DATE</th>
                                     <th>SHARIAH APPROVAL</th>
                                 </tr>
                             </thead>
@@ -166,16 +165,6 @@
                                         </a>
                                     </td>
                                     <td>{{ $milk->milk_volume }} mL</td>
-                                    <td>
-                                        @if($milk->milk_expiryDate)
-                                            {{ \Carbon\Carbon::parse($milk->milk_expiryDate)->format('M d, Y') }}
-                                            @if(\Carbon\Carbon::parse($milk->milk_expiryDate)->isPast())
-                                                <span class="expired-text">(expired)</span>
-                                            @endif
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
                                     <td>
                                         @php
                                             $approval = $milk->milk_shariahApproval;
