@@ -7,57 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-    /* Specific styles for the simplified Donor Modal */
-    .tracking-list {
-        list-style: none;
-        padding: 0;
-        margin: 20px 0 0 0;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .tracking-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 16px;
-        border-bottom: 1px solid #f1f5f9;
-        background: #fff;
-        align-items: center;
-    }
-    .tracking-item:last-child {
-        border-bottom: none;
-    }
-    .tracking-item:nth-child(even) {
-        background: #f8fafc;
-    }
-    .tracking-stage {
-        font-weight: 600;
-        color: #334155;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .tracking-date {
-        font-size: 13px;
-        color: #64748b;
-        font-family: monospace; /* tabular look for dates */
-    }
-    .icon-stage {
-        width: 24px;
-        text-align: center;
-        color: #1A5F7A;
-    }
-    .date-pending {
-        color: #cbd5e1;
-        font-style: italic;
-    }
-    .shariah-box {
-        margin-top: 20px;
-        padding: 15px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 8px;
-    }
+
 </style>
 
 <div class="container">
@@ -154,17 +104,12 @@
                         {{-- 5. Actions --}}
                         <div class="actions">
                             @php
-                                // Helper to format date safely
                                 $fmt = function($d) { return $d ? \Carbon\Carbon::parse($d)->format('d M Y, h:i A') : null; };
-
                                 $payload = [
                                     'milkId' => $milk->formatted_id,
                                     'status' => $displayStatus,
                                     'volume' => $milk->milk_volume . ' mL',
-                                    // SHARIAH INFO
                                     'shariah' => is_null($milk->milk_shariahApproval) ? 'In Review' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected'),
-                                    
-                                    // STAGE START DATES ONLY
                                     'stage1' => $fmt($milk->milk_stage1StartDate),
                                     'stage2' => $fmt($milk->milk_stage2StartDate),
                                     'stage3' => $fmt($milk->milk_stage3StartDate),
@@ -184,13 +129,14 @@
                     </div>
                 @endforelse
                 
+                {{-- Pagination Container --}}
                 <div id="paginationControls" class="pagination-controls"></div>
             </div>
         </div>
     </div>
 </div>
 
-{{-- ===================== VIEW MODAL (SIMPLIFIED) ===================== --}}
+{{-- ===================== VIEW MODAL ===================== --}}
 <div id="viewMilkModal" class="modal-overlay">
     <div class="modal-content" style="max-width: 100%;">
         <div class="modal-header">
@@ -201,7 +147,7 @@
         <div class="modal-body">
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <p><strong>Milk Batch ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
+                    <p><strong>Batch ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
                     <p><strong>Volume:</strong> <span id="view-volume"></span></p>
                     <p><strong>Status:</strong> <span id="view-status"></span></p>
                 </div>
@@ -245,7 +191,6 @@
     window.addEventListener("click", (e) => { if (e.target === viewModal) viewModal.style.display = "none"; });
     function closeViewMilkModal() { viewModal.style.display = "none"; }
 
-    // Click Handler for View Buttons
     document.querySelectorAll('.btn-view').forEach(btn => {
         btn.addEventListener('click', () => {
             try {
@@ -256,19 +201,16 @@
     });
 
     function openViewMilkModal(data) {
-        // 1. Populate Basic Info
         document.getElementById('view-milk-id').textContent = data.milkId;
         document.getElementById('view-volume').textContent = data.volume;
         document.getElementById('view-status').textContent = data.status;
         
-        // 2. Populate Shariah Status
         const shariahEl = document.getElementById('view-shariah');
         shariahEl.textContent = data.shariah;
         if(data.shariah === 'Approved') shariahEl.style.color = 'green';
         else if(data.shariah === 'Rejected') shariahEl.style.color = 'red';
-        else shariahEl.style.color = '#d97706'; // Orange for review
+        else shariahEl.style.color = '#d97706';
 
-        // 3. Populate Timeline Dates (or "Pending")
         const setDate = (id, dateStr) => {
             const el = document.getElementById(id);
             if (dateStr) {
@@ -286,7 +228,6 @@
         setDate('view-stage4', data.stage4);
         setDate('view-stage5', data.stage5);
 
-        // Show Modal
         viewModal.style.display = 'flex';
     }
 
@@ -298,7 +239,7 @@
     });
     document.getElementById('clearFilters').addEventListener('click', () => { window.location.href = '{{ url()->current() }}'; });
 
-    // --- Sorting & Pagination Logic (Standard) ---
+    // --- Sorting & Pagination Logic ---
     (function setupList() {
         const container = document.querySelector('.records-list');
         const controls = document.getElementById('paginationControls');
@@ -337,22 +278,43 @@
             const total = Math.ceil(rows.length / perPage);
             currentPage = page < 1 ? 1 : (page > total && total > 0 ? total : page);
             
+            // Hide all rows
             rows.forEach((r, i) => r.style.display = 'none');
+            // Show slice
             rows.slice((currentPage-1)*perPage, currentPage*perPage).forEach(r => r.style.display = 'grid');
 
+            // Render Controls
             if(controls) {
                 controls.innerHTML = '';
-                if(total > 1) {
-                    for(let i=1; i<=total; i++) {
-                        const btn = document.createElement('button');
-                        btn.className = `page-btn ${i===currentPage?'active':''}`;
-                        btn.textContent = i;
-                        btn.onclick = () => renderPage(i);
-                        controls.appendChild(btn);
-                    }
+                
+                // Prev
+                const prev = document.createElement('button');
+                prev.className = 'page-btn';
+                prev.innerHTML = '&lsaquo; Prev';
+                prev.disabled = currentPage === 1;
+                prev.onclick = () => renderPage(currentPage - 1);
+                controls.appendChild(prev);
+
+                // Page Numbers
+                for(let i=1; i<=total; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = `page-btn ${i===currentPage?'active':''}`;
+                    btn.textContent = i;
+                    btn.onclick = () => renderPage(i);
+                    controls.appendChild(btn);
                 }
+
+                // Next
+                const next = document.createElement('button');
+                next.className = 'page-btn';
+                next.innerHTML = 'Next &rsaquo;';
+                next.disabled = currentPage === total || total === 0;
+                next.onclick = () => renderPage(currentPage + 1);
+                controls.appendChild(next);
             }
         }
+        
+        // Initial Render
         renderPage(1);
     })();
 </script>
