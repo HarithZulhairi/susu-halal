@@ -245,7 +245,7 @@
                                         <small><em>By accepting, you acknowledge that you will become the <strong>Milk Mother (Ibu Susuan)</strong> to the recipient infant(s) associated with this batch, establishing a permanent Mahram relationship in accordance with Shariah law.</em></small>
                                     </p>
                                 </div>
-                                <form id="kinship-form" method="POST" action="{{ route('donor.kinship') }}">
+                                <form id="kinship-form" method="POST" action="{{ route('kinship') }}">
                                     @csrf
                                     <input type="hidden" name="decision" id="kinship-decision">
                                     <div class="kinship-actions">
