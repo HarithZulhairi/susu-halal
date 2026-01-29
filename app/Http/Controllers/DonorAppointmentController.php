@@ -35,6 +35,7 @@ class DonorAppointmentController extends Controller
         $appointment = MilkAppointment::create([
             'dn_ID' => $dn_id,
             'milk_amount' => $request->milk_amount,
+            'less_amount_reason' => $request->less_amount_reason,
             'delivery_method' => $request->delivery_method,
             'location' => $location,
             'collection_address' => $collection_address,
@@ -159,6 +160,7 @@ class DonorAppointmentController extends Controller
                 'ma_ID',
                 'appointment_datetime',
                 'milk_amount',
+                'less_amount_reason',
                 'delivery_method as type',
                 'location',
                 'collection_address',
@@ -224,14 +226,14 @@ class DonorAppointmentController extends Controller
     {
         $request->validate([
             'edit_datetime' => 'required|date',
-            'remarks' => 'nullable|string'
+            'reschedule_reason' => 'nullable|string'
         ]);
 
         $reAppointment = MilkAppointment::findOrFail($id);
 
         $reAppointment->update([
             'appointment_datetime' => $request->edit_datetime,
-            'remarks' => $request->remarks,
+            'reschedule_reason' => $request->reschedule_reason,
             'status' => 'Pending'
         ]);
 

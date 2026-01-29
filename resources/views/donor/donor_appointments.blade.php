@@ -467,7 +467,7 @@
 
                 <h3>Reason</h3>
                 <div class="form-group full-width">
-                    <textarea id="remarks" name="remarks" class="form-control" rows="2" placeholder="Optional..."></textarea>
+                    <textarea id="reschedule_reason" name="reschedule_reason" class="form-control" rows="2" placeholder="Optional..."></textarea>
                 </div>
 
                 <button class="modal-save-btn">

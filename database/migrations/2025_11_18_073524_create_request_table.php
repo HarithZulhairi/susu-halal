@@ -21,6 +21,11 @@ return new class extends Migration
             // Milk attributes
             $table->double('current_weight');
             $table->integer('recommended_volume');
+            $table->integer('baby_age');
+            $table->integer('gestational_age');
+            $table->string('kinship_method');
+            $table->string('feeding_tube');
+            $table->string('oral_feeding');
             $table->date('feeding_start_date');
             $table->time('feeding_start_time');
             $table->integer('feeding_perday');
