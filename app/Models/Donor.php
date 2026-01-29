@@ -40,6 +40,7 @@ class Donor extends Model
         'dn_TobaccoAlcohol',
         'dn_DietaryAlerts',
         'dn_ConsentStatus',
+        'dn_CredentialsSentAt',
         'user_id',
     ];
 

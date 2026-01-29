@@ -17,6 +17,7 @@ return new class extends Migration
             // Batch Attributes
             $table->integer('milk_volume'); // Total Raw Volume from Donor
             $table->string('milk_Status')->nullable(); // e.g. "Screening", "Pasteurization"
+            $table->date('milk_expiryDate')->nullable();
 
             // Shariah Info (Applies to the whole batch)
             $table->boolean('milk_shariahApproval')->nullable();

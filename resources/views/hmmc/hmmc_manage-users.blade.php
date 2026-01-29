@@ -205,9 +205,14 @@
                                     <div class="action-buttons">
                                         @if($user->role == 'donor' && ($user->screening_status === 'passed'))
                                             {{-- For approved donors: Show Send Credentials + all other buttons --}}
-                                            <button class="icon-btn send-credential-btn" title="Send Credentials"
+                                            @php
+                                                $credsSent = !empty($user->credentials_sent_at);
+                                            @endphp
+                                            <button class="icon-btn send-credential-btn" 
+                                                    title="{{ $credsSent ? 'Resend Credentials (Sent on ' . \Carbon\Carbon::parse($user->credentials_sent_at)->format('d M Y') . ')' : 'Send Credentials' }}"
                                                     onclick="sendCredentials('{{ $user->original_id }}', '{{ addslashes($user->name) }}', '{{ $user->email }}', '{{ $user->contact }}')">
-                                                <i class="fas fa-paper-plane"></i>
+                                                <i class="fas {{ $credsSent ? 'fa-check-circle' : 'fa-paper-plane' }}" 
+                                                   style="{{ $credsSent ? 'color: #10b981;' : '' }}"></i>
                                             </button>
 
                                             <button class="icon-btn view-btn" title="View Details"

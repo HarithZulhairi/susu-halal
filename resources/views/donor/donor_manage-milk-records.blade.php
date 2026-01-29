@@ -3,11 +3,13 @@
 @section('title', 'Manage Milk Records (Donor)')
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/donor_manage-milk-records.css') }}">
+<!-- Reusing LabTech CSS for consistent design -->
+<link rel="stylesheet" href="{{ asset('css/labtech_manage-milk-records.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <div class="container">
     <div class="main-content">
+
 
         <div class="page-header">
             <h1>Milk Records Management</h1>
@@ -49,6 +51,8 @@
                     </select>
 
                     <div class="filter-actions">
+                        <button id="applyFilters" class="btn" type="submit">Apply</button>
+                        <button id="clearFilters" class="btn" type="button" onclick="window.location='{{ url()->current() }}'">Clear</button>
                         <button id="applyFilters" class="btn" type="submit">Apply</button>
                         <button id="clearFilters" class="btn" type="button" onclick="window.location='{{ url()->current() }}'">Clear</button>
                     </div>
@@ -132,7 +136,13 @@
                     <div class="record-item text-center text-muted py-5">
                         <i class="fas fa-inbox fa-3x mb-3"></i>
                         <p>No milk records found.</p>
+                @empty
+                    <div class="record-item text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No milk records found.</p>
                     </div>
+                @endforelse
+                
                 @endforelse
                 
                 <div id="paginationControls" class="pagination-controls"></div>
@@ -144,12 +154,20 @@
 {{-- ===================== VIEW MILK RECORD MODAL ===================== --}}
 <div id="viewMilkModal" class="modal-overlay">
     <div class="modal-content">
+    <div class="modal-content">
         <div class="modal-header">
             <h2>Milk Record Details</h2>
             <button class="modal-close-btn" onclick="closeViewMilkModal()">Close</button>
         </div>
 
         <div class="modal-body">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <p><strong>Milk ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
+                    <p><strong>Donor:</strong> <span id="view-donor-name"></span></p>
+                    <p><strong>Volume:</strong> <span id="view-volume"></span></p>
+                    <p><strong>Status:</strong> <span id="view-status"></span></p>
+                </div>
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <p><strong>Milk ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
@@ -207,6 +225,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+
 <script>
     // --- Modal Logic ---
     const viewModal = document.getElementById("viewMilkModal");
@@ -215,6 +234,7 @@
 
     document.querySelectorAll('.btn-view').forEach(btn => {
         btn.addEventListener('click', () => {
+            const payload = btn.getAttribute('data-payload');
             try {
                 const data = JSON.parse(btn.getAttribute('data-payload'));
                 openViewMilkModal(data);
