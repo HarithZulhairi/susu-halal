@@ -19,13 +19,15 @@ return new class extends Migration
 
             //Table Attributes
             $table->integer('milk_amount');
+            $table->text('less_amount_reason')->nullable();
             $table->string('delivery_method');
             $table->string('location')->nullable();
             $table->string('collection_address')->nullable();
             $table->dateTime('appointment_datetime');
             $table->text('remarks')->nullable();
             
-            $table->string('status')->default('pending'); // optional
+            $table->string('status')->default('pending'); 
+            $table->text('reschedule_reason')->nullable();
 
             $table->timestamps();
 

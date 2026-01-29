@@ -21,12 +21,14 @@ class MilkAppointment extends Model
         'reference_num',
         'dn_ID',
         'milk_amount',
+        'less_amount_reason',
         'delivery_method',
         'location',
         'collection_address',
         'appointment_datetime',
         'remarks',
         'status',
+        'reschedule_reason',
     ];
 
 

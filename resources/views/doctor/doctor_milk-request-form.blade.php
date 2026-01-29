@@ -66,26 +66,7 @@
         </div>
       </div>
     </section>
-
-    <section class="form-section">
-        <h2>🤝 Milk Kinship Consent Status</h2>
-        <div class="consent-box">
-            <div class="consent-status" id="consent-status-display">
-                <i class="fas fa-info-circle"></i> Select a patient to check status.
-            </div>
-            
-            <div class="consent-details">
-                <div class="consent-item">
-                    <span class="label">Parent Consent:</span>
-                    <span class="value status-approved" id="parent-consent-val">-</span>
-                </div>
-                <div class="consent-item">
-                    <span class="label">Donor Consent:</span>
-                    <span class="value status-approved" id="donor-consent-val">-</span>
-                </div>
-            </div>
-        </div>
-    </section>
+    
 
     <section class="form-section">
         <h2>💧 Milk Dispensing Method</h2>
