@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 
 //new routes
-Route::view('/doctor/manage-milk-records', 'doctor.doctor_manage-milk-records')->name('doctor.manage-milk-records');
 Route::view('/labtech/inventory-quality-control', 'labtech.labtech_quality-control')->name('labtech.quality-control');
 Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
 Route::view('/hmmc/infants-request', 'hmmc.hmmc_infants-request')->name('hmmc.infants-request');
@@ -257,6 +256,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/hmmc/manage-milk-records/{id}', [MilkController::class, 'updateMilkRecordHMMC'])->name('hmmc.update-milk-record');
     Route::delete('/hmmc/manage-milk-records/{id}', [MilkController::class, 'deleteMilkRecordHMMC'])->name('hmmc.delete-milk-record');
     Route::get('/donor/manage-milk-records', [MilkController::class, 'viewMilkDonor'])->name('donor.donor_manage-milk-records');
+    Route::get('/doctor/manage-milk-records', [MilkController::class, 'viewMilkDoctor'])->name('doctor.doctor_manage-milk-records');
 
 
     Route::get('/nurse/manage-milk-records', [MilkController::class, 'viewMilkNurse'])->name('nurse.manage-milk-records');

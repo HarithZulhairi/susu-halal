@@ -206,6 +206,72 @@ class MilkController extends Controller
         return view('nurse.nurse_manage-milk-records', compact('donors', 'milks'));
     }
 
+    public function viewMilkDoctor(Request $request)
+    {
+        $donors = Donor::all();
+
+        // Start Query with Relationships
+        $query = Milk::with(['donor', 'preBottles', 'postBottles']);
+
+        // --- 1. SEARCH INPUT (ID or Donor Name) ---
+        if ($request->filled('searchInput')) {
+            $search = $request->input('searchInput');
+            $query->where(function($q) use ($search) {
+                $q->where('milk_ID', 'like', "%{$search}%")
+                ->orWhereHas('donor', function($dq) use ($search) {
+                    $dq->where('dn_FullName', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // --- 2. STATUS FILTER ---
+        if ($request->filled('filterStatus')) {
+            $status = $request->input('filterStatus');
+            if (strtolower($status) === 'not yet started') {
+                // Check for explicit "Not Yet Started" OR null
+                $query->where(function($q) {
+                    $q->where('milk_Status', 'Not Yet Started')
+                    ->orWhereNull('milk_Status');
+                });
+            } else {
+                $query->where('milk_Status', $status);
+            }
+        }
+
+        // --- 3. VOLUME RANGE FILTER ---
+        if ($request->filled('volumeMin')) {
+            $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
+        }
+        if ($request->filled('volumeMax')) {
+            $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
+        }
+
+        // --- 4. EXPIRY DATE FILTER (REMOVED) ---
+        // Since milk_expiryDate column is deleted, we cannot filter by it directly on the Milk table.
+        // If you want to filter by the *final product expiry*, you would need to query the related postBottles.
+        // For now, I have removed it to prevent SQL errors. 
+        /* if ($request->filled('expiryFrom')) { ... }
+        if ($request->filled('expiryTo')) { ... }
+        */
+
+        // --- 5. SHARIAH APPROVAL FILTER ---
+        if ($request->filled('filterShariah')) {
+            $sh = $request->input('filterShariah');
+            if (strtolower($sh) === 'not yet reviewed') {
+                $query->whereNull('milk_shariahApproval');
+            } elseif (strtolower($sh) === 'approved') {
+                $query->where('milk_shariahApproval', true);
+            } elseif (strtolower($sh) === 'rejected') {
+                $query->where('milk_shariahApproval', false);
+            }
+        }
+
+        // Get Results
+        $milks = $query->orderByDesc('created_at')->get();
+
+        return view('doctor.doctor_manage-milk-records', compact('donors', 'milks'));
+    }
+
     public function viewMilkShariah(Request $request)
     {
         $donors = Donor::all();
@@ -276,32 +342,35 @@ class MilkController extends Controller
     {
         $donors = Donor::all();
 
-        // Build query and apply filters from request (GET)
-        $query = Milk::with('donor');
-        
+        // Start Query with Relationships
+        $query = Milk::with(['donor', 'preBottles', 'postBottles']);
 
-        // Search by donor name or milk ID
+        // --- 1. SEARCH INPUT (ID or Donor Name) ---
         if ($request->filled('searchInput')) {
             $search = $request->input('searchInput');
             $query->where(function($q) use ($search) {
                 $q->where('milk_ID', 'like', "%{$search}%")
-                  ->orWhereHas('donor', function($dq) use ($search) {
-                      $dq->where('dn_FullName', 'like', "%{$search}%");
-                  });
+                ->orWhereHas('donor', function($dq) use ($search) {
+                    $dq->where('dn_FullName', 'like', "%{$search}%");
+                });
             });
         }
 
-        // Clinical status filter (exact match or treat 'Not Yet Started' as null)
+        // --- 2. STATUS FILTER ---
         if ($request->filled('filterStatus')) {
             $status = $request->input('filterStatus');
             if (strtolower($status) === 'not yet started') {
-                $query->whereNull('milk_Status');
+                // Check for explicit "Not Yet Started" OR null
+                $query->where(function($q) {
+                    $q->where('milk_Status', 'Not Yet Started')
+                    ->orWhereNull('milk_Status');
+                });
             } else {
                 $query->where('milk_Status', $status);
             }
         }
 
-        // Volume range filter
+        // --- 3. VOLUME RANGE FILTER ---
         if ($request->filled('volumeMin')) {
             $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
         }
@@ -309,15 +378,15 @@ class MilkController extends Controller
             $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
         }
 
-        // Expiry date range
-        if ($request->filled('expiryFrom')) {
-            $query->whereDate('milk_expiryDate', '>=', $request->input('expiryFrom'));
-        }
-        if ($request->filled('expiryTo')) {
-            $query->whereDate('milk_expiryDate', '<=', $request->input('expiryTo'));
-        }
+        // --- 4. EXPIRY DATE FILTER (REMOVED) ---
+        // Since milk_expiryDate column is deleted, we cannot filter by it directly on the Milk table.
+        // If you want to filter by the *final product expiry*, you would need to query the related postBottles.
+        // For now, I have removed it to prevent SQL errors. 
+        /* if ($request->filled('expiryFrom')) { ... }
+        if ($request->filled('expiryTo')) { ... }
+        */
 
-        // Shariah approval
+        // --- 5. SHARIAH APPROVAL FILTER ---
         if ($request->filled('filterShariah')) {
             $sh = $request->input('filterShariah');
             if (strtolower($sh) === 'not yet reviewed') {
@@ -329,6 +398,7 @@ class MilkController extends Controller
             }
         }
 
+        // Get Results
         $milks = $query->orderByDesc('created_at')->get();
 
         return view('hmmc.hmmc_manage-milk-records', compact('donors', 'milks'));
