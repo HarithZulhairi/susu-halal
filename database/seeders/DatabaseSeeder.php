@@ -51,40 +51,13 @@ class DatabaseSeeder extends Seeder
         // 3️⃣ Donor
         Donor::create([
             'dn_NRIC' => '920202020202',
-            'dn_FullName' => 'Default Donor 1',
+            'dn_FullName' => 'Default Donor',
             'dn_Username' => 'dn_default',
             'dn_Password' => Hash::make('Donor123'),
             'dn_DOB' => '1992-02-02',
             'dn_Contact' => '0142345678',
             'dn_Email' => 'donor@hmmc.org',
             'dn_Address' => '45 Donor Avenue, Klang',
-            'dn_MaritalStatus' => 'Married',
-            'dn_HusbandConsent' => 'Yes',
-            'dn_DonationType' => 'Voluntary',
-            'dn_Religion' => 'Islam',
-            'dn_ExcessBreastMilk' => 'Yes',
-            'dn_MilkQuantity' => ['quantity' => 500, 'unit' => 'ml'], // Saved as JSON array
-            'dn_InfectionDeseaseRisk' => 'None',
-            'dn_Medication' => 'None',
-            'dn_RecentIllness' => 'None',
-            'dn_SmokingStatus' => 'Non-smoker',
-            'dn_PhysicalHealth' => 'Good',
-            'dn_MentalHealth' => 'Good',
-            'dn_TobaccoAlcohol' => 0,
-            'dn_DietaryAlerts' => 'None',
-            'dn_ConsentStatus' => 'Pending',
-        ]);
-
-        // 3️⃣ Donor
-        Donor::create([
-            'dn_NRIC' => '930303030303',
-            'dn_FullName' => 'Default Donor 2',
-            'dn_Username' => 'dn_default2',
-            'dn_Password' => Hash::make('Donor123'),
-            'dn_DOB' => '1998-02-02',
-            'dn_Contact' => '0112456779',
-            'dn_Email' => 'donor@hmmc.org',
-            'dn_Address' => '452 Melaka Avenue, Klang',
             'dn_MaritalStatus' => 'Married',
             'dn_HusbandConsent' => 'Yes',
             'dn_DonationType' => 'Voluntary',

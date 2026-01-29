@@ -49,14 +49,13 @@
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="stat-label">Lab Processing Queue</span>
+                    <span class="stat-label">Processing Queue</span>
                     <div class="stat-icon red">
                         <i class="fas fa-industry"></i>
                     </div>
                 </div>
-                {{-- This now reflects real data from Milk table (Stages 1-4) --}}
                 <div class="stat-value">{{ $processingQueue ?? 0 }}</div>
-                <small class="text-muted" style="font-size: 0.8em;">Batches in progress</small>
+                <small style="color: #888; font-size: 11px;">Active Batches</small>
             </div>
         </div>
 
@@ -65,7 +64,7 @@
                 <div class="card-header">
                     <h2>Milk Collection Volume ({{ date('Y') }})</h2>
                     <a href="{{ route('nurse.manage-milk-records') }}" class="view-report">
-                        Manage Records
+                        View Full Report
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -154,7 +153,8 @@
                                             {{ $app->dn_FullName ?? 'Unknown Donor' }}
                                         </div>
                                         <div class="user-email">
-                                            ID: {{ $app->dn_id ?? '-' }}
+                                            {{ $app instanceof \App\Models\MilkAppointment ? 'Milk Donation' : 'Pumping Kit' }}
+                                            • ID: {{ $app->dn_ID ?? '-' }}
                                         </div>
                                     </div>
                                 </div>
@@ -163,8 +163,8 @@
                             <td>{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</td>
 
                             <td>
-                                <span class="badge badge-donor">
-                                    Donation
+                                <span class="badge badge-{{ $app instanceof \App\Models\MilkAppointment ? 'donor' : 'advisor' }}">
+                                    {{ $app instanceof \App\Models\MilkAppointment ? 'Donation' : 'Pump Kit' }}
                                 </span>
                             </td>
 
@@ -176,13 +176,10 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" style="text-align:center; padding: 20px; color: #888;">
-                                No appointments scheduled for today.
-                            </td>
+                            <td colspan="4" style="text-align: center; padding: 20px; color: #999;">No appointments for today.</td>
                         </tr>
                         @endforelse
                         </tbody>
-
                     </table>
                 </div>
             </div>
@@ -194,7 +191,7 @@
 <script>
     const ctx = document.getElementById('milkVolumeChart');
 
-    // Gradient for Volume
+    // gradient fill for blue line
     const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
     gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
     gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
@@ -202,17 +199,17 @@
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: @json($months),
+            labels: @json($months), // Passed from Controller
             datasets: [
                 {
                     label: 'Total Volume Collected (mL)',
-                    data: @json($volumeData), // Real data from controller
-                    borderColor: '#1A5F7A',   // Matching your theme blue
+                    data: @json($volumeData), // UPDATED: Now using volumeData
+                    borderColor: '#4B9CD3',
                     backgroundColor: gradientBlue,
                     fill: true,
                     tension: 0.4,
                     pointRadius: 5,
-                    pointBackgroundColor: '#1A5F7A',
+                    pointBackgroundColor: '#4B9CD3',
                     pointHoverRadius: 7,
                     borderWidth: 2
                 }
@@ -230,22 +227,25 @@
                     position: 'bottom',
                     labels: {
                         color: '#444',
+                        boxWidth: 12,
+                        boxHeight: 12,
                         padding: 15,
-                        font: { size: 13, family: "'Poppins', sans-serif" }
+                        font: { size: 13 }
                     }
                 },
                 tooltip: {
                     usePointStyle: true,
                     backgroundColor: '#fff',
-                    titleColor: '#1A5F7A',
+                    titleColor: '#111',
                     bodyColor: '#333',
                     borderColor: '#E2E8F0',
                     borderWidth: 1,
-                    padding: 12,
+                    padding: 10,
+                    displayColors: true,
                     boxPadding: 5,
                     callbacks: {
                         label: function(context) {
-                            return ` ${context.dataset.label}: ${context.formattedValue} mL`;
+                            return `${context.dataset.label}: ${context.formattedValue} mL`;
                         }
                     }
                 }
@@ -255,24 +255,23 @@
                     beginAtZero: true,
                     grid: { color: '#f1f5f9' },
                     ticks: { 
-                        color: '#64748b',
-                        callback: function(value) { return value + ' ml'; }
+                        color: '#555', 
+                        callback: function(value) { return value + ' ml'; } 
                     },
                     title: {
                         display: true,
-                        text: 'Volume (Milliliters)',
-                        color: '#94a3b8'
+                        text: 'Volume (Milliliters)'
                     }
                 },
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#64748b' }
+                    ticks: { color: '#555' }
                 }
             },
             animations: {
                 tension: {
-                    duration: 1500,
-                    easing: 'easeOutQuart',
+                    duration: 2000,
+                    easing: 'easeOutElastic',
                     from: 0.5,
                     to: 0.4,
                     loop: false

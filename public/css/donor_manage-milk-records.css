@@ -301,7 +301,6 @@
 .status-tag.status-pending   {     background: #dedede;color: #8b8b8b; border: 1px solid #9e9d9b; }
 
 
-
 /* Eligibility */
 .eligibility-tag {
     color: #065f46;
@@ -373,6 +372,7 @@
 
 #viewMilkModal .modal-body p {
     margin-bottom: 12px;
+    padding-left: 10px;
 }
 
 #viewMilkModal .modal-body p strong {
@@ -427,79 +427,17 @@
     to { transform: scale(1); opacity: 1;}
 }
 
-/* Status Badge Overrides for Shariah View */
-.status-clickable {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-.status-clickable:hover {
-    transform: scale(1.05);
-}
-.status-disabled {
-    cursor: default;
-    opacity: 0.8;
-}
-
-/* Action Button for Shariah Review */
-.btn-review {
-    background-color: #1A5F7A;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn-review:hover {
-    background-color: #134b61;
-    color: white;
-}
-
-.btn-rejected {
-    background-color: #dc2626;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn-rejected:hover {
-    background-color: #a21b1b;
-    color: white;
-}
-
-.btn-approved {
-    background-color: #16a34a;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 25px;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn-approved:hover {
-    background-color: #12733b;
-    color: white;
-}
-/* Modal Tabs */
 .view-tab-btn {
     background: none; border: none; padding: 10px 15px; cursor: pointer; color: #64748b; font-weight: 600;
     border-bottom: 2px solid transparent;
 }
+
 .view-tab-btn.active {
     color: #0ea5e9; border-bottom-color: #0ea5e9;
 }
+
 .view-table td { border-bottom: 1px solid #e2e8f0; padding: 8px; }
+
 
 .modal-header, .modal-footer {
     display: flex;
@@ -527,26 +465,6 @@
 
 .cancel-btn {
     background: #ccc;
-}
-
-/* Modal Tabs */
-.view-tab-btn {
-    background: none; border: none; padding: 10px 15px; cursor: pointer; color: #64748b; font-weight: 600;
-    border-bottom: 2px solid transparent;
-}
-.view-tab-btn.active { color: #0ea5e9; border-bottom-color: #0ea5e9; }
-.view-table td { border-bottom: 1px solid #e2e8f0; padding: 8px; }
-
-/* Sortable Header Cursor */
-.sortable-header { cursor: pointer; user-select: none; }
-.sortable-header:hover { color: #1A5F7A; }
-.sort-indicator { margin-left: 5px; font-size: 0.8em; }
-
-/* Pagination Active State override */
-.pagination-controls .page-btn.active {
-    background-color: #1A5F7A;
-    color: white;
-    border-color: #1A5F7A;
 }
 
 /* Expired label under expiry date */

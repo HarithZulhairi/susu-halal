@@ -9,7 +9,6 @@
 <div class="container">
     <div class="main-content">
 
-
         <div class="page-header">
             <h1>Milk Records Management</h1>
             <p>Milk Processing and Records</p>
@@ -21,7 +20,6 @@
                 <div class="actions-header">
                     <button class="btn btn-search"><i class="fas fa-search"></i> Search &amp; Filter</button>
                 </div>
-
             </div>
 
             <div id="filterPanel" class="filter-panel" role="region" aria-label="Search and filters">
@@ -51,8 +49,6 @@
                     </select>
 
                     <div class="filter-actions">
-                        <button id="applyFilters" class="btn" type="submit">Apply</button>
-                        <button id="clearFilters" class="btn" type="button" onclick="window.location='{{ url()->current() }}'">Clear</button>
                         <button id="applyFilters" class="btn" type="submit">Apply</button>
                         <button id="clearFilters" class="btn" type="button" onclick="window.location='{{ url()->current() }}'">Clear</button>
                     </div>
@@ -149,7 +145,6 @@
 {{-- ===================== VIEW MILK RECORD MODAL ===================== --}}
 <div id="viewMilkModal" class="modal-overlay">
     <div class="modal-content">
-    <div class="modal-content">
         <div class="modal-header">
             <h2>Milk Record Details</h2>
             <button class="modal-close-btn" onclick="closeViewMilkModal()">Close</button>
@@ -162,19 +157,9 @@
                     <p><strong>Donor:</strong> <span id="view-donor-name"></span></p>
                     <p><strong>Volume:</strong> <span id="view-volume"></span></p>
                     <p><strong>Status:</strong> <span id="view-status"></span></p>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <p><strong>Milk ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
-                    <p><strong>Donor:</strong> <span id="view-donor-name"></span></p>
-                    <p><strong>Volume:</strong> <span id="view-volume"></span></p>
-                    <p><strong>Status:</strong> <span id="view-status"></span></p>
                 </div>
             </div>
 
-            <div class="view-tabs" style="display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 15px;">
-                <button class="view-tab-btn active" onclick="switchViewTab('raw')">Raw Milk (Stage 1-2)</button>
-                <button class="view-tab-btn" onclick="switchViewTab('processed')">Processed (Stage 3-5)</button>
-                <button class="view-tab-btn" onclick="switchViewTab('qc')">Quality Control</button>
             <div class="view-tabs" style="display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 15px;">
                 <button class="view-tab-btn active" onclick="switchViewTab('raw')">Raw Milk (Stage 1-2)</button>
                 <button class="view-tab-btn" onclick="switchViewTab('processed')">Processed (Stage 3-5)</button>
@@ -217,24 +202,11 @@
                 <p><strong>Approval Date:</strong> <span id="view-shariah-date"></span></p>
                 <p><strong>Remarks:</strong> <span id="view-shariah-remarks"></span></p>
             </div>
-            <div id="view-tab-qc" class="view-tab-content" style="display: none; padding-top: 10px;">
-                <h3>Quality Control</h3>
-                <p><strong>Shariah Approval:</strong> <span id="view-shariah"></span></p>
-                <p><strong>Approval Date:</strong> <span id="view-shariah-date"></span></p>
-                <p><strong>Remarks:</strong> <span id="view-shariah-remarks"></span></p>
-            </div>
         </div>
-
     </div>
 </div>
 
-
-{{-- ===========================
-      POPUP SCRIPT
-=========================== --}}
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
 <script>
     // --- Modal Logic ---
@@ -243,9 +215,7 @@
     function closeViewMilkModal() { viewModal.style.display = "none"; }
 
     document.querySelectorAll('.btn-view').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const payload = btn.getAttribute('data-payload');
-            if (!payload) return console.error('No payload on view button');
+        btn.addEventListener('click', () => {
             try {
                 const data = JSON.parse(btn.getAttribute('data-payload'));
                 openViewMilkModal(data);
@@ -457,170 +427,4 @@
         renderPage(1);
     })();
 </script>
-
-    <script>
-    // Per-second ticker: update any status-pill that has `data-end-ts` set by the poller
-    document.addEventListener('DOMContentLoaded', function () {
-        const postedCompletion = window.__milkPostedCompletion || new Set();
-        window.__milkPostedCompletion = postedCompletion;
-
-        setInterval(() => {
-            document.querySelectorAll('.clinical-status a.status-tag[data-end-ts]').forEach(el => {
-                const endTs = Number(el.dataset.endTs);
-                if (!endTs) return;
-                const now = Date.now();
-                const diffMs = endTs - now;
-                const record = el.closest('.record-item');
-                const id = record ? record.dataset.milkId : null;
-                const baseStage = el.dataset.baseStage || (el.textContent || '').split(' • ')[0];
-
-                if (diffMs <= 0) {
-                    // send completion POST once per session or handle screening specially
-                    if (!id) { delete el.dataset.endTs; delete el.dataset.baseStage; return; }
-                    const baseLower = (baseStage || '').toLowerCase();
-                    const key = id + '-' + baseLower;
-                    const hasResults = el.dataset.hasResults === 'true';
-
-                    if (baseLower === 'screening') {
-                        // Screening: if results exist, mark completed in UI; otherwise show waiting message
-                        if (hasResults) {
-                            const completedLabel = 'Screening Completed';
-                            delete el.dataset.endTs; delete el.dataset.baseStage; delete el.dataset.hasResults;
-                            el.textContent = completedLabel;
-                            const fullCls = completedLabel.toLowerCase().replace(/\s+/g, '-');
-                            const baseCls = 'screening';
-                            const preserved = el.className.split(' ').filter(c => c === 'status-tag' || c === 'status-clickable' || !c.startsWith('status-'));
-                            el.className = preserved.join(' ');
-                            el.classList.add(`status-${baseCls}`);
-                            el.classList.add(`status-${fullCls}`);
-                        } else {
-                            const waitingLabel = 'Screening • Waiting for results';
-                            const normalized = 'screening-waiting-for-results';
-                            delete el.dataset.endTs; delete el.dataset.baseStage; // stop ticker for this item
-                            el.textContent = waitingLabel;
-                            const preserved = el.className.split(' ').filter(c => c === 'status-tag' || c === 'status-clickable' || !c.startsWith('status-'));
-                            el.className = preserved.join(' ');
-                            el.classList.add('status-screening');
-                            el.classList.add(`status-${normalized}`);
-                        }
-                        return;
-                    }
-
-                    if (postedCompletion.has(key)) {
-                        delete el.dataset.endTs; delete el.dataset.baseStage; return;
-                    }
-
-                    const completeUrl = `/labtech/process-milk/${id}/${baseLower === 'labelling' ? 'labelling-complete' : 'distributing-complete'}`;
-                    fetch(completeUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({})
-                    })
-                    .then(r => r.json())
-                    .then(resp => {
-                        if (resp && resp.success) {
-                            postedCompletion.add(key);
-                            // update UI to completed
-                            const completedLabel = baseLower === 'labelling' ? 'Labelling Completed' : 'Distributing Completed';
-                            delete el.dataset.endTs; delete el.dataset.baseStage;
-                            el.textContent = completedLabel;
-                            const fullCls = (completedLabel || '').toLowerCase().replace(/\s+/g, '-');
-                            const baseCls = baseLower;
-                            const preserved = el.className.split(' ').filter(c => c === 'status-tag' || c === 'status-clickable' || !c.startsWith('status-'));
-                            el.className = preserved.join(' ');
-                            el.classList.add(`status-${baseCls}`);
-                            el.classList.add(`status-${fullCls}`);
-                        }
-                    })
-                    .catch(err => {
-                        // keep data attributes so next tick will retry
-                        console.error('Completion POST failed (ticker):', err);
-                    });
-                } else {
-                    // still counting — update display
-                    const totalSeconds = Math.floor(diffMs / 1000);
-                    const hours = Math.floor(totalSeconds / 3600);
-                    const minutes = Math.floor((totalSeconds % 3600) / 60);
-                    const seconds = totalSeconds % 60;
-                    const formatted = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
-                    el.textContent = `${baseStage} • ${formatted}`;
-                }
-            });
-        }, 1000);
-    });
-
-    function switchViewTab(tabName) {
-        // Hide all
-        document.querySelectorAll('.view-tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.view-tab-btn').forEach(el => el.classList.remove('active'));
-
-        // Show target
-        document.getElementById('view-tab-' + tabName).style.display = 'block';
-        // Find button (simple heuristic: rely on onclick text or index, here purely visual for simplicity)
-        const btns = document.querySelectorAll('.view-tab-btn');
-        if(tabName === 'raw') btns[0].classList.add('active');
-        if(tabName === 'processed') btns[1].classList.add('active');
-        if(tabName === 'qc') btns[2].classList.add('active');
-    }
-
-    function openViewMilkModal(data) {
-        // 1. Basic Info
-        document.getElementById('view-milk-id').textContent = data.milkId;
-        document.getElementById('view-donor-name').textContent = data.donorName;
-        document.getElementById('view-volume').textContent = data.volume;
-        document.getElementById('view-status').textContent = data.status;
-        
-        // 2. Shariah Info
-        document.getElementById('view-shariah').textContent = data.shariah;
-        document.getElementById('view-shariah-date').textContent = data.shariahApprovalDate;
-        document.getElementById('view-shariah-remarks').textContent = data.shariahRemarks;
-
-        // 3. Populate Pre-Bottles (Raw)
-        const preList = document.getElementById('view-pre-bottles-list');
-        preList.innerHTML = '';
-        if (data.preBottles && data.preBottles.length > 0) {
-            data.preBottles.forEach(b => {
-                const thawed = b.pre_is_thawed ? '<span style="color:green">Yes</span>' : '<span style="color:gray">No</span>';
-                preList.innerHTML += `<tr>
-                    <td>${b.pre_bottle_code}</td>
-                    <td>${b.pre_volume}</td>
-                    <td>${thawed}</td>
-                </tr>`;
-            });
-        } else {
-            preList.innerHTML = '<tr><td colspan="3" class="text-muted">No raw bottles recorded.</td></tr>';
-        }
-
-        // 4. Populate Post-Bottles (Processed)
-        const postList = document.getElementById('view-post-bottles-list');
-        postList.innerHTML = '';
-        if (data.postBottles && data.postBottles.length > 0) {
-            data.postBottles.forEach(b => {
-                // Check micro status color
-                let microColor = 'gray';
-                if (b.post_micro_status === 'Passed' || b.post_micro_status === 'Not Contaminated') microColor = 'green';
-                if (b.post_micro_status === 'Failed' || b.post_micro_status === 'Contaminated') microColor = 'red';
-
-                postList.innerHTML += `<tr>
-                    <td>${b.post_bottle_code}</td>
-                    <td>${b.post_volume}</td>
-                    <td>${b.post_expiry_date || '-'}</td>
-                    <td style="color:${microColor}; font-weight:bold;">${b.post_micro_status || 'Pending'}</td>
-                    <td>${b.post_storage_location || '-'}</td>
-                </tr>`;
-            });
-        } else {
-            postList.innerHTML = '<tr><td colspan="5" class="text-muted">No processed bottles yet.</td></tr>';
-        }
-
-        // Reset to first tab
-        switchViewTab('raw');
-        
-        document.getElementById('viewMilkModal').style.display = 'flex';
-    }
-    </script>
-
 @endsection

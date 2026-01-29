@@ -87,46 +87,47 @@ class DashboardController extends Controller
         // 1. STATS CARDS
         // ============================
 
-        // Active Donors
+        // Active Donors (Passed Screening)
         $activeDonors = Donor::whereHas('screening', function($query) {
             $query->where('dtb_ScreeningStatus', 'passed');
         })->count();
 
-        // Pending Appointments (Sum of Milk + Kit)
+        // Pending Appointments (Milk + Kit)
         $pendingAppointments = MilkAppointment::where('status', 'Pending')->count() 
                             + PumpingKitAppointment::where('status', 'Pending')->count();
 
-        // Milk Requests (Placeholder or Real Model)
-        // If you don't have a MilkRequest model yet, this defaults to 0 to prevent errors
+        // Milk Requests 
+        // (If you have a MilkRequest model, use that. Otherwise, defaults to 0)
         $milkRequests = class_exists('App\Models\MilkRequest') 
             ? \App\Models\MilkRequest::where('status', 'Pending')->count() 
-            : 0; 
+            : 0;
 
         // Processing Queue (Real Data)
-        // Counts all milk records that have started (not null/Not Yet Started) 
-        // but are not yet finished (Storage Completed)
+        // Counts milk that has started processing but is not yet in final storage
         $processingQueue = Milk::whereNotIn('milk_Status', ['Not Yet Started', 'Storage Completed'])
                             ->whereNotNull('milk_Status')
                             ->count();
 
         // ============================
-        // 2. CHART DATA (Total Volume)
+        // 2. CHART DATA (Total Volume per Month)
         // ============================
-        // We calculate the total VOLUME of milk collected per month for the chart
+        // This sums up the 'milk_volume' column for the current year
         $monthlyVolume = Milk::select(
                 DB::raw('MONTH(created_at) as month'), 
                 DB::raw('SUM(milk_volume) as total_volume')
             )
             ->whereYear('created_at', date('Y'))
             ->groupBy('month')
-            ->pluck('total_volume', 'month'); // [month_number => volume]
+            ->pluck('total_volume', 'month');
 
         $months = [];
         $volumeData = [];
 
+        // Loop 1 to 12 (January to December)
         for ($i = 1; $i <= 12; $i++) {
-            $months[] = date('F', mktime(0, 0, 0, $i, 1)); // Jan, Feb...
-            $volumeData[] = $monthlyVolume->get($i, 0); // Get volume or 0
+            $months[] = date('F', mktime(0, 0, 0, $i, 1));
+            // Get the volume for month $i, or 0 if no data
+            $volumeData[] = $monthlyVolume->get($i, 0); 
         }
 
         // ============================
@@ -134,7 +135,7 @@ class DashboardController extends Controller
         // ============================
         $today = Carbon::today();
 
-        $todayMilk = MilkAppointment::with('donor') // Eager load donor to avoid N+1
+        $todayMilk = MilkAppointment::with('donor') // Eager load donor info
             ->whereDate('appointment_datetime', $today)
             ->get();
 
@@ -142,16 +143,19 @@ class DashboardController extends Controller
             ->whereDate('appointment_datetime', $today)
             ->get();
 
-        // Merge and sort by time
+        // Merge collections and sort by time (earliest first)
         $todayAppointments = $todayMilk->merge($todayKit)->sortBy('appointment_datetime');
 
+        // ============================
+        // 4. RETURN VIEW
+        // ============================
         return view('nurse.nurse_dashboard', compact(
             'activeDonors',
             'pendingAppointments',
             'milkRequests',
             'processingQueue',
             'months',
-            'volumeData', // This variable matches the new Chart.js code
+            'volumeData',
             'todayAppointments'
         ));
     }

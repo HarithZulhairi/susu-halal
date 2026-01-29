@@ -23,7 +23,7 @@
         <div class="page-header">
             <div>
                 <h1 class="page-title">Compliance Audit: {{ $milk->formatted_id }}</h1>
-                <p class="page-subtitle" style="font-size: 16px; color: #64748b; margin: 6px 0 0 0;">Donor: {{ $milk->donor->dn_FullName ?? 'Unknown' }}</p>
+                <p class="page-subtitle" style="font-size: 18px; color: #64748b; margin: 10px 0 0 0;">Donor: {{ $milk->donor->dn_FullName ?? 'Unknown' }}</p>
             </div>
             <a href="{{ route('shariah.shariah_manage-milk-records') }}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Back to List
@@ -340,7 +340,8 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 // IMPORTANT: Manually fetch the ID from the Blade object
-                const url = "{{ route('shariah.update-decision', ':id') }}".replace(':id', "{{ $milk->milk_ID }}");
+                const milkId = "{{ $milk->milk_ID }}";
+                const url = "{{ route('shariah.update-decision', ':id') }}".replace(':id', milkId);
 
                 fetch(url, {
                     method: 'POST',
