@@ -13,11 +13,7 @@
     color: #1e293b;
     margin: 0;
 }
-.page-subtitle {
-    font-size: 14px;
-    color: #64748b;
-    margin: 4px 0 0 0;
-}
+
 .btn-back {
     background: white;
     border: 1px solid #cbd5e1;
@@ -45,12 +41,18 @@
     margin-bottom: 40px;
     gap: 20px;
 }
+
+.overview-item label {
+    padding-bottom: 5px;
+}
+
 .overview-item {
     display: flex;
     align-items: center;
     gap: 16px;
     padding: 10px;
 }
+
 .icon-box {
     width: 48px;
     height: 48px;
@@ -77,6 +79,30 @@
     font-weight: 700;
     color: #1e293b;
 }
+
+/* Mini Table for Microbiology */
+.table-micro {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+}
+.table-micro th {
+    text-align: left;
+    color: #64748b;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 6px;
+}
+.table-micro td {
+    padding: 6px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+.table-micro tr:last-child td {
+    border-bottom: none;
+}
+
 
 /* ===== Timeline ===== */
 .audit-timeline {

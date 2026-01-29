@@ -6,34 +6,14 @@
 <link rel="stylesheet" href="{{ asset('css/shariah_view-milk-processing.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-{{-- ========================================================= --}}
-{{-- DUMMY DATA SIMULATION (No Backend Required) --}}
-{{-- ========================================================= --}}
 @php
-    $currentId = request('id', 5); 
-
-    // Define Dummy Data
-    $milk = (object) [
-        'milk_ID' => $currentId,
-        'formatted_id' => 'M26-00' . $currentId,
-        'milk_volume' => 200,
-        'milk_Status' => 'Post-Pasteurization', 
-        'milk_shariahApproval' => null, 
-        'milk_shariahRemarks' => '',
-        'donor' => (object) ['dn_FullName' => 'Mariam Isa'],
-        
-        // Stage Dates
-        'stage1_end' => '2026-01-15 09:00:00',
-        'stage2_end' => '2026-01-15 14:00:00',
-        'stage3_end' => '2026-01-16 10:00:00',
-        'stage4_end' => '2026-01-17 16:00:00',
-        'stage5_end' => '2026-01-18 09:00:00',
-        
-        // Expiry
-        'expiry_date' => '2026-07-15'
-    ];
-
-    $isReadyForDecision = str_contains(strtolower($milk->milk_Status), 'post-pasteurization');
+    // Determine if ready (Storage Completed)
+    $isReadyForDecision = ($milk->milk_Status === 'Storage Completed');
+    
+    // Helper function for dates
+    function fmtDate($date) {
+        return $date ? \Carbon\Carbon::parse($date)->format('d M Y, H:i') : 'Pending';
+    }
 @endphp
 
 <div class="container">
@@ -43,7 +23,7 @@
         <div class="page-header">
             <div>
                 <h1 class="page-title">Compliance Audit: {{ $milk->formatted_id }}</h1>
-                <p class="page-subtitle">Donor: {{ $milk->donor->dn_FullName }}</p>
+                <p class="page-subtitle" style="font-size: 16px; color: #64748b; margin: 6px 0 0 0;">Donor: {{ $milk->donor->dn_FullName ?? 'Unknown' }}</p>
             </div>
             <a href="{{ route('shariah.shariah_manage-milk-records') }}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Back to List
@@ -56,7 +36,11 @@
                 <div class="icon-box blue"><i class="fas fa-flask"></i></div>
                 <div>
                     <label>Current Volume</label>
-                    <span>{{ $milk->milk_volume }} mL</span>
+                    @php 
+                        $totalPostVol = $milk->postBottles->sum('post_volume');
+                        $displayVol = $totalPostVol > 0 ? $totalPostVol : $milk->milk_volume;
+                    @endphp
+                    <span>{{ $displayVol }} mL</span>
                 </div>
             </div>
             <div class="overview-item">
@@ -71,7 +55,13 @@
                 <div>
                     <label>Shariah Status</label>
                     <span class="status-text">
-                        {{ is_null($milk->milk_shariahApproval) ? 'Pending Review' : 'Decided' }}
+                        @if(is_null($milk->milk_shariahApproval))
+                            Pending Review
+                        @elseif($milk->milk_shariahApproval == 1)
+                            <span style="color:green"><i class="fas fa-check"></i> Compliant</span>
+                        @else
+                            <span style="color:red"><i class="fas fa-times"></i> Rejected</span>
+                        @endif
                     </span>
                 </div>
             </div>
@@ -81,119 +71,211 @@
         <div class="audit-timeline">
             
             {{-- STAGE 1 --}}
-            <div class="timeline-item completed">
+            <div class="timeline-item {{ $milk->milk_stage1EndDate ? 'completed' : '' }}">
                 <div class="timeline-marker"><i class="fas fa-vial"></i></div>
                 <div class="timeline-content">
                     <div class="timeline-header">
                         <h3>Stage 1: Pre-Pasteurization & Screening</h3>
-                        <span class="date">{{ \Carbon\Carbon::parse($milk->stage1_end)->format('d M Y, H:i') }}</span>
+                        <span class="date">{{ fmtDate($milk->milk_stage1EndDate) }}</span>
                     </div>
                     <div class="timeline-body">
-                        {{-- UPDATED: Just simple text --}}
-                        <p class="text-success" style="font-weight: 600;">
-                            <i class="fas fa-check-circle"></i> Labelling Complete
-                        </p>
+                        @if($milk->milk_stage1EndDate)
+                            <p class="text-success" style="font-weight: 600; margin-bottom: 10px;">
+                                <i class="fas fa-check-circle"></i> Labelling Complete
+                            </p>
+                            
+                            {{-- DETAILED TABLE --}}
+                            <table class="table-micro">
+                                <thead>
+                                    <tr>
+                                        <th>Raw Bottle ID</th>
+                                        <th>Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($milk->preBottles as $pb)
+                                    <tr>
+                                        <td>{{ $pb->pre_bottle_code }}</td>
+                                        <td>{{ $pb->pre_volume }} mL</td>
+                                    </tr>
+                                    @endforeach
+                                    <tr style="background-color: #f8fafc; font-weight: bold;">
+                                        <td style="text-align: right;">Total:</td>
+                                        <td>{{ $milk->preBottles->sum('pre_volume') }} mL</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="text-muted">Process not started or in progress.</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             {{-- STAGE 2 --}}
-            <div class="timeline-item completed">
+            <div class="timeline-item {{ $milk->milk_stage2StartDate ? 'completed' : '' }}">
                 <div class="timeline-marker"><i class="fas fa-snowflake"></i></div>
                 <div class="timeline-content">
                     <div class="timeline-header">
                         <h3>Stage 2: Thawing</h3>
-                        <span class="date">{{ \Carbon\Carbon::parse($milk->stage2_end)->format('d M Y, H:i') }}</span>
+                        <span class="date">{{ fmtDate($milk->milk_stage2StartDate) }}</span>
                     </div>
                     <div class="timeline-body">
-                        <p>Milk thawed under controlled temperature (4°C).</p>
-                        <span class="badge-pass">Thawing Complete</span>
+                        @if($milk->milk_stage2StartDate)
+                            <p style="margin-bottom: 10px;">Milk thawed under controlled temperature.</p>
+                            
+                            {{-- DETAILED TABLE --}}
+                            <table class="table-micro">
+                                <thead>
+                                    <tr>
+                                        <th>Bottle ID</th>
+                                        <th>Thawing Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($milk->preBottles as $pb)
+                                    <tr>
+                                        <td>{{ $pb->pre_bottle_code }}</td>
+                                        <td>
+                                            @if($pb->pre_is_thawed)
+                                                <span class="badge-pass"><i class="fas fa-check"></i> Thawed</span>
+                                            @else
+                                                <span class="badge-fail">Not Thawed</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="text-muted">Pending.</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             {{-- STAGE 3 --}}
-            <div class="timeline-item completed">
+            <div class="timeline-item {{ $milk->milk_stage3StartDate ? 'completed' : '' }}">
                 <div class="timeline-marker"><i class="fas fa-fire-burner"></i></div>
                 <div class="timeline-content">
                     <div class="timeline-header">
                         <h3>Stage 3: Pasteurization</h3>
-                        <span class="date">{{ \Carbon\Carbon::parse($milk->stage3_end)->format('d M Y, H:i') }}</span>
+                        <span class="date">{{ fmtDate($milk->milk_stage3StartDate) }}</span>
                     </div>
                     <div class="timeline-body">
-                        <p><strong>Expiry Date Generated:</strong> <span style="color:#dc2626; font-weight:bold;">{{ \Carbon\Carbon::parse($milk->expiry_date)->format('d M Y') }}</span></p>
-                        <p>Re-bottled into 30ml standard batches.</p>
+                        @if($milk->milk_stage3StartDate)
+                            <p style="margin-bottom: 10px;">Re-bottled into standard batches.</p>
+                            
+                            {{-- DETAILED TABLE --}}
+                            <table class="table-micro">
+                                <thead>
+                                    <tr>
+                                        <th>Post Bottle ID</th>
+                                        <th>Volume</th>
+                                        <th>Pasteurized Date</th>
+                                        <th>Expiry Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($milk->postBottles as $pb)
+                                    <tr>
+                                        <td>{{ $pb->post_bottle_code }}</td>
+                                        <td>{{ $pb->post_volume }} mL</td>
+                                        <td>{{ \Carbon\Carbon::parse($pb->post_pasteurization_date)->format('d M Y') }}</td>
+                                        <td style="color:#dc2626; font-weight:bold;">{{ \Carbon\Carbon::parse($pb->post_expiry_date)->format('d M Y') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="text-muted">Pending.</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             {{-- STAGE 4 --}}
-            <div class="timeline-item completed">
+            <div class="timeline-item {{ $milk->milk_stage4StartDate ? 'completed' : '' }}">
                 <div class="timeline-marker"><i class="fas fa-microscope"></i></div>
                 <div class="timeline-content">
                     <div class="timeline-header">
                         <h3>Stage 4: Microbiology Test</h3>
-                        <span class="date">{{ \Carbon\Carbon::parse($milk->stage4_end)->format('d M Y, H:i') }}</span>
+                        <span class="date">{{ fmtDate($milk->milk_stage4StartDate) }}</span>
                     </div>
                     <div class="timeline-body">
-                        
-                        {{-- UPDATED: Detailed Table & Volume Summary --}}
-                        <table class="table-micro">
-                            <thead>
-                                <tr>
-                                    <th>Bottle ID</th>
-                                    <th>Total Viable</th>
-                                    <th>Entero.</th>
-                                    <th>Staph.</th>
-                                    <th>Result</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>M26-005-P1</td>
-                                    <td>5,000</td>
-                                    <td>100</td>
-                                    <td>50</td>
-                                    <td><span class="badge-pass">Pass</span></td>
-                                </tr>
-                                <tr>
-                                    <td>M26-005-P2</td>
-                                    <td>8,500</td>
-                                    <td>200</td>
-                                    <td>80</td>
-                                    <td><span class="badge-pass">Pass</span></td>
-                                </tr>
-                                 <tr>
-                                    <td>M26-005-P3</td>
-                                    <td>120,000</td> {{-- Fail Example --}}
-                                    <td>500</td>
-                                    <td>100</td>
-                                    <td><span class="badge-fail" style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">Contaminated</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="micro-summary" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-                            <span class="badge-pass" style="font-size: 13px;">
-                                <i class="fas fa-check-double"></i> 180 mL Safe / Not Contaminated
-                            </span>
-                            <small style="display:block; margin-top:4px; color:#64748b;">(20 mL discarded due to contamination)</small>
-                        </div>
-
+                        @if($milk->milk_stage4StartDate)
+                            <table class="table-micro">
+                                <thead>
+                                    <tr>
+                                        <th>Bottle ID</th>
+                                        <th>Total Viable</th>
+                                        <th>Entero.</th>
+                                        <th>Staph.</th>
+                                        <th>Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($milk->postBottles as $pb)
+                                    <tr>
+                                        <td>{{ $pb->post_bottle_code }}</td>
+                                        <td>{{ $pb->post_micro_total_viable ?? '-' }}</td>
+                                        <td>{{ $pb->post_micro_entero ?? '-' }}</td>
+                                        <td>{{ $pb->post_micro_staph ?? '-' }}</td>
+                                        <td>
+                                            @if(str_contains($pb->post_micro_status, 'Contaminated') || str_contains($pb->post_micro_status, 'Fail'))
+                                                <span class="badge-fail" style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">Contaminated</span>
+                                            @else
+                                                <span class="badge-pass">Pass</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="text-muted">Pending.</p>
+                        @endif
                     </div>
                 </div>
             </div>
 
             {{-- STAGE 5 --}}
-            <div class="timeline-item {{ $milk->stage5_end ? 'completed' : '' }}">
+            <div class="timeline-item {{ $milk->milk_stage5StartDate ? 'completed' : '' }}">
                 <div class="timeline-marker"><i class="fas fa-box-archive"></i></div>
                 <div class="timeline-content">
                     <div class="timeline-header">
                         <h3>Stage 5: Final Storage</h3>
-                        <span class="date">{{ \Carbon\Carbon::parse($milk->stage5_end)->format('d M Y, H:i') }}</span>
+                        <span class="date">{{ fmtDate($milk->milk_stage5StartDate) }}</span>
                     </div>
                     <div class="timeline-body">
-                        <p>Stored in <strong>Freezer 2 - Drawer A01</strong>. Ready for distribution.</p>
+                        @if($milk->milk_stage5StartDate)
+                            <p style="margin-bottom: 10px;">Only passed bottles are stored.</p>
+                            
+                             {{-- DETAILED TABLE --}}
+                             <table class="table-micro">
+                                <thead>
+                                    <tr>
+                                        <th>Bottle ID</th>
+                                        <th>Storage Location</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($milk->postBottles as $pb)
+                                    {{-- Only show bottles that have a storage location (meaning they passed) --}}
+                                    @if($pb->post_storage_location)
+                                        <tr>
+                                            <td>{{ $pb->post_bottle_code }}</td>
+                                            <td style="font-weight: bold; color: #1A5F7A;">{{ $pb->post_storage_location }}</td>
+                                            <td><span class="badge-pass">Stored</span></td>
+                                        </tr>
+                                    @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <p class="text-muted">Pending.</p>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -212,9 +294,9 @@
                         Please review the timeline above. Ensure all stages (Screening to Storage) meet compliance standards before approving.
                     </p>
                     
-                    <form id="shariahForm" onsubmit="event.preventDefault();">
+                    <form id="shariahForm">
                         <label for="shariah-remarks">Remarks (Optional)</label>
-                        <textarea id="shariah-remarks" rows="3" placeholder="Enter any notes regarding the compliance...">{{ $milk->milk_shariahRemarks }}</textarea>
+                        <textarea id="shariah-remarks" rows="3" class="form-control" placeholder="Enter any notes regarding the compliance...">{{ $milk->milk_shariahRemarks }}</textarea>
                     </form>
 
                     <div class="decision-actions">
@@ -228,10 +310,12 @@
                 </div>
             @else
                 <div class="decision-body locked-body">
-                    <i class="fas fa-lock fa-3x"></i>
-                    <h3>Approval Locked</h3>
-                    <p>This milk batch is currently in the <strong>{{ ucfirst($milk->milk_Status) }}</strong> stage.</p>
-                    <p>Shariah approval is only available once the milk reaches <strong>Post-Pasteurization</strong> status.</p>
+                    <div style="text-align: center; color: #94a3b8; padding: 20px;">
+                        <i class="fas fa-lock fa-3x" style="margin-bottom: 15px;"></i>
+                        <h3>Approval Locked</h3>
+                        <p>This milk batch is currently in the <strong>{{ ucfirst($milk->milk_Status) }}</strong> stage.</p>
+                        <p>Shariah approval is only available once the milk reaches <strong>Storage Completed</strong> status.</p>
+                    </div>
                 </div>
             @endif
         </div>
@@ -239,36 +323,12 @@
     </div>
 </div>
 
-<style>
-    /* Mini Table for Microbiology */
-    .table-micro {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        margin-top: 10px;
-    }
-    .table-micro th {
-        text-align: left;
-        color: #64748b;
-        font-weight: 600;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 6px;
-    }
-    .table-micro td {
-        padding: 6px;
-        border-bottom: 1px solid #f1f5f9;
-        color: #334155;
-    }
-    .table-micro tr:last-child td {
-        border-bottom: none;
-    }
-</style>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function submitShariahDecision(isApproved) {
         const action = isApproved ? 'Approve' : 'Decline';
         const color = isApproved ? '#16a34a' : '#dc2626';
+        const remarks = document.getElementById('shariah-remarks').value;
 
         Swal.fire({
             title: `Confirm ${action}?`,
@@ -279,10 +339,35 @@
             confirmButtonText: `Yes, ${action}`
         }).then((result) => {
             if (result.isConfirmed) {
-                // SIMULATE SUCCESS FOR FRONTEND
-                Swal.fire('Success', `Milk record ${action.toLowerCase()}d successfully.`, 'success')
-                .then(() => {
-                    window.location.href = "{{ route('shariah.shariah_manage-milk-records') }}";
+                // IMPORTANT: Manually fetch the ID from the Blade object
+                const url = "{{ route('shariah.update-decision', ':id') }}".replace(':id', "{{ $milk->milk_ID }}");
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        approval: isApproved ? 1 : 0,
+                        remarks: remarks
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        Swal.fire('Success', data.message, 'success')
+                        .then(() => {
+                            window.location.href = "{{ route('shariah.shariah_manage-milk-records') }}";
+                        });
+                    } else {
+                        Swal.fire('Error', 'Something went wrong', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Network request failed', 'error');
                 });
             }
         });

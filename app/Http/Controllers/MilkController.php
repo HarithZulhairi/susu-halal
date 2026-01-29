@@ -11,7 +11,69 @@ use App\Models\PostBottle;
 
 class MilkController extends Controller
 {
-    // MilkController.php
+    public function viewMilkDonor(Request $request)
+    {
+        // 1. GET CURRENT DONOR
+        // Assuming your 'donor' table has a 'user_id' column linking to the Auth user.
+        // If you use 'role_id' or another method, adjust this line accordingly.
+        $currentDonor = Donor::where('user_id', auth()->id())->first();
+
+        // Safety check: if no donor profile exists for this user
+        if (!$currentDonor) {
+            abort(403, 'No donor profile found for this account.');
+        }
+
+        // 2. START QUERY (Filter by current Donor ID immediately)
+        $query = Milk::with(['preBottles', 'postBottles'])
+                     ->where('dn_ID', $currentDonor->dn_ID);
+
+        // --- SEARCH INPUT (Only search Milk ID, removing Donor Name search) ---
+        if ($request->filled('searchInput')) {
+            $search = $request->input('searchInput');
+            $query->where('milk_ID', 'like', "%{$search}%");
+        }
+
+        // --- STATUS FILTER ---
+        if ($request->filled('filterStatus')) {
+            $status = $request->input('filterStatus');
+            if (strtolower($status) === 'not yet started') {
+                $query->where(function($q) {
+                    $q->where('milk_Status', 'Not Yet Started')
+                      ->orWhereNull('milk_Status');
+                });
+            } else {
+                $query->where('milk_Status', $status);
+            }
+        }
+
+        // --- VOLUME FILTER ---
+        if ($request->filled('volumeMin')) {
+            $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
+        }
+        if ($request->filled('volumeMax')) {
+            $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
+        }
+
+        // --- SHARIAH FILTER ---
+        if ($request->filled('filterShariah')) {
+            $sh = $request->input('filterShariah');
+            if (strtolower($sh) === 'not yet reviewed') {
+                $query->whereNull('milk_shariahApproval');
+            } elseif (strtolower($sh) === 'approved') {
+                $query->where('milk_shariahApproval', true);
+            } elseif (strtolower($sh) === 'rejected') {
+                $query->where('milk_shariahApproval', false);
+            }
+        }
+
+        // Get Results
+        $milks = $query->orderByDesc('created_at')->get();
+
+        // We don't need to pass all $donors, just the current user's records
+        return view('donor.donor_manage-milk-records', compact('milks'));
+    }
+
+
     public function viewMilkLabtech(Request $request)
     {
         $donors = Donor::all();
@@ -81,30 +143,36 @@ class MilkController extends Controller
     public function viewMilkNurse(Request $request)
     {
         $donors = Donor::all();
-        $query = Milk::with('donor');
 
-        // Search by donor name or milk ID
+        // Start Query with Relationships
+        $query = Milk::with(['donor', 'preBottles', 'postBottles']);
+
+        // --- 1. SEARCH INPUT (ID or Donor Name) ---
         if ($request->filled('searchInput')) {
             $search = $request->input('searchInput');
             $query->where(function($q) use ($search) {
                 $q->where('milk_ID', 'like', "%{$search}%")
-                  ->orWhereHas('donor', function($dq) use ($search) {
-                      $dq->where('dn_FullName', 'like', "%{$search}%");
-                  });
+                ->orWhereHas('donor', function($dq) use ($search) {
+                    $dq->where('dn_FullName', 'like', "%{$search}%");
+                });
             });
         }
 
-        // Clinical status filter (exact match or treat 'Not Yet Started' as null)
+        // --- 2. STATUS FILTER ---
         if ($request->filled('filterStatus')) {
             $status = $request->input('filterStatus');
             if (strtolower($status) === 'not yet started') {
-                $query->whereNull('milk_Status');
+                // Check for explicit "Not Yet Started" OR null
+                $query->where(function($q) {
+                    $q->where('milk_Status', 'Not Yet Started')
+                    ->orWhereNull('milk_Status');
+                });
             } else {
                 $query->where('milk_Status', $status);
             }
         }
 
-        // Volume range filter
+        // --- 3. VOLUME RANGE FILTER ---
         if ($request->filled('volumeMin')) {
             $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
         }
@@ -112,15 +180,15 @@ class MilkController extends Controller
             $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
         }
 
-        // Expiry date range
-        if ($request->filled('expiryFrom')) {
-            $query->whereDate('milk_expiryDate', '>=', $request->input('expiryFrom'));
-        }
-        if ($request->filled('expiryTo')) {
-            $query->whereDate('milk_expiryDate', '<=', $request->input('expiryTo'));
-        }
+        // --- 4. EXPIRY DATE FILTER (REMOVED) ---
+        // Since milk_expiryDate column is deleted, we cannot filter by it directly on the Milk table.
+        // If you want to filter by the *final product expiry*, you would need to query the related postBottles.
+        // For now, I have removed it to prevent SQL errors. 
+        /* if ($request->filled('expiryFrom')) { ... }
+        if ($request->filled('expiryTo')) { ... }
+        */
 
-        // Shariah approval
+        // --- 5. SHARIAH APPROVAL FILTER ---
         if ($request->filled('filterShariah')) {
             $sh = $request->input('filterShariah');
             if (strtolower($sh) === 'not yet reviewed') {
@@ -132,40 +200,45 @@ class MilkController extends Controller
             }
         }
 
-        $milks = $query->orderBy('created_at', 'desc')->get();
+        // Get Results
+        $milks = $query->orderByDesc('created_at')->get();
 
-        return view('nurse.nurse_manage-milk-records', compact('milks'));
+        return view('nurse.nurse_manage-milk-records', compact('donors', 'milks'));
     }
 
     public function viewMilkShariah(Request $request)
     {
         $donors = Donor::all();
 
-        // Build query and apply filters from request (GET)
-        $query = Milk::with('donor');
+        // Start Query with Relationships
+        $query = Milk::with(['donor', 'preBottles', 'postBottles']);
 
-        // Search by donor name or milk ID
+        // --- 1. SEARCH INPUT (ID or Donor Name) ---
         if ($request->filled('searchInput')) {
             $search = $request->input('searchInput');
             $query->where(function($q) use ($search) {
                 $q->where('milk_ID', 'like', "%{$search}%")
-                  ->orWhereHas('donor', function($dq) use ($search) {
-                      $dq->where('dn_FullName', 'like', "%{$search}%");
-                  });
+                ->orWhereHas('donor', function($dq) use ($search) {
+                    $dq->where('dn_FullName', 'like', "%{$search}%");
+                });
             });
         }
 
-        // Clinical status filter (exact match or treat 'Not Yet Started' as null)
+        // --- 2. STATUS FILTER ---
         if ($request->filled('filterStatus')) {
             $status = $request->input('filterStatus');
             if (strtolower($status) === 'not yet started') {
-                $query->whereNull('milk_Status');
+                // Check for explicit "Not Yet Started" OR null
+                $query->where(function($q) {
+                    $q->where('milk_Status', 'Not Yet Started')
+                    ->orWhereNull('milk_Status');
+                });
             } else {
                 $query->where('milk_Status', $status);
             }
         }
 
-        // Volume range filter
+        // --- 3. VOLUME RANGE FILTER ---
         if ($request->filled('volumeMin')) {
             $query->where('milk_volume', '>=', (float) $request->input('volumeMin'));
         }
@@ -173,15 +246,15 @@ class MilkController extends Controller
             $query->where('milk_volume', '<=', (float) $request->input('volumeMax'));
         }
 
-        // Expiry date range
-        if ($request->filled('expiryFrom')) {
-            $query->whereDate('milk_expiryDate', '>=', $request->input('expiryFrom'));
-        }
-        if ($request->filled('expiryTo')) {
-            $query->whereDate('milk_expiryDate', '<=', $request->input('expiryTo'));
-        }
+        // --- 4. EXPIRY DATE FILTER (REMOVED) ---
+        // Since milk_expiryDate column is deleted, we cannot filter by it directly on the Milk table.
+        // If you want to filter by the *final product expiry*, you would need to query the related postBottles.
+        // For now, I have removed it to prevent SQL errors. 
+        /* if ($request->filled('expiryFrom')) { ... }
+        if ($request->filled('expiryTo')) { ... }
+        */
 
-        // Shariah approval
+        // --- 5. SHARIAH APPROVAL FILTER ---
         if ($request->filled('filterShariah')) {
             $sh = $request->input('filterShariah');
             if (strtolower($sh) === 'not yet reviewed') {
@@ -193,6 +266,7 @@ class MilkController extends Controller
             }
         }
 
+        // Get Results
         $milks = $query->orderByDesc('created_at')->get();
 
         return view('shariah.shariah_manage-milk-records', compact('donors', 'milks'));
@@ -262,38 +336,41 @@ class MilkController extends Controller
 
     public function viewMilkProcessingShariah($id)
     {
-        // 1. Fetch the Milk record with its Donor
-        $milk = Milk::with('donor')->findOrFail($id);
+        // Eager load all necessary relationships for the audit timeline
+        $milk = Milk::with(['donor', 'preBottles', 'postBottles'])->findOrFail($id);
 
-        // 2. Decode the JSON result from Screening Stage (milk_stage1Result)
-        // The database stores it as a JSON string or null.
-        $screeningResults = [];
-        if ($milk->milk_stage1Result) {
-            $decoded = json_decode($milk->milk_stage1Result, true);
-            if (is_array($decoded)) {
-                $screeningResults = $decoded;
-            }
-        }
-
-        // 3. Return view with data
-        return view('shariah.shariah_view-milk-processing', compact('milk', 'screeningResults'));
+        return view('shariah.shariah_view-milk-processing', compact('milk'));
     }
 
-    public function updateDecision(Request $request)
+    public function updateDecision(Request $request, $id)
     {
+        // 1. Validate Input
         $request->validate([
-            'milk_id' => 'required|exists:milk,milk_ID',
-            'approval' => 'required|boolean',
-            'remarks' => 'nullable|string'
+            'approval' => 'required|boolean', // 1 or 0
+            'remarks'  => 'nullable|string|max:1000'
         ]);
 
-        $milk = Milk::findOrFail($request->milk_id);
-        $milk->milk_shariahApproval = $request->approval;
-        $milk->milk_shariahRemarks = $request->remarks;
-        $milk->milk_shariahApprovalDate = Carbon::now(); // Set current date
-        $milk->save();
+        // 2. Find Record Manually (Safest for custom Primary Keys)
+        $milk = Milk::findOrFail($id);
 
-        return response()->json(['success' => true]);
+        // 3. Update
+        $updated = $milk->update([
+            'milk_shariahApproval'     => $request->approval,
+            'milk_shariahRemarks'      => $request->remarks,
+            'milk_shariahApprovalDate' => now(),
+        ]);
+
+        if ($updated) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Shariah decision recorded successfully.'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update database.'
+            ], 500);
+        }
     }
 
     // 2. Update Method
@@ -464,33 +541,6 @@ class MilkController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // AJAX endpoint to mark labelling complete
-    public function markLabellingComplete(Request $request, Milk $milk)
-    {
-        $milk->update(['milk_Status' => 'Labelling Completed']);
-        return response()->json(['success' => true]);
-    }
-
-    // AJAX endpoint to mark distributing complete
-    public function markDistributingComplete(Request $request, Milk $milk)
-    {
-        $milk->update(['milk_Status' => 'Distributing Completed']);
-        return response()->json(['success' => true]);
-    }
-
-    // AJAX endpoint to mark labelling in-progress (stage 2 started but not completed)
-    public function markLabellingInProgress(Request $request, Milk $milk)
-    {
-        $milk->update(['milk_Status' => 'Labelling']);
-        return response()->json(['success' => true]);
-    }
-
-    // AJAX endpoint to mark distributing in-progress (stage 3 started but not completed)
-    public function markDistributingInProgress(Request $request, Milk $milk)
-    {
-        $milk->update(['milk_Status' => 'Distributing']);
-        return response()->json(['success' => true]);
-    }
 
     // JSON endpoint: return minimal status list for polling in manage view
     public function milkStatuses()
@@ -534,6 +584,11 @@ class MilkController extends Controller
             return redirect()->back()->with('error', 'Failed to delete milk record.');
         }
     }
+
+
+    ////////////////////////////////////////
+    // MILK PROCESSING STAGE SAVE METHODS //
+    ////////////////////////////////////////
 
     public function saveStage1(Request $request, $id)
     {

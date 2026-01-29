@@ -83,116 +83,77 @@ class DashboardController extends Controller
     // ============================   
     public function nurse()
     {
-        // ====== STATS DATA ======
-        // Active Donors (donors who passed screening)
+        // ============================
+        // 1. STATS CARDS
+        // ============================
+
+        // Active Donors
         $activeDonors = Donor::whereHas('screening', function($query) {
             $query->where('dtb_ScreeningStatus', 'passed');
         })->count();
 
-        // Pending Appointments (both milk and pumping kit)
-        $pendingMilkAppointments = MilkAppointment::where('status', 'Pending')->count();
-        $pendingKitAppointments = PumpingKitAppointment::where('status', 'Pending')->count();
-        $pendingAppointments = $pendingMilkAppointments + $pendingKitAppointments;
+        // Pending Appointments (Sum of Milk + Kit)
+        $pendingAppointments = MilkAppointment::where('status', 'Pending')->count() 
+                            + PumpingKitAppointment::where('status', 'Pending')->count();
 
-        // Today's pending appointments for the change indicator
-        $todayPendingAppointments = MilkAppointment::where('status', 'Pending')
-            ->whereDate('appointment_datetime', Carbon::today())
-            ->count() + PumpingKitAppointment::where('status', 'Pending')
-            ->whereDate('appointment_datetime', Carbon::today())
-            ->count();
+        // Milk Requests (Placeholder or Real Model)
+        // If you don't have a MilkRequest model yet, this defaults to 0 to prevent errors
+        $milkRequests = class_exists('App\Models\MilkRequest') 
+            ? \App\Models\MilkRequest::where('status', 'Pending')->count() 
+            : 0; 
 
-        // Milk Requests (milk records that need processing - not yet completed)
-        $milkRequests = Milk::whereNotIn('milk_Status', [
-            'Distributing Completed', 
-            'Completed',
-            'Rejected'
-        ])->count();
+        // Processing Queue (Real Data)
+        // Counts all milk records that have started (not null/Not Yet Started) 
+        // but are not yet finished (Storage Completed)
+        $processingQueue = Milk::whereNotIn('milk_Status', ['Not Yet Started', 'Storage Completed'])
+                            ->whereNotNull('milk_Status')
+                            ->count();
 
-        // Milk requests from last week for percentage change
-        $lastWeekMilkRequests = Milk::whereNotIn('milk_Status', [
-            'Distributing Completed', 
-            'Completed',
-            'Rejected'
-        ])->where('created_at', '>=', Carbon::now()->subWeek())
-        ->count();
+        // ============================
+        // 2. CHART DATA (Total Volume)
+        // ============================
+        // We calculate the total VOLUME of milk collected per month for the chart
+        $monthlyVolume = Milk::select(
+                DB::raw('MONTH(created_at) as month'), 
+                DB::raw('SUM(milk_volume) as total_volume')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->pluck('total_volume', 'month'); // [month_number => volume]
 
-        $requestsChange = $lastWeekMilkRequests > 0 
-            ? round((($milkRequests - $lastWeekMilkRequests) / $lastWeekMilkRequests) * 100) . '%' 
-            : '0%';
-
-        // Processing Queue (milk records in active processing stages)
-        $processingQueue = Milk::whereIn('milk_Status', [
-            'Screening',
-            'Screening Completed', 
-            'Labelling',
-            'Labelling Completed',
-            'Distributing'
-        ])->count();
-
-        // Urgent processing (milk expiring soon - within 3 days)
-        $urgentQueue = Milk::where('milk_expiryDate', '<=', Carbon::now()->addDays(3))
-            ->whereIn('milk_Status', ['Screening', 'Screening Completed', 'Labelling', 'Labelling Completed', 'Distributing'])
-            ->count();
-
-        // Active donors change from last month
-        $lastMonthActiveDonors = Donor::whereHas('screening', function($query) {
-            $query->where('dtb_ScreeningStatus', 'passed');
-        })->where('created_at', '>=', Carbon::now()->subMonth())
-        ->count();
-
-        $donorsChange = $lastMonthActiveDonors > 0 
-            ? round((($activeDonors - $lastMonthActiveDonors) / $lastMonthActiveDonors) * 100) . '%' 
-            : '100%';
-
-        // ====== GRAPH DATA (Monthly) ======
         $months = [];
-        $milkData = [];
-        $kitData = [];
+        $volumeData = [];
 
         for ($i = 1; $i <= 12; $i++) {
-            // Month labels
-            $months[] = Carbon::create()->month($i)->format('M');
-
-            // Count MilkAppointments per month
-            $milkData[] = MilkAppointment::whereMonth('appointment_datetime', $i)->count();
-
-            // Count PumpingKitAppointments per month
-            $kitData[] = PumpingKitAppointment::whereMonth('appointment_datetime', $i)->count();
+            $months[] = date('F', mktime(0, 0, 0, $i, 1)); // Jan, Feb...
+            $volumeData[] = $monthlyVolume->get($i, 0); // Get volume or 0
         }
-            $dn_id = auth()->user()->role_id;
-            $today = Carbon::today();
 
-            // ====== TODAY'S APPOINTMENTS ======
-            $todayMilk = MilkAppointment::join('donor', 'milk_appointments.dn_ID', '=', 'donor.dn_ID')
-                ->select(
-                    'milk_appointments.*',
-                    'donor.dn_FullName',
-                    'donor.dn_ID as donor_id'
-                )
-                ->whereDate('milk_appointments.appointment_datetime', $today)
-                ->get();
+        // ============================
+        // 3. TODAY'S APPOINTMENTS
+        // ============================
+        $today = Carbon::today();
 
-            $todayKit = PumpingKitAppointment::join('donor', 'pumping_kit_appointments.dn_ID', '=', 'donor.dn_ID')
-                ->select(
-                    'pumping_kit_appointments.*',
-                    'donor.dn_FullName',
-                    'donor.dn_ID as donor_id'
-                )
-                ->whereDate('pumping_kit_appointments.appointment_datetime', $today)
-                ->get();
+        $todayMilk = MilkAppointment::with('donor') // Eager load donor to avoid N+1
+            ->whereDate('appointment_datetime', $today)
+            ->get();
 
-            $todayAppointments = $todayMilk->merge($todayKit);
+        $todayKit = PumpingKitAppointment::with('donor')
+            ->whereDate('appointment_datetime', $today)
+            ->get();
 
-        return view('nurse.nurse_dashboard', [
-            'activeDonors' => $activeDonors,
-            'pendingAppointments' => $pendingAppointments,
-            'milkRequests' => $milkRequests,
-            'processingQueue' => $processingQueue,
-            'months' => $months,
-            'milkData' => $milkData,
-            'kitData' => $kitData,
-            'todayAppointments' => $todayAppointments,
-        ]);
+        // Merge and sort by time
+        $todayAppointments = $todayMilk->merge($todayKit)->sortBy('appointment_datetime');
+
+        return view('nurse.nurse_dashboard', compact(
+            'activeDonors',
+            'pendingAppointments',
+            'milkRequests',
+            'processingQueue',
+            'months',
+            'volumeData', // This variable matches the new Chart.js code
+            'todayAppointments'
+        ));
     }
 
 

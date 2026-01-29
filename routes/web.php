@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\Mail;
 
 //new routes
 Route::view('/doctor/manage-milk-records', 'doctor.doctor_manage-milk-records')->name('doctor.manage-milk-records');
-Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.view-milk-processing');
-Route::view('/donor/manage-milk-records', 'donor.donor_manage-milk-records')->name('donor.manage-milk-records');
 Route::view('/labtech/inventory-quality-control', 'labtech.labtech_quality-control')->name('labtech.quality-control');
 Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
 Route::view('/hmmc/infants-request', 'hmmc.hmmc_infants-request')->name('hmmc.infants-request');
@@ -247,26 +245,24 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/hmmc/list-of-infants/update', [RequestController::class, 'updateInfantWeightHMMC'])->name('hmmc.hmmc_list-of-infants.update');
     
     Route::view('/shariah/infant-request', 'shariah.shariah_infant-request')->name('shariah.infant-request');
-
-    Route::get('/shariah/infant-request', 
-    [RequestController::class, 'viewInfantMilkShariah'])->name('shariah.infant-request');
-
+    Route::get('/shariah/infant-request', [RequestController::class, 'viewInfantMilkShariah'])->name('shariah.infant-request');
+    Route::get('/shariah/milk-statuses', [MilkController::class, 'milkStatuses'])->name('shariah.milk-statuses');
+    Route::get('/shariah/view-milk-processing/{milk}', [MilkController::class, 'viewMilkProcessingShariah'])->name('shariah.shariah_view-milk-processing');
+    Route::post('/shariah/update-decision/{milk}', [MilkController::class, 'updateDecision'])->name('shariah.update-decision');
+    Route::get('/shariah/manage-milk-records', [MilkController::class, 'viewMilkShariah'])->name('shariah.shariah_manage-milk-records');
+    
 
     // Milk Records Views
     Route::get('/hmmc/manage-milk-records', [MilkController::class, 'viewMilkHMMC'])->name('hmmc.hmmc_manage-milk-records');
     Route::put('/hmmc/manage-milk-records/{id}', [MilkController::class, 'updateMilkRecordHMMC'])->name('hmmc.update-milk-record');
     Route::delete('/hmmc/manage-milk-records/{id}', [MilkController::class, 'deleteMilkRecordHMMC'])->name('hmmc.delete-milk-record');
+    Route::get('/donor/manage-milk-records', [MilkController::class, 'viewMilkDonor'])->name('donor.donor_manage-milk-records');
 
-    Route::get('/shariah/manage-milk-records', [MilkController::class, 'viewMilkShariah'])->name('shariah.shariah_manage-milk-records');
 
     Route::get('/nurse/manage-milk-records', [MilkController::class, 'viewMilkNurse'])->name('nurse.manage-milk-records');
     Route::get('/nurse/milk-statuses', [MilkController::class, 'milkStatuses'])->name('nurse.milk-statuses');
 
-    Route::get('/shariah/milk-statuses', [MilkController::class, 'milkStatuses'])->name('shariah.milk-statuses');
 
-    // Route::view('/shariah/view-milk-processing', 'shariah.shariah_view-milk-processing')->name('shariah.shariah_view-milk-processing');
-    Route::get('/shariah/view-milk-processing/{id}', [MilkController::class, 'viewMilkProcessingShariah'])->name('shariah.shariah_view-milk-processing');
-    Route::post('/shariah/update-decision', [MilkController::class, 'updateDecision'])->name('shariah.update-decision');
     Route::view('/nurse/view-milk-processing', 'nurse.nurse_view-milk-processing')->name('nurse.view-milk-processing');
 
     // Appointment Module

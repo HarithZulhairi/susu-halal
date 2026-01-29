@@ -1,460 +1,429 @@
 @extends('layouts.donor')
 
-@section('title', 'Manage Milk Records')
+@section('title', 'Manage Milk Records (Donor)')
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/donor_manage-milk-records.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<style>
-    /* Beautified Clinical Status Colors */
-    .status-tag {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: inline-block;
-        border: 1px solid transparent;
-    }
-
-    /* 1. Pre-Pasteurization (Warm Orange/Yellow) */
-    .status-screening { 
-        background-color: #fff7ed; 
-        color: #c2410c; 
-        border-color: #ffedd5; 
-    }
-
-    /* 2. Thawing (Cool Ice Blue) */
-    .status-labelling { 
-        background-color: #eff6ff; 
-        color: #1d4ed8; 
-        border-color: #dbeafe; 
-    }
-
-    /* 3. Pasteurization (Vibrant Purple/Indigo) */
-    .status-distributing { 
-        background-color: #eef2ff; 
-        color: #4338ca; 
-        border-color: #e0e7ff; 
-    }
-
-    /* 4. Microbiology (Teal/Mint) */
-    .status-microbiology { 
-        background-color: #f0fdf4; 
-        color: #15803d; 
-        border-color: #dcfce7; 
-    }
-
-    /* 5. Post-Pasteurization (Solid Green) */
-    .status-post-pasteurization { 
-        background-color: #ecfdf5; 
-        color: #047857; 
-        border-color: #d1fae5; 
-    }
-
-    /* Pending/Gray */
-    .status-pending { 
-        background-color: #f3f4f6; 
-        color: #6b7280; 
-        border-color: #e5e7eb; 
-    }
-
-    /* Profile Icon Style */
-    .milk-icon-wrapper {
-        background-color: #f1f5f9;
-        color: #64748b;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-    }
-</style>
-
 <div class="container">
     <div class="main-content">
+
         <div class="page-header">
             <h1>Milk Records Management</h1>
-            <p>Milk Processing and Records</p>
+            <p>Your Milk Processing and Records</p>
         </div>
 
         <div class="card">
             <div class="card-header">
-                <h2>Milk Processing and Records</h2>
+                <h2>Milk Records List</h2>
                 <div class="actions-header">
-                    <button class="btn btn-search">
-                        <i class="fas fa-search"></i> Search &amp; Filter
-                    </button>
+                    <button class="btn btn-search"><i class="fas fa-search"></i> Search &amp; Filter</button>
                 </div>
             </div>
 
-            <div id="filterPanel" class="filter-panel">
-                <form id="filterForm" onsubmit="event.preventDefault();">
-                    <input id="searchInput" class="form-control" type="search" placeholder="Search by Milk ID">
+            <div id="filterPanel" class="filter-panel" role="region" aria-label="Search and filters">
+                <form id="filterForm" method="GET" action="{{ url()->current() }}" autocomplete="off">
+                    <input id="searchInput" name="searchInput" value="{{ request('searchInput') }}" class="form-control" type="search" placeholder="Search by Milk ID">
+
+                    <select id="filterStatus" name="filterStatus" class="form-control">
+                        <option value="">All Clinical Status</option>
+                        <option value="Not Yet Started" {{ request('filterStatus') == 'Not Yet Started' ? 'selected' : '' }}>Not Yet Started</option>
+                        <option value="Labelling Completed" {{ request('filterStatus') == 'Labelling Completed' ? 'selected' : '' }}>Labelling Completed</option>
+                        <option value="Thawing Completed" {{ request('filterStatus') == 'Thawing Completed' ? 'selected' : '' }}>Thawing Completed</option>
+                        <option value="Pasteurization Completed" {{ request('filterStatus') == 'Pasteurization Completed' ? 'selected' : '' }}>Pasteurization Completed</option>
+                        <option value="Microbiology Completed" {{ request('filterStatus') == 'Microbiology Completed' ? 'selected' : '' }}>Microbiology Completed</option>
+                        <option value="Storage Completed" {{ request('filterStatus') == 'Storage Completed' ? 'selected' : '' }}>Storage Completed (Ready for Review)</option>
+                    </select>
+
+                    <div style="display:flex; gap:8px;">
+                        <input id="volumeMin" name="volumeMin" value="{{ request('volumeMin') }}" class="form-control" type="number" min="0" placeholder="Min mL">
+                        <input id="volumeMax" name="volumeMax" value="{{ request('volumeMax') }}" class="form-control" type="number" min="0" placeholder="Max mL">
+                    </div>
+
+                    <select id="filterShariah" name="filterShariah" class="form-control">
+                        <option value="">All Shariah Status</option>
+                        <option value="Not Yet Reviewed" {{ request('filterShariah') == 'Not Yet Reviewed' ? 'selected' : '' }}>Not Yet Reviewed</option>
+                        <option value="Approved" {{ request('filterShariah') == 'Approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="Rejected" {{ request('filterShariah') == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                    </select>
+
                     <div class="filter-actions">
-                        <button type="submit" class="btn">Apply</button>
-                        <button type="button" class="btn">Clear</button>
+                        <button id="applyFilters" class="btn" type="submit">Apply</button>
+                        <button id="clearFilters" class="btn" type="button" onclick="window.location='{{ url()->current() }}'">Clear</button>
                     </div>
                 </form>
             </div>
 
             <div class="records-list">
                 <div class="record-header">
-                    {{-- Changed Header to MILK ID --}}
-                    <button class="sortable-header" data-key="milkId">MILK ID <span class="sort-indicator"></span></button>
+                    <button class="sortable-header" data-key="donor">MILK DONOR <span class="sort-indicator"></span></button>
                     <button class="sortable-header" data-key="status">CLINICAL STATUS <span class="sort-indicator"></span></button>
                     <button class="sortable-header" data-key="volume">VOLUME <span class="sort-indicator"></span></button>
-                    <button class="sortable-header" data-key="expiry">EXPIRATION DATE <span class="sort-indicator"></span></button>
                     <button class="sortable-header" data-key="shariah">SHARIAH APPROVAL <span class="sort-indicator"></span></button>
                     <span>ACTIONS</span>
                 </div>
 
-                {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 1 --}}
-                {{-- ================================================================= --}}
-                @php
-                    $payload1 = [
-                        'milkId' => 'M26-001',
-                        'status' => 'Pre-Pasteurization',
-                        'volume' => '150 mL',
-                        'expiry' => '-',
-                        'shariah' => 'Approved',
-                        'location' => 'Reception Fridge',
-                        'quality' => 'Pending Screening',
-                        'timeline' => [
-                            ['stage' => 'Pre-Pasteurization', 'status' => 'In Progress', 'date' => date('Y-m-d H:i')],
-                            ['stage' => 'Thawing', 'status' => 'Pending', 'date' => '-'],
-                            ['stage' => 'Pasteurization', 'status' => 'Pending', 'date' => '-'],
-                            ['stage' => 'Microbiology', 'status' => 'Pending', 'date' => '-'],
-                            ['stage' => 'Storage', 'status' => 'Pending', 'date' => '-']
-                        ]
-                    ];
-                @endphp
-                <div class="record-item" data-milk-id="1">
-                    <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
-                        <div>
-                            {{-- Only showing Milk ID --}}
-                            <span class="milk-id">M26-001</span>
+                @forelse($milks as $milk)
+                    <div class="record-item" 
+                         data-milk-id="{{ $milk->milk_ID }}"
+                         data-name="{{ strtolower($milk->donor?->dn_FullName ?? '') }}"
+                         data-status="{{ strtolower($milk->milk_Status ?? 'not yet started') }}" 
+                         data-volume="{{ $milk->milk_volume }}"
+                         data-shariah="{{ strtolower($milk->milk_shariahApproval ?? 'not yet reviewed') }}">
+                        
+                        {{-- 1. Donor --}}
+                        <div class="milk-donor-info">
+                            <div class="milk-icon-wrapper"><i class="fas fa-bottle-droplet milk-icon"></i></div>
+                            <div>
+                                <span class="milk-id">{{ $milk->formatted_id }}</span>
+                            </div>
+                        </div>
+
+                        {{-- 2. Clinical Status --}}
+                        <div class="clinical-status">
+                            @php
+                                $rawStatus = $milk->milk_Status ?? 'Not Yet Started';
+                                $fullCls = strtolower(str_replace(' ', '-', $rawStatus));
+                                $baseCls = strtolower(explode(' ', $rawStatus)[0] ?? 'pending');
+                            @endphp
+                            <span class="status-tag status-{{ $baseCls }} status-{{ $fullCls }} status-disabled">
+                                {{ ucfirst($rawStatus) }}
+                            </span>
+                        </div>
+
+                        {{-- 3. Volume --}}
+                        <div class="volume-data">{{ $milk->milk_volume }} mL</div>
+
+                        {{-- 4. Shariah Approval --}}
+                        <div class="shariah-status">
+                            @php
+                                $approval = $milk->milk_shariahApproval;
+                            @endphp
+                            <span class="status-tag
+                                {{ is_null($approval) ? 'status-pending' :
+                                ($approval ? 'status-approved' : 'status-rejected') }}">
+                                {{ is_null($approval) ? 'Not Yet Reviewed' :
+                                ($approval ? 'Approved' : 'Rejected') }}
+                            </span>
+                        </div>
+
+                        {{-- 5. Actions --}}
+                        <div class="actions">
+                            @php
+                                $payload = [
+                                    'milkId' => $milk->formatted_id,
+                                    'donorName' => $milk->donor?->dn_FullName ?? 'N/A',
+                                    'status' => ucfirst($milk->milk_Status ?? 'Not Yet Started'),
+                                    'volume' => $milk->milk_volume . ' mL',
+                                    'shariah' => is_null($milk->milk_shariahApproval) ? 'Not Yet Reviewed' : ($milk->milk_shariahApproval ? 'Approved' : 'Rejected'),
+                                    'shariahRemarks' => $milk->milk_shariahRemarks ?? '-',
+                                    'shariahApprovalDate' => $milk->milk_shariahApprovalDate ? \Carbon\Carbon::parse($milk->milk_shariahApprovalDate)->format('M d, Y') : '-',
+                                    'preBottles' => $milk->preBottles,
+                                    'postBottles' => $milk->postBottles
+                                ];
+                            @endphp
+                            <button class="btn-view" title="Quick View" data-payload='@json($payload)'>
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="clinical-status">
-                        <span class="status-tag status-screening">Pre-Pasteurization</span>
+                @empty
+                    <div class="record-item text-center text-muted py-5">
+                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                        <p>No milk records found.</p>
                     </div>
-                    <div class="volume-data">150 mL</div>
-                    <div class="expiry-date">-</div>
-                    <div class="shariah-status"><span class="status-tag status-approved">Approved</span></div>
-                    <div class="actions">
-                        <button class="btn-view" title="View Details" data-payload='@json($payload1)'><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-
-                {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 2 --}}
-                {{-- ================================================================= --}}
-                @php
-                    $payload2 = [
-                        'milkId' => 'M26-002',
-                        'status' => 'Thawing',
-                        'volume' => '200 mL',
-                        'expiry' => '-',
-                        'shariah' => 'Approved',
-                        'location' => 'Thawing Counter',
-                        'quality' => 'Passed Screening',
-                        'timeline' => [
-                            ['stage' => 'Pre-Pasteurization', 'status' => 'Completed', 'date' => '2026-01-20'],
-                            ['stage' => 'Thawing', 'status' => 'In Progress', 'date' => date('Y-m-d H:i')],
-                            ['stage' => 'Pasteurization', 'status' => 'Pending', 'date' => '-'],
-                            ['stage' => 'Microbiology', 'status' => 'Pending', 'date' => '-'],
-                            ['stage' => 'Storage', 'status' => 'Pending', 'date' => '-']
-                        ]
-                    ];
-                @endphp
-                <div class="record-item" data-milk-id="2">
-                    <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
-                        <div>
-                            <span class="milk-id">M26-002</span>
-                        </div>
-                    </div>
-                    <div class="clinical-status">
-                        <span class="status-tag status-labelling">Thawing</span>
-                    </div>
-                    <div class="volume-data">200 mL</div>
-                    <div class="expiry-date">-</div>
-                    <div class="shariah-status"><span class="status-tag status-approved">Approved</span></div>
-                    <div class="actions">
-                        <button class="btn-view" title="View Details" data-payload='@json($payload2)'><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-
-                {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 3 --}}
-                {{-- ================================================================= --}}
-                @php
-                    $payload3 = [
-                        'milkId' => 'M26-003',
-                        'status' => 'Pasteurization',
-                        'volume' => '120 mL',
-                        'expiry' => '2026-07-22',
-                        'shariah' => 'Approved',
-                        'location' => 'Pasteurizer Machine A',
-                        'quality' => 'Heat Treatment Active',
-                        'timeline' => [
-                            ['stage' => 'Pre-Pasteurization', 'status' => 'Completed', 'date' => '2026-01-21'],
-                            ['stage' => 'Thawing', 'status' => 'Completed', 'date' => '2026-01-21'],
-                            ['stage' => 'Pasteurization', 'status' => 'In Progress', 'date' => date('Y-m-d H:i')],
-                            ['stage' => 'Microbiology', 'status' => 'Pending', 'date' => '-'],
-                            ['stage' => 'Storage', 'status' => 'Pending', 'date' => '-']
-                        ]
-                    ];
-                @endphp
-                <div class="record-item" data-milk-id="3">
-                    <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
-                        <div>
-                            <span class="milk-id">M26-003</span>
-                        </div>
-                    </div>
-                    <div class="clinical-status">
-                        <span class="status-tag status-distributing">Pasteurization</span>
-                    </div>
-                    <div class="volume-data">120 mL</div>
-                    <div class="expiry-date">Jul 22, 2026</div>
-                    <div class="shariah-status"><span class="status-tag status-approved">Approved</span></div>
-                    <div class="actions">
-                        <button class="btn-view" title="View Details" data-payload='@json($payload3)'><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-
-                {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 4 --}}
-                {{-- ================================================================= --}}
-                @php
-                    $payload4 = [
-                        'milkId' => 'M26-004',
-                        'status' => 'Microbiology Test',
-                        'volume' => '180 mL',
-                        'expiry' => '2026-07-20',
-                        'shariah' => 'Approved',
-                        'location' => 'Lab Incubator',
-                        'quality' => 'Samples under analysis',
-                        'timeline' => [
-                            ['stage' => 'Pre-Pasteurization', 'status' => 'Completed', 'date' => '2026-01-19'],
-                            ['stage' => 'Thawing', 'status' => 'Completed', 'date' => '2026-01-20'],
-                            ['stage' => 'Pasteurization', 'status' => 'Completed', 'date' => '2026-01-20'],
-                            ['stage' => 'Microbiology', 'status' => 'In Progress', 'date' => date('Y-m-d')],
-                            ['stage' => 'Storage', 'status' => 'Pending', 'date' => '-']
-                        ]
-                    ];
-                @endphp
-                <div class="record-item" data-milk-id="4">
-                    <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
-                        <div>
-                            <span class="milk-id">M26-004</span>
-                        </div>
-                    </div>
-                    <div class="clinical-status">
-                        <span class="status-tag status-microbiology">Microbiology Test</span>
-                    </div>
-                    <div class="volume-data">180 mL</div>
-                    <div class="expiry-date">Jul 20, 2026</div>
-                    <div class="shariah-status"><span class="status-tag status-approved">Approved</span></div>
-                    <div class="actions">
-                        <button class="btn-view" title="View Details" data-payload='@json($payload4)'><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-
-                {{-- ================================================================= --}}
-                {{-- DUMMY RECORD 5 --}}
-                {{-- ================================================================= --}}
-                @php
-                    $payload5 = [
-                        'milkId' => 'M26-005',
-                        'status' => 'Post-Pasteurization',
-                        'volume' => '200 mL',
-                        'expiry' => '2026-07-15',
-                        'shariah' => 'Approved',
-                        'location' => 'Freezer 2 - Drawer A01',
-                        'quality' => 'Passed / Safe',
-                        'timeline' => [
-                            ['stage' => 'Pre-Pasteurization', 'status' => 'Completed', 'date' => '2026-01-15'],
-                            ['stage' => 'Thawing', 'status' => 'Completed', 'date' => '2026-01-15'],
-                            ['stage' => 'Pasteurization', 'status' => 'Completed', 'date' => '2026-01-15'],
-                            ['stage' => 'Microbiology', 'status' => 'Passed', 'date' => '2026-01-17'],
-                            ['stage' => 'Storage', 'status' => 'Stored', 'date' => '2026-01-18']
-                        ]
-                    ];
-                @endphp
-                <div class="record-item" data-milk-id="5">
-                    <div class="milk-donor-info">
-                        <div class="milk-icon-wrapper"><i class="fas fa-user"></i></div>
-                        <div>
-                            <span class="milk-id">M26-005</span>
-                        </div>
-                    </div>
-                    <div class="clinical-status">
-                        <span class="status-tag status-post-pasteurization">Post-Pasteurization</span>
-                    </div>
-                    <div class="volume-data">200 mL</div>
-                    <div class="expiry-date">Jul 15, 2026</div>
-                    <div class="shariah-status"><span class="status-tag status-approved">Approved</span></div>
-                    <div class="actions">
-                        <button class="btn-view" title="View Details" data-payload='@json($payload5)'><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-
+                @endforelse
+                
                 <div id="paginationControls" class="pagination-controls"></div>
             </div>
         </div>
     </div>
 </div>
 
-{{-- ======================================================== --}}
-{{-- VIEW MODAL --}}
-{{-- ======================================================== --}}
+{{-- ===================== VIEW MILK RECORD MODAL ===================== --}}
 <div id="viewMilkModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-content">
         <div class="modal-header">
-            <h2><i class="fas fa-notes-medical"></i> Milk Record Details</h2>
+            <h2>Milk Record Details</h2>
             <button class="modal-close-btn" onclick="closeViewMilkModal()">Close</button>
         </div>
+
         <div class="modal-body">
-            
-            {{-- 1. HEADER INFO --}}
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1A5F7A;">
-                <div style="display: flex; justify-content: space-between;">
-                    <div>
-                        <small style="color: #64748b;">Milk ID</small>
-                        <h3 id="view-milk-id" style="margin:0; color:#1A5F7A;">-</h3>
-                    </div>
-                    </div>
-            </div>
-
-            {{-- 2. VITAL INFO --}}
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                    <p style="margin-bottom:5px;"><strong><i class="fas fa-flask"></i> Volume:</strong> <span id="view-volume"></span></p>
-                    <p style="margin-bottom:5px;"><strong><i class="fas fa-calendar-alt"></i> Expiry:</strong> <span id="view-expiry"></span></p>
-                </div>
-                <div>
-                    <p style="margin-bottom:5px;"><strong><i class="fas fa-star"></i> Shariah:</strong> <span id="view-shariah"></span></p>
-                    <p style="margin-bottom:5px;"><strong><i class="fas fa-shield-alt"></i> Safety:</strong> <span id="view-quality" style="color: green; font-weight: bold;">-</span></p>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <p><strong>Milk ID:</strong> <span id="view-milk-id" style="color: #1A5F7A; font-weight: bold;"></span></p>
+                    <p><strong>Donor:</strong> <span id="view-donor-name"></span></p>
+                    <p><strong>Volume:</strong> <span id="view-volume"></span></p>
+                    <p><strong>Status:</strong> <span id="view-status"></span></p>
                 </div>
             </div>
 
-            {{-- 3. CURRENT LOCATION --}}
-            <div style="margin-bottom: 20px; padding: 10px; border: 2px dashed #cbd5e1; border-radius: 8px; text-align: center;">
-                <label style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Current Storage Location</label>
-                <div id="view-location" style="font-size: 18px; font-weight: bold; color: #1e293b; margin-top: 5px;">-</div>
+            <div class="view-tabs" style="display: flex; gap: 10px; border-bottom: 1px solid #e2e8f0; margin-bottom: 15px;">
+                <button class="view-tab-btn active" onclick="switchViewTab('raw')">Raw Milk (Stage 1-2)</button>
+                <button class="view-tab-btn" onclick="switchViewTab('processed')">Processed (Stage 3-5)</button>
+                <button class="view-tab-btn" onclick="switchViewTab('qc')">Quality Control</button>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-
-            {{-- 4. SIMPLIFIED TIMELINE --}}
-            <h3 style="font-size: 16px; margin-bottom: 15px;">Processing Timeline</h3>
-            <div id="timeline-container">
+            <div id="view-tab-raw" class="view-tab-content active" style="padding-top: 10px;">
+                <h3>Pre-Pasteurization Bottles</h3>
+                <table class="view-table" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <thead style="background: #f1f5f9;">
+                        <tr>
+                            <th style="padding: 8px; text-align: left;">Code</th>
+                            <th style="padding: 8px; text-align: left;">Volume (mL)</th>
+                            <th style="padding: 8px; text-align: left;">Thawed?</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-pre-bottles-list"></tbody>
+                </table>
             </div>
 
+            <div id="view-tab-processed" class="view-tab-content" style="padding-top: 10px; display: none;">
+                <h3>Pasteurized Bottles</h3>
+                <table class="view-table" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                    <thead style="background: #f1f5f9;">
+                        <tr>
+                            <th style="padding: 8px; text-align: left;">Code</th>
+                            <th style="padding: 8px; text-align: left;">Vol</th>
+                            <th style="padding: 8px; text-align: left;">Expiry</th>
+                            <th style="padding: 8px; text-align: left;">Micro Result</th>
+                            <th style="padding: 8px; text-align: left;">Storage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-post-bottles-list"></tbody>
+                </table>
+            </div>
+
+            <div id="view-tab-qc" class="view-tab-content" style="display: none; padding-top: 10px;">
+                <h3>Quality Control</h3>
+                <p><strong>Shariah Approval:</strong> <span id="view-shariah"></span></p>
+                <p><strong>Approval Date:</strong> <span id="view-shariah-date"></span></p>
+                <p><strong>Remarks:</strong> <span id="view-shariah-remarks"></span></p>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    // --- Modal Logic ---
     const viewModal = document.getElementById("viewMilkModal");
+    window.addEventListener("click", (e) => { if (e.target === viewModal) viewModal.style.display = "none"; });
+    function closeViewMilkModal() { viewModal.style.display = "none"; }
 
-    // Filter panel toggle
-    document.querySelector('.btn-search')?.addEventListener('click', () => {
-        document.getElementById('filterPanel').classList.toggle('active');
-    });
-
-    // Close modal on backdrop click
-    window.addEventListener('click', e => {
-        if (e.target === viewModal) viewModal.style.display = 'none';
-    });
-
-    // View button click
     document.querySelectorAll('.btn-view').forEach(btn => {
         btn.addEventListener('click', () => {
             try {
-                const data = JSON.parse(btn.dataset.payload);
+                const data = JSON.parse(btn.getAttribute('data-payload'));
                 openViewMilkModal(data);
-            } catch (err) {
-                console.error("Payload error:", err);
-            }
+            } catch (err) { console.error('Payload error', err); }
         });
     });
-});
 
-function openViewMilkModal(data) {
-    // Populate Basic Info
-    document.getElementById('view-milk-id').textContent = data.milkId || '-';
-    document.getElementById('view-volume').textContent = data.volume || '-';
-    
-    // Logic for Expiry color
-    const expiryEl = document.getElementById('view-expiry');
-    expiryEl.textContent = data.expiry || '-';
-    if(data.expiry && data.expiry !== '-') expiryEl.style.color = '#dc2626'; // Highlight expiry
-    else expiryEl.style.color = 'inherit';
-
-    // Shariah
-    document.getElementById('view-shariah').textContent = data.shariah || '-';
-    
-    // Location & Quality
-    document.getElementById('view-location').textContent = data.location || 'Unknown';
-    
-    const qualityEl = document.getElementById('view-quality');
-    qualityEl.textContent = data.quality || 'Pending';
-    qualityEl.style.color = data.quality.includes('Passed') || data.quality.includes('Safe') ? 'green' : 'orange';
-
-    // Render Timeline
-    const timelineContainer = document.getElementById('timeline-container');
-    timelineContainer.innerHTML = ''; // Clear previous
-
-    if(data.timeline && Array.isArray(data.timeline)) {
-        data.timeline.forEach(step => {
-            const row = document.createElement('div');
-            row.className = 'stage-row';
-            row.style.cssText = 'display:flex; justify-content:space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size:14px;';
-            
-            // Icon selection logic
-            let icon = '<i class="fas fa-circle" style="color:#ccc; margin-right:8px;"></i>';
-            let statusColor = '#64748b';
-
-            if(step.status === 'Completed' || step.status === 'Passed' || step.status === 'Stored') {
-                icon = '<i class="fas fa-check-circle" style="color:#10b981; margin-right:8px;"></i>';
-                statusColor = '#10b981';
-            } else if (step.status === 'In Progress') {
-                icon = '<i class="fas fa-spinner fa-spin" style="color:#f59e0b; margin-right:8px;"></i>';
-                statusColor = '#f59e0b';
-            }
-
-            row.innerHTML = `
-                <div>
-                    ${icon} <strong>${step.stage}</strong>
-                </div>
-                <div style="text-align:right;">
-                    <span style="color:${statusColor}; font-weight:600;">${step.status}</span>
-                    <br>
-                    <small style="color:#94a3b8;">${step.date}</small>
-                </div>
-            `;
-            timelineContainer.appendChild(row);
-        });
+    function switchViewTab(tabName) {
+        document.querySelectorAll('.view-tab-content').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.view-tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('view-tab-' + tabName).style.display = 'block';
+        
+        const btns = document.querySelectorAll('.view-tab-btn');
+        if(tabName === 'raw') btns[0].classList.add('active');
+        if(tabName === 'processed') btns[1].classList.add('active');
+        if(tabName === 'qc') btns[2].classList.add('active');
     }
 
-    document.getElementById('viewMilkModal').style.display = 'flex';
-}
+    function openViewMilkModal(data) {
+        document.getElementById('view-milk-id').textContent = data.milkId;
+        document.getElementById('view-donor-name').textContent = data.donorName;
+        document.getElementById('view-volume').textContent = data.volume;
+        document.getElementById('view-status').textContent = data.status;
+        document.getElementById('view-shariah').textContent = data.shariah;
+        document.getElementById('view-shariah-date').textContent = data.shariahApprovalDate;
+        document.getElementById('view-shariah-remarks').textContent = data.shariahRemarks;
 
-function closeViewMilkModal() {
-    document.getElementById('viewMilkModal').style.display = 'none';
-}
+        const preList = document.getElementById('view-pre-bottles-list');
+        preList.innerHTML = '';
+        if (data.preBottles && data.preBottles.length > 0) {
+            data.preBottles.forEach(b => {
+                const thawed = b.pre_is_thawed ? '<span style="color:green">Yes</span>' : '<span style="color:gray">No</span>';
+                preList.innerHTML += `<tr><td>${b.pre_bottle_code}</td><td>${b.pre_volume}</td><td>${thawed}</td></tr>`;
+            });
+        } else { preList.innerHTML = '<tr><td colspan="3" class="text-muted">No data.</td></tr>'; }
+
+        const postList = document.getElementById('view-post-bottles-list');
+        postList.innerHTML = '';
+        if (data.postBottles && data.postBottles.length > 0) {
+            data.postBottles.forEach(b => {
+                let microColor = 'gray';
+                if (b.post_micro_status?.includes('Pass') || b.post_micro_status?.includes('Not')) microColor = 'green';
+                if (b.post_micro_status?.includes('Fail') || b.post_micro_status?.includes('Contaminated')) microColor = 'red';
+                postList.innerHTML += `<tr><td>${b.post_bottle_code}</td><td>${b.post_volume}</td><td>${b.post_expiry_date || '-'}</td><td style="color:${microColor}; font-weight:bold;">${b.post_micro_status || 'Pending'}</td><td>${b.post_storage_location || '-'}</td></tr>`;
+            });
+        } else { postList.innerHTML = '<tr><td colspan="5" class="text-muted">No data.</td></tr>'; }
+
+        switchViewTab('raw');
+        viewModal.style.display = 'flex';
+    }
+
+    // --- Search & Filter Panel ---
+    const panel = document.getElementById('filterPanel');
+    document.querySelector('.btn-search').addEventListener('click', () => {
+        panel.classList.toggle('active');
+        if(panel.classList.contains('active')) document.getElementById('searchInput').focus();
+    });
+    document.getElementById('clearFilters').addEventListener('click', () => { window.location.href = '{{ url()->current() }}'; });
+
+    // ==========================================
+    //  SORTING LOGIC (With Visual Indicators)
+    // ==========================================
+    (function setupSorting() {
+        const listContainer = document.querySelector('.records-list');
+        if (!listContainer) return;
+        const headerButtons = Array.from(document.querySelectorAll('.record-header .sortable-header'));
+
+        function getValueForKey(row, key) {
+            if (key === 'donor') return row.querySelector('.donor-name')?.textContent?.trim() || '';
+            if (key === 'status') return row.querySelector('.clinical-status .status-tag')?.textContent?.trim() || '';
+            if (key === 'volume') {
+                const v = row.querySelector('.volume-data')?.textContent || '';
+                return parseFloat(v.replace(/[^0-9.]/g, '')) || 0;
+            }
+            if (key === 'shariah') return row.querySelector('.shariah-status')?.textContent?.trim() || '';
+            return ''; // Default
+        }
+
+        function sortBy(key, direction = 'asc') {
+            const rows = Array.from(listContainer.querySelectorAll('.record-item'));
+            const multiplier = direction === 'asc' ? 1 : -1;
+
+            rows.sort((a, b) => {
+                const va = getValueForKey(a, key);
+                const vb = getValueForKey(b, key);
+
+                if (typeof va === 'number' && typeof vb === 'number') {
+                    return (va - vb) * multiplier;
+                }
+                return va.toString().localeCompare(vb.toString()) * multiplier;
+            });
+
+            // Re-append rows after header
+            const header = listContainer.querySelector('.record-header');
+            rows.forEach(r => header.after(r));
+
+            // Reset pagination to Page 1 after sorting
+            if (window.__rebuildPagination) window.__rebuildPagination(1);
+        }
+
+        function clearIndicators() {
+            headerButtons.forEach(btn => {
+                btn.classList.remove('sorted-asc', 'sorted-desc');
+                const ind = btn.querySelector('.sort-indicator');
+                if(ind) ind.textContent = '';
+            });
+        }
+
+        // Initialize state
+        let activeKey = ''; 
+        let activeDir = 'asc';
+
+        headerButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const key = btn.dataset.key;
+                if (!key) return;
+
+                if (activeKey === key) {
+                    activeDir = (activeDir === 'asc') ? 'desc' : 'asc';
+                } else {
+                    activeKey = key;
+                    activeDir = 'asc';
+                }
+
+                clearIndicators();
+                btn.classList.add(activeDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                const ind = btn.querySelector('.sort-indicator');
+                if(ind) ind.textContent = activeDir === 'asc' ? '▲' : '▼';
+
+                sortBy(activeKey, activeDir);
+            });
+        });
+    })();
+
+
+    // ==========================================
+    //  PAGINATION LOGIC (Numbered Pages)
+    // ==========================================
+    (function setupPagination() {
+        const listContainer = document.querySelector('.records-list');
+        const controls = document.getElementById('paginationControls');
+        const perPage = 10;
+        let currentPage = 1;
+
+        if (!listContainer || !controls) return;
+
+        function getRows() {
+            // Get all rows (ignoring any potential future client-side filter logic for now)
+            return Array.from(listContainer.querySelectorAll('.record-item'));
+        }
+
+        function renderPage(page) {
+            const rows = getRows();
+            const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+
+            // Hide all rows first
+            rows.forEach(r => r.style.display = 'none');
+
+            // Show current slice
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            rows.slice(start, end).forEach(r => r.style.display = 'grid'); // Use grid to match layout
+
+            renderControls(totalPages);
+        }
+
+        function renderControls(totalPages) {
+            controls.innerHTML = '';
+
+            // Prev Button
+            const prev = document.createElement('button');
+            prev.className = 'page-btn';
+            prev.innerHTML = '&lsaquo; Prev';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => renderPage(currentPage - 1);
+            controls.appendChild(prev);
+
+            // Numbered Buttons
+            // Logic to show a window of pages (e.g. 1 2 ... 5 6 7 ... 10) can be added here
+            // For now, simple loop for all pages (or limited if lots of pages)
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                if (i === currentPage) btn.classList.add('active');
+                btn.textContent = i;
+                btn.onclick = () => renderPage(i);
+                controls.appendChild(btn);
+            }
+
+            // Next Button
+            const next = document.createElement('button');
+            next.className = 'page-btn';
+            next.innerHTML = 'Next &rsaquo;';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => renderPage(currentPage + 1);
+            controls.appendChild(next);
+        }
+
+        // Expose function for sorting to reset page
+        window.__rebuildPagination = function(page) {
+            renderPage(page || 1);
+        };
+
+        // Initial Render
+        renderPage(1);
+    })();
 </script>
 @endsection

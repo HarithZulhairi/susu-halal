@@ -5,135 +5,131 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/nurse_dashboard.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <div class="container">
-<div class="main-content">
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="header-content">
-            <h1>Welcome, {{ auth()->user()->name }}<br>
-            <p class="muted">Shariah-compliant Human Milk Bank • Nurse dashboard</p>
-            </h1>
+    <div class="main-content">
+        <div class="page-header">
+            <div class="header-content">
+                <h1>Welcome, {{ auth()->user()->name }}<br>
+                <p class="muted">Shariah-compliant Human Milk Bank • Nurse dashboard</p>
+                </h1>
+            </div>
         </div>
-    </div>
 
-      <!-- Stats Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Active Donors</span>
-                <div class="stat-icon blue">
-                    <i class="fas fa-user-check"></i>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Active Donors</span>
+                    <div class="stat-icon blue">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ $activeDonors ?? 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Pending Appointments</span>
+                    <div class="stat-icon green">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ $pendingAppointments ?? 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Milk Requests</span>
+                    <div class="stat-icon orange">
+                        <i class="fas fa-hand-holding-medical"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ $milkRequests ?? 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Lab Processing Queue</span>
+                    <div class="stat-icon red">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                </div>
+                {{-- This now reflects real data from Milk table (Stages 1-4) --}}
+                <div class="stat-value">{{ $processingQueue ?? 0 }}</div>
+                <small class="text-muted" style="font-size: 0.8em;">Batches in progress</small>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card donations-card">
+                <div class="card-header">
+                    <h2>Milk Collection Volume ({{ date('Y') }})</h2>
+                    <a href="{{ route('nurse.manage-milk-records') }}" class="view-report">
+                        Manage Records
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="chart-body" style="height: 400px; position: relative;">
+                    <canvas id="milkVolumeChart"></canvas>
                 </div>
             </div>
-            <div class="stat-value">{{ $activeDonors ?? 45 }}</div>
-        </div>
 
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Pending Appointments</span>
-                <div class="stat-icon green">
-                    <i class="fas fa-calendar-check"></i>
+            <div class="card quick-stats-card">
+                <h2>Quick Actions</h2>
+                <div class="quick-stats-list">
+                    <a href="{{ route('nurse.donor-appointment-record') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="quick-stat-label">Appointments</div>
+                        </div>
+                        <span class="quick-stat-badge primary">Manage</span>
+                    </a>
+                    <a href="{{ route('nurse.nurse_milk-request-list') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value"><i class="fas fa-baby"></i></div>
+                            <div class="quick-stat-label">Milk Requests</div>
+                        </div>
+                        <span class="quick-stat-badge primary">Review</span>
+                    </a>
+                    <a href="{{ route('nurse.allocate-milk') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value"><i class="fas fa-tasks"></i></div>
+                            <div class="quick-stat-label">Allocate Milk</div>
+                        </div>
+                        <span class="quick-stat-badge primary">Allocate</span>
+                    </a>
+                    <a href="{{ route('nurse.donor-candidate-list') }}" class="quick-stat-item" style="text-decoration: none;">
+                        <div class="quick-stat-info">
+                            <div class="quick-stat-value"><i class="fas fa-users"></i></div>
+                            <div class="quick-stat-label">Donor Screening</div>
+                        </div>
+                        <span class="quick-stat-badge primary">Screen</span>
+                    </a>
                 </div>
             </div>
-            <div class="stat-value">{{ $pendingAppointments ?? 8 }}</div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Milk Requests</span>
-                <div class="stat-icon orange">
-                    <i class="fas fa-hand-holding-medical"></i>
+        <div class="quick-stats-card">
+            <div class="card users-card">
+                <div class="card-header">
+                    <h2>Today's Appointments</h2>
+                    <a href="{{ route('nurse.donor-appointment-record') }}" class="view-all">
+                        View All Appointments
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
                 </div>
-            </div>
-            <div class="stat-value">{{ $milkRequests ?? 23 }}</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-label">Processing Queue</span>
-                <div class="stat-icon red">
-                    <i class="fas fa-industry"></i>
-                </div>
-            </div>
-            <div class="stat-value">{{ $processingQueue ?? 15 }}</div>
-        </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="content-grid">
-        <!-- Donation Statistics -->
-        <div class="card donations-card">
-            <div class="card-header">
-                <h2>Donation Statistics</h2>
-                <a href="{{ route('nurse.manage-milk-records') }}" class="view-report">
-                    View Full Report
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="chart-body" style="height: 400px; position: relative;">
-                <canvas id="milkVolumeChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card quick-stats-card">
-            <h2>Quick Actions</h2>
-            <div class="quick-stats-list">
-                <a href="{{ route('nurse.donor-appointment-record') }}" class="quick-stat-item" style="text-decoration: none;">
-                    <div class="quick-stat-info">
-                        <div class="quick-stat-value"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="quick-stat-label">Appointments</div>
-                    </div>
-                    <span class="quick-stat-badge primary">Manage</span>
-                </a>
-                <a href="{{ route('nurse.nurse_milk-request-list') }}" class="quick-stat-item" style="text-decoration: none;">
-                    <div class="quick-stat-info">
-                        <div class="quick-stat-value"><i class="fas fa-baby"></i></div>
-                        <div class="quick-stat-label">Milk Requests</div>
-                    </div>
-                    <span class="quick-stat-badge primary">Review</span>
-                </a>
-                <a href="{{ route('nurse.allocate-milk') }}" class="quick-stat-item" style="text-decoration: none;">
-                    <div class="quick-stat-info">
-                        <div class="quick-stat-value"><i class="fas fa-tasks"></i></div>
-                        <div class="quick-stat-label">Allocate Milk</div>
-                    </div>
-                    <span class="quick-stat-badge primary">Allocate</span>
-                </a>
-                <a href="{{ route('nurse.donor-candidate-list') }}" class="quick-stat-item" style="text-decoration: none;">
-                    <div class="quick-stat-info">
-                        <div class="quick-stat-value"><i class="fas fa-users"></i></div>
-                        <div class="quick-stat-label">Donor Screening</div>
-                    </div>
-                    <span class="quick-stat-badge primary">Screen</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Grid -->
-    <div class="quick-stats-card">
-        <!-- Today's Appointments -->
-        <div class="card users-card">
-            <div class="card-header">
-                <h2>Today's Appointments</h2>
-                <a href="{{ route('nurse.donor-appointment-record') }}" class="view-all">
-                    View All Appointments
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="table-container">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>DONOR</th>
-                            <th>TIME</th>
-                            <th>TYPE</th>
-                            <th>STATUS</th>
-                        </tr>
-                    </thead>
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>DONOR</th>
+                                <th>TIME</th>
+                                <th>TYPE</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
                         <tbody>
-                        @foreach($todayAppointments as $app)
+                        @forelse($todayAppointments as $app)
                         <tr>
                             <td>
                                 <div class="user-info">
@@ -158,8 +154,7 @@
                                             {{ $app->dn_FullName ?? 'Unknown Donor' }}
                                         </div>
                                         <div class="user-email">
-                                            {{ $app instanceof \App\Models\MilkAppointment ? 'Milk Donation' : 'Pumping Kit' }}
-                                            • ID: {{ $app->dn_id }}
+                                            ID: {{ $app->dn_id ?? '-' }}
                                         </div>
                                     </div>
                                 </div>
@@ -168,8 +163,8 @@
                             <td>{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</td>
 
                             <td>
-                                <span class="badge badge-{{ $app instanceof \App\Models\MilkAppointment ? 'donor' : 'advisor' }}">
-                                    {{ $app instanceof \App\Models\MilkAppointment ? 'Donation' : 'Pump Kit' }}
+                                <span class="badge badge-donor">
+                                    Donation
                                 </span>
                             </td>
 
@@ -179,116 +174,111 @@
                                 </span>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding: 20px; color: #888;">
+                                No appointments scheduled for today.
+                            </td>
+                        </tr>
+                        @endforelse
                         </tbody>
 
-                </table>
+                    </table>
+                </div>
             </div>
         </div>
-
     </div>
 </div>
-</div>
-<!-- Chart.js -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const ctx = document.getElementById('milkVolumeChart');
+    const ctx = document.getElementById('milkVolumeChart');
 
-// gradient fill for blue line
-const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
-gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
+    // Gradient for Volume
+    const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
+    gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
+    gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
 
-// gradient fill for green line
-const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-gradientGreen.addColorStop(0, 'rgba(72, 187, 120, 0.4)');
-gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
-
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: @json($months),
-        datasets: [
-            {
-                label: 'Milk Donation Appointments',
-                data: @json($milkData),
-                borderColor: '#4B9CD3',
-                backgroundColor: gradientBlue,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 5,
-                pointBackgroundColor: '#4B9CD3',
-                pointHoverRadius: 7,
-            },
-            {
-                label: 'Pumping Kit Appointments',
-                data: @json($kitData),
-                borderColor: '#48BB78',
-                backgroundColor: gradientGreen,
-                fill: true,
-                tension: 0.4,
-                pointRadius: 5,
-                pointBackgroundColor: '#48BB78',
-                pointHoverRadius: 7,
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false
-        },
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    color: '#444',
-                    boxWidth: 12,
-                    boxHeight: 12,
-                    padding: 15,
-                    font: { size: 13 }
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: @json($months),
+            datasets: [
+                {
+                    label: 'Total Volume Collected (mL)',
+                    data: @json($volumeData), // Real data from controller
+                    borderColor: '#1A5F7A',   // Matching your theme blue
+                    backgroundColor: gradientBlue,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#1A5F7A',
+                    pointHoverRadius: 7,
+                    borderWidth: 2
                 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
             },
-            tooltip: {
-                usePointStyle: true,
-                backgroundColor: '#fff',
-                titleColor: '#111',
-                bodyColor: '#333',
-                borderColor: '#E2E8F0',
-                borderWidth: 1,
-                padding: 10,
-                displayColors: true,
-                boxPadding: 5,
-                callbacks: {
-                    label: function(context) {
-                        return `${context.dataset.label}: ${context.formattedValue}`;
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#444',
+                        padding: 15,
+                        font: { size: 13, family: "'Poppins', sans-serif" }
+                    }
+                },
+                tooltip: {
+                    usePointStyle: true,
+                    backgroundColor: '#fff',
+                    titleColor: '#1A5F7A',
+                    bodyColor: '#333',
+                    borderColor: '#E2E8F0',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 5,
+                    callbacks: {
+                        label: function(context) {
+                            return ` ${context.dataset.label}: ${context.formattedValue} mL`;
+                        }
                     }
                 }
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: { color: '#f1f5f9' },
-                ticks: { color: '#555', stepSize: 500 }
             },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#555' }
-            }
-        },
-        animations: {
-            tension: {
-                duration: 2000,
-                easing: 'easeOutElastic',
-                from: 0.5,
-                to: 0.4,
-                loop: false
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f1f5f9' },
+                    ticks: { 
+                        color: '#64748b',
+                        callback: function(value) { return value + ' ml'; }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Volume (Milliliters)',
+                        color: '#94a3b8'
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#64748b' }
+                }
+            },
+            animations: {
+                tension: {
+                    duration: 1500,
+                    easing: 'easeOutQuart',
+                    from: 0.5,
+                    to: 0.4,
+                    loop: false
+                }
             }
         }
-    }
-});
+    });
 </script>
 @endsection
