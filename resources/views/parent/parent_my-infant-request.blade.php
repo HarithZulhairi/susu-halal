@@ -164,8 +164,8 @@
     ];
 @endphp
 
-<div class="container">
-    <div class="main-content">
+<div>
+    <div>
 
         <div class="page-header">
             <h1>My Infant's Milk Requests</h1>

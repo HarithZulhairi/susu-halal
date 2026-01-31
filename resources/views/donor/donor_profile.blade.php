@@ -149,6 +149,14 @@
                             <p>{{ $profile->dob ? \Carbon\Carbon::parse($profile->dob)->format('F d, Y') : 'Not provided' }}</p>
                         </div>
                         <div class="info-item">
+                            <label>MARITAL STATUS</label>
+                            <p>{{ $profile->marital_status ?? 'Not provided' }}</p>
+                        </div>
+                        <div class="info-item">
+                            <label>RELIGION</label>
+                            <p>{{ $profile->religion ?? 'Not provided' }}</p>
+                        </div>
+                        <div class="info-item">
                             <label>ADDRESS</label>
                             <p>{{ $profile->address ?? 'Not provided' }}</p>
                         </div>
@@ -196,6 +204,18 @@
                                     <span class="status-badge completed">No</span>
                                 @endif
                             </p>
+                        </div>
+                        <div class="info-item">
+                            <label>SMOKING STATUS</label>
+                            <p>{{ ucwords(str_replace('_', ' ', $profile->smoking_status ?? 'Not provided')) }}</p>
+                        </div>
+                        <div class="info-item">
+                            <label>PHYSICAL HEALTH</label>
+                            <p>{{ ucfirst($profile->physical_health ?? 'Not provided') }}</p>
+                        </div>
+                        <div class="info-item">
+                            <label>MENTAL HEALTH</label>
+                            <p>{{ ucfirst($profile->mental_health ?? 'Not provided') }}</p>
                         </div>
                     </div>
                 </div>

@@ -110,6 +110,34 @@
                         </div>
                         @endif
                         
+                        @if(in_array($role, ['donor']))
+                        <div class="form-group">
+                            <label for="marital_status">Marital Status</label>
+                            <select id="marital_status" name="marital_status" class="form-control @error('marital_status') is-invalid @enderror">
+                                <option value="">Select Status</option>
+                                <option value="Single" {{ old('marital_status', $profile->marital_status ?? '') == 'Single' ? 'selected' : '' }}>Single</option>
+                                <option value="Married" {{ old('marital_status', $profile->marital_status ?? '') == 'Married' ? 'selected' : '' }}>Married</option>
+                                <option value="Divorced" {{ old('marital_status', $profile->marital_status ?? '') == 'Divorced' ? 'selected' : '' }}>Divorced</option>
+                                <option value="Widowed" {{ old('marital_status', $profile->marital_status ?? '') == 'Widowed' ? 'selected' : '' }}>Widowed</option>
+                            </select>
+                            @error('marital_status')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="religion">Religion</label>
+                            <input type="text" 
+                                id="religion" 
+                                name="religion" 
+                                value="{{ old('religion', $profile->religion ?? '') }}" 
+                                class="form-control @error('religion') is-invalid @enderror">
+                            @error('religion')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        @endif
+                        
                         <div class="form-group full-width">
                             <label for="address">Address</label>
                             <textarea id="address" 
@@ -292,6 +320,37 @@
                                     {{ old('tobacco_alcohol', $profile->tobacco_alcohol ?? false) ? 'checked' : '' }}>
                                 <span class="checkbox-text">I consume tobacco or alcohol</span>
                             </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="smoking_status">Smoking Status</label>
+                            <select id="smoking_status" name="smoking_status" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="non_smoker" {{ old('smoking_status', $profile->smoking_status ?? '') == 'non_smoker' ? 'selected' : '' }}>Non Smoker</option>
+                                <option value="passive_smoker" {{ old('smoking_status', $profile->smoking_status ?? '') == 'passive_smoker' ? 'selected' : '' }}>Passive Smoker</option>
+                                <option value="former_smoker" {{ old('smoking_status', $profile->smoking_status ?? '') == 'former_smoker' ? 'selected' : '' }}>Former Smoker</option>
+                                <option value="current_smoker" {{ old('smoking_status', $profile->smoking_status ?? '') == 'current_smoker' ? 'selected' : '' }}>Current Smoker</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="physical_health">Physical Health</label>
+                            <select id="physical_health" name="physical_health" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="good" {{ old('physical_health', $profile->physical_health ?? '') == 'good' ? 'selected' : '' }}>Good</option>
+                                <option value="fair" {{ old('physical_health', $profile->physical_health ?? '') == 'fair' ? 'selected' : '' }}>Fair</option>
+                                <option value="poor" {{ old('physical_health', $profile->physical_health ?? '') == 'poor' ? 'selected' : '' }}>Poor</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mental_health">Mental Health</label>
+                            <select id="mental_health" name="mental_health" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="good" {{ old('mental_health', $profile->mental_health ?? '') == 'good' ? 'selected' : '' }}>Good</option>
+                                <option value="fair" {{ old('mental_health', $profile->mental_health ?? '') == 'fair' ? 'selected' : '' }}>Fair</option>
+                                <option value="poor" {{ old('mental_health', $profile->mental_health ?? '') == 'poor' ? 'selected' : '' }}>Poor</option>
+                            </select>
                         </div>
                     </div>
                 </div>

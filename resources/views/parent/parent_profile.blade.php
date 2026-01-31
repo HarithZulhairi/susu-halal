@@ -30,7 +30,7 @@
     </div>
     @endif
 
-    <div class="main-content">
+    <div>
         <div class="page-header">
             <h1>My Profile</h1>
         </div>

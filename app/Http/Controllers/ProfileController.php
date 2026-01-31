@@ -163,11 +163,17 @@ class ProfileController extends Controller
         if ($role === 'donor') {
             $rules = array_merge($rules, [
                 'dob' => 'nullable|date',
+                'marital_status' => 'nullable|string|max:255',
+                'religion' => 'nullable|string|max:255',
+                'children_count' => 'nullable|integer|min:0',
                 'infection_risk' => 'nullable|string|max:500',
                 'medication' => 'nullable|string|max:500',
                 'recent_illness' => 'nullable|string|max:500',
                 'tobacco_alcohol' => 'nullable|boolean',
                 'dietary_alerts' => 'nullable|string|max:500',
+                'smoking_status' => 'nullable|string',
+                'physical_health' => 'nullable|string',
+                'mental_health' => 'nullable|string',
             ]);
         }
 
@@ -296,6 +302,11 @@ class ProfileController extends Controller
             $formatted['tobacco_alcohol'] = $profile->dn_TobaccoAlcohol ?? false;
             $formatted['dietary_alerts'] = $profile->dn_DietaryAlerts ?? null;
             $formatted['consent_status'] = $profile->dn_ConsentStatus ?? 'Pending';
+            $formatted['marital_status'] = $profile->dn_MaritalStatus ?? null;
+            $formatted['religion'] = $profile->dn_Religion ?? null;
+            $formatted['smoking_status'] = $profile->dn_SmokingStatus ?? null;
+            $formatted['physical_health'] = $profile->dn_PhysicalHealth ?? null;
+            $formatted['mental_health'] = $profile->dn_MentalHealth ?? null;
         }
 
         // Admin-specific fields
@@ -350,7 +361,13 @@ class ProfileController extends Controller
             $updateData['dn_Medication'] = $validated['medication'] ?? null;
             $updateData['dn_RecentIllness'] = $validated['recent_illness'] ?? null;
             $updateData['dn_TobaccoAlcohol'] = $validated['tobacco_alcohol'] ?? false;
+            $updateData['dn_TobaccoAlcohol'] = $validated['tobacco_alcohol'] ?? false;
             $updateData['dn_DietaryAlerts'] = $validated['dietary_alerts'] ?? null;
+            $updateData['dn_SmokingStatus'] = $validated['smoking_status'] ?? null;
+            $updateData['dn_PhysicalHealth'] = $validated['physical_health'] ?? null;
+            $updateData['dn_MentalHealth'] = $validated['mental_health'] ?? null;
+            $updateData['dn_MaritalStatus'] = $validated['marital_status'] ?? null;
+            $updateData['dn_Religion'] = $validated['religion'] ?? null;
         }
 
         return $updateData;

@@ -1,4 +1,10 @@
 /* Sidebar Only */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
 .sidebar {
   width: 260px;
   background: #8B4513; /* Main color for Donor */
