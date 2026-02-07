@@ -24,11 +24,18 @@ return new class extends Migration
             
             // Age Information
             $table->integer('baby_age');            // form: baby_age
-            $table->string('age_unit');             // form: age_unit (days/months) - NEW
+            $table->string('age_unit')->nullable();             // form: age_unit (days/months) - NEW
             $table->integer('gestational_age')->nullable(); // form: gestational_age (optional in HTML?)
 
             // Dispensing Method
             $table->string('kinship_method');       // form: kinship_method (yes/no)
+
+            $table->decimal('volume_per_feed', 8, 2)->nullable();
+            $table->decimal('drip_total', 8, 2)->nullable();
+            $table->decimal('oral_total', 8, 2)->nullable();;
+            $table->decimal('oral_per_feed', 8, 2)->nullable();
+                 
+
             $table->string('feeding_tube')->nullable(); // form: feeding_tube (might be empty if oral used)
             $table->string('oral_feeding')->nullable(); // form: oral_feeding (might be empty if tube used)
 

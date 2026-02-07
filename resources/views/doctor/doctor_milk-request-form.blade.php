@@ -146,6 +146,14 @@
             </div>
         </div>
 
+        {{-- Calculated values (submitted to backend) --}}
+        <input type="hidden" name="volume_per_feed" id="volume_per_feed">
+        <input type="hidden" name="drip_total" id="drip_total">
+        <input type="hidden" name="oral_total" id="oral_total">
+        <input type="hidden" name="oral_per_feed" id="oral_per_feed">
+
+
+
     </section>
 
     <section class="form-section">
@@ -209,10 +217,16 @@
     function calculateDispensing() {
         const totalVolume = parseFloat(document.getElementById("entered_volume").value);
         const method = document.querySelector('input[name="kinship_method"]:checked').value;
+
         const resultBox = document.getElementById("calculation-result");
-        
         const resYes = document.getElementById("kinship-yes-result");
-        const resNo = document.getElementById("kinship-no-result");
+        const resNo  = document.getElementById("kinship-no-result");
+
+        // Hidden inputs
+        const volumePerFeedInput = document.getElementById("volume_per_feed");
+        const dripTotalInput     = document.getElementById("drip_total");
+        const oralTotalInput     = document.getElementById("oral_total");
+        const oralPerFeedInput   = document.getElementById("oral_per_feed");
 
         if (isNaN(totalVolume) || totalVolume <= 0) {
             resultBox.style.display = "none";
@@ -221,31 +235,48 @@
 
         resultBox.style.display = "block";
 
-        if (method === 'yes') {
-            // Logic 1: Involve Kinship -> Total / 12
-            resYes.style.display = "block";
-            resNo.style.display = "none";
+        // === Common base calculations ===
+        const perFeedKinship = (totalVolume / 12).toFixed(2);
+        const dripTotal     = (totalVolume * 0.8).toFixed(2);
+        const oralTotal     = (totalVolume * 0.2).toFixed(2);
+        const oralPerFeed   = (oralTotal / 12).toFixed(2);
 
-            let perFeed = (totalVolume / 12).toFixed(2);
-            document.getElementById("vol-per-feed-yes").textContent = `${perFeed} ml`;
+        if (method === 'yes') {
+            /**
+             * ✅ KINSHIP INVOLVED
+             */
+            resYes.style.display = "block";
+            resNo.style.display  = "none";
+
+            // UI
+            document.getElementById("vol-per-feed-yes").textContent = `${perFeedKinship} ml`;
 
         } else {
-            // Logic 2: NO Kinship -> Split Drip vs Oral
+            /**
+             * ❌ NO KINSHIP
+             */
             resYes.style.display = "none";
-            resNo.style.display = "block";
-            
-            let dripVolume = totalVolume * 0.8; 
-            let oralTotal = totalVolume * 0.2;
-            let oralPerFeed = (oralTotal / 12).toFixed(2);
+            resNo.style.display  = "block";
 
-            document.getElementById("vol-drip").textContent = `${dripVolume.toFixed(1)} ml`;
+            // UI
+            document.getElementById("vol-drip").textContent = `${dripTotal} ml`;
             document.getElementById("vol-oral").textContent = `${oralPerFeed} ml`;
-            
-            document.getElementById("calc-explanation").innerHTML = 
-                `<strong>Calculation:</strong> Total ${totalVolume}ml - ${dripVolume.toFixed(1)}ml (Drip) = ${oralTotal.toFixed(1)}ml (Oral). <br>
-                 Oral ${oralTotal.toFixed(1)}ml / 12 feeds = <strong>${oralPerFeed} ml/feed</strong>`;
+
+            document.getElementById("calc-explanation").innerHTML =
+                `<strong>Calculation:</strong>
+                Total ${totalVolume}ml → ${dripTotal}ml (Drip) + ${oralTotal}ml (Oral)<br>
+                Oral ${oralTotal}ml ÷ 12 feeds = <strong>${oralPerFeed} ml/feed</strong>`;
         }
+
+        // 🔐 STORE EVERYTHING (ALWAYS)
+        volumePerFeedInput.value = perFeedKinship;
+        dripTotalInput.value     = dripTotal;
+        oralTotalInput.value     = oralTotal;
+        oralPerFeedInput.value   = oralPerFeed;
     }
+
+
+
 
     // --- Consent Simulation Logic ---
     document.getElementById('patient_id').addEventListener('change', function() {
