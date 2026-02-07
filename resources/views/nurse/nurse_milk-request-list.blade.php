@@ -92,7 +92,7 @@
 
   {{-- DUMMY DATA --}}
   @php
-      $requests = [
+      $request = [
           (object)[
               'request_ID' => 101,
               'patient_name' => 'Baby Adam',
@@ -213,7 +213,7 @@
                   <div class="patient-info">
                     <i class="fas fa-baby milk-icon"></i>
                     <div>
-                      <strong>{{ $req->parent_id }}</strong><br>
+                      <strong>{{ $req->formatted_id }}</strong><br>
                       <span>{{ $req->patient_name }}</span>
                     </div>
                   </div>
@@ -239,7 +239,7 @@
                         onclick='openMilkModal(this)'
                         data-id="{{ $req->request_ID }}"
                         data-status="{{ $req->status }}"
-                        data-patient-id="{{ $req->parent_id }}"
+                        data-formatted-id="{{ $req->formatted_id }}"
                         data-patient-name="{{ $req->patient_name }}"
                         data-weight="{{ $req->weight }}"
                         data-dob="{{ $req->parent->pr_BabyDOB }}"
@@ -284,7 +284,7 @@
             <h3><i class="fas fa-baby"></i> Patient Information</h3>
             <div class="info-grid">
                 <div class="info-item"> <label>Patient Name</label> <p id="view-patient-name">-</p> </div>
-                <div class="info-item"> <label>Patient ID</label> <p id="view-patient-id">-</p> </div>
+                <div class="info-item"> <label>Patient ID</label> <p id="view-formatted-id">-</p> </div>
                 <div class="info-item"> <label>NICU Location</label> <p id="view-cubicle">-</p> </div>
             </div>
         </div>
@@ -299,10 +299,31 @@
         </div>
         <div class="info-section consent-section">
             <h3><i class="fas fa-handshake"></i> Milk Kinship Consent</h3>
+
             <div class="consent-grid">
-                <div class="consent-badge approved"> <i class="fas fa-check-circle"></i> Parent Consent </div>
+                @if($req->parent_consent === 'Approved')
+                    <div class="consent-badge approved">
+                        <i class="fas fa-check-circle"></i> Parent Consent Approved
+                    </div>
+
+                @elseif($req->parent_consent === 'Pending')
+                    <div class="consent-badge pending">
+                        <i class="fas fa-clock"></i> Consent Pending
+                    </div>
+
+                @elseif($req->parent_consent === 'Rejected')
+                    <div class="consent-badge rejected">
+                        <i class="fas fa-times-circle"></i> Consent Rejected
+                    </div>
+
+                @else
+                    <div class="consent-badge unknown">
+                        <i class="fas fa-question-circle"></i> Consent Not Recorded
+                    </div>
+                @endif
             </div>
         </div>
+
         <div class="info-section">
             <h3><i class="fas fa-prescription-bottle"></i> Dispensing Method</h3>
             <div id="method-kinship-yes" class="method-box" style="display:block; background:#f0fdf4; border-color:#86efac; margin-bottom: 15px;">
@@ -430,16 +451,16 @@
     // --- 1. VIEW DETAILS LOGIC ---
     function openViewModal(data) {
         document.getElementById('view-patient-name').textContent = data.patient_name;
-        document.getElementById('view-patient-id').textContent = data.parent_id;
+        document.getElementById('view-formatted-id').textContent = data.formatted_id;
         document.getElementById('view-cubicle').textContent = data.cubicle;
         document.getElementById('view-weight').textContent = data.weight;
         document.getElementById('view-age').textContent = data.age;
         document.getElementById('view-gestational').textContent = data.gestational;
-        document.getElementById('view-total-vol').textContent = data.total_vol;
+        document.getElementById('view-total-vol').textContent = data.total_daily_volume;
         document.getElementById('view-start-date').textContent = data.date_requested;
         document.getElementById('view-start-time').textContent = data.feed_time.split(' ')[1];
-        document.getElementById('view-feeds').textContent = data.feeds;
-        document.getElementById('view-interval').textContent = data.interval;
+        document.getElementById('view-feeds').textContent = data.feeding_perday;
+        document.getElementById('view-interval').textContent = data.feeding_interval;
 
         let perFeed = (data.total_vol / data.feeds).toFixed(1);
         document.getElementById('view-kinship-vol').textContent = perFeed;

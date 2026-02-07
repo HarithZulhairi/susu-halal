@@ -31,44 +31,105 @@ class RequestController extends Controller
     public function viewRequestNurse(Request $request)
     {
         $search = $request->input('search');
-        $status = $request->input('status'); // Get status from tabs
+        $status = $request->input('status');
 
-        // 1. Start the query
-        $query = MilkRequest::with(['parent', 'doctor', 'allocation.milk']);
+        /**
+         * ----------------------------------------------------
+         * 1. Build base query
+         * ----------------------------------------------------
+         */
+        $query = MilkRequest::with([
+            'parent',
+            'doctor',
+            'allocation.milk.postBottles'
+        ]);
 
-        // 2. Apply Search Filter
-        if ($search) {
+        /**
+         * ----------------------------------------------------
+         * 2. Search (Baby Name or Parent ID)
+         * ----------------------------------------------------
+         */
+        if (!empty($search)) {
             $query->whereHas('parent', function ($q) use ($search) {
                 $q->where('pr_BabyName', 'LIKE', "%{$search}%")
-                ->orWhere('pr_ID', 'LIKE', "%{$search}%");
+                ->orWhere('formattedID', 'LIKE', "%{$search}%");
             });
         }
 
-        // 3. Apply Status Filter (Tabs)
-        if ($status && $status !== 'All') {
+        /**
+         * ----------------------------------------------------
+         * 3. Status Filter (Tabs)
+         * ----------------------------------------------------
+         */
+        if (!empty($status) && $status !== 'All') {
             $query->where('status', $status);
         }
 
-        // 4. Order and Paginate
+        /**
+         * ----------------------------------------------------
+         * 4. Order + Paginate
+         * ----------------------------------------------------
+         */
         $requests = $query->latest()->paginate(10);
+        $requests->appends(compact('search', 'status'));
 
-        // 5. Append query parameters so tabs + search + pagination work together
-        $requests->appends(['search' => $search, 'status' => $status]);
+        /**
+         * ----------------------------------------------------
+         * 5. Transform data for NEW UI
+         * ----------------------------------------------------
+         */
+        $requests->getCollection()->transform(function ($req) {
 
-        // Only NON-EXPIRED milk
-        $milks = Milk::whereHas('postBottles', function($query) {
-                    $query->whereDate('post_expiry_date', '>=', Carbon::today());
-                })
-                ->where('milk_Status', 'Storage Completed') // Use your updated status
-                ->where('milk_shariahApproval', '1')
-                ->with(['postBottles' => function($query) {
-                    
-                    $query->whereDate('post_expiry_date', '>=', Carbon::today());
-                }])
-                ->get();
+            // Prepare allocated items for Dispense Modal
+            $req->allocated_items = $req->allocation->map(function ($alloc) {
+                return (object) [
+                    'id'  => $alloc->milk->formattedID ?? '-',
+                    'vol' => $alloc->allocated_volume ?? 0,
+                ];
+            });
 
+            // Flatten common fields for Blade / JS
+            $req->patient_name = $req->parent->pr_BabyName ?? '-';
+            $req->formatted_id    = $req->parent->formattedID ?? '-';
+            $req->cubicle      = $req->parent->pr_NICU ?? '-';
+            $req->parent_consent = $req->parent->pr_ConsentStatus ?? '-';
+            $req->date_requested = $req->created_at ? $req->created_at->format('d-m-Y') : '-';
+            $req->feed_time = ($req->feeding_start_date && $req->feeding_start_time) ? 
+            Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i') : '-';
+
+            $req->weight       = $req->parent->pr_BabyCurrentWeight ?? 0;
+            $req->age          = $req->baby_age ?? '-';
+            $req->gestational  = $req->gestational_age ?? '-';
+            $req->feeding_perday  = $req->feeding_perday ?? '-';
+            $req->feeding_interval  = $req->feeding_interval ?? '-';
+            
+
+            return $req;
+        });
+
+        /**
+         * ----------------------------------------------------
+         * 6. Available Milk (NON-EXPIRED, SHARIAH OK)
+         * ----------------------------------------------------
+         */
+        $milks = Milk::where('milk_Status', 'Storage Completed')
+            ->where('milk_shariahApproval', 1)
+            ->whereHas('postBottles', function ($q) {
+                $q->whereDate('post_expiry_date', '>=', Carbon::today());
+            })
+            ->with(['postBottles' => function ($q) {
+                $q->whereDate('post_expiry_date', '>=', Carbon::today());
+            }])
+            ->get();
+
+        /**
+         * ----------------------------------------------------
+         * 7. Return View
+         * ----------------------------------------------------
+         */
         return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
     }
+
 
     public function viewRequestHMMC(Request $request)
     {
@@ -106,6 +167,7 @@ class RequestController extends Controller
         return view('hmmc.hmmc_milk-request', compact('requests', 'milks'));
     }
 
+    //CRUD other than viewing//
     public function store(Request $request)
     {
         // $doctor = \App\Models\Doctor::where('dr_ID', auth()->id())->first();
@@ -127,10 +189,14 @@ class RequestController extends Controller
             // 'dr_ID'              => $doctor->dr_ID,
             'pr_ID'              => $request->pr_ID,
             'current_weight'     => $request->weight,
-            'recommended_volume' => $request->entered_volume,
+            'total_daily_volume' => $request->entered_volume,
             'baby_age' => $request->baby_age,
             'gestational_age' => $request->gestational_age,
             'kinship_method' => $request->kinship_method,
+            'volume_per_feed' => $request->volume_per_feed,
+            'drip_total' => $request->drip_total,
+            'oral_total' => $request->oral_total,
+            'oral_per_feed' => $request->oral_per_feed,
             'feeding_tube' => $request->feeding_tube,
             'oral_feeding' => $request->oral_feeding,
             'feeding_start_date' => $request->feeding_date,
@@ -210,6 +276,9 @@ class RequestController extends Controller
             'message' => 'Allocation reverted successfully.'
         ]);
     }
+
+
+    //Infant Weight Record//
 
     public function viewInfantWeightHMMC(Request $request)
     {
