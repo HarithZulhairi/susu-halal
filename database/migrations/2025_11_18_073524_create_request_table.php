@@ -12,41 +12,40 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('request', function (Blueprint $table) {
-            $table->id('request_ID'); // Primary Key
+            $table->id('request_ID');
 
             // Foreign Keys
-            $table->unsignedBigInteger('dr_ID'); // Doctor creating the request
-            $table->unsignedBigInteger('pr_ID'); // Patient/Parent ID
+            $table->unsignedBigInteger('dr_ID');
+            $table->unsignedBigInteger('pr_ID');
 
             // Clinical Information
-            $table->double('current_weight');       // form: weight
-            $table->integer('total_daily_volume');  // form: entered_volume
+            $table->double('current_weight');
+            $table->integer('total_daily_volume');
             
-            // Age Information
-            $table->integer('baby_age');            // form: baby_age
-            $table->string('age_unit')->nullable();             // form: age_unit (days/months) - NEW
-            $table->integer('gestational_age')->nullable(); // form: gestational_age (optional in HTML?)
+            // Age Information (Renamed)
+            $table->string('current_baby_age');
+            $table->integer('gestational_age')->nullable();
 
             // Dispensing Method
-            $table->string('kinship_method');       // form: kinship_method (yes/no)
+            $table->string('kinship_method');
 
+            // Calculated Volume Fields
             $table->decimal('volume_per_feed', 8, 2)->nullable();
             $table->decimal('drip_total', 8, 2)->nullable();
-            $table->decimal('oral_total', 8, 2)->nullable();;
+            $table->decimal('oral_total', 8, 2)->nullable();
             $table->decimal('oral_per_feed', 8, 2)->nullable();
-                 
 
-            $table->string('feeding_tube')->nullable(); // form: feeding_tube (might be empty if oral used)
-            $table->string('oral_feeding')->nullable(); // form: oral_feeding (might be empty if tube used)
+            // Methods
+            $table->string('feeding_tube')->nullable();
+            $table->string('oral_feeding')->nullable();
 
             // Schedule
-            $table->date('feeding_start_date')->nullable(); // form: feeding_date
-            $table->time('feeding_start_time');             // form: start_time
-            $table->integer('feeding_perday')->default(12); // form: feeds_per_day
-            $table->integer('feeding_interval')->default(2); // form: interval_hours
+            $table->date('feeding_start_date')->nullable();
+            $table->time('feeding_start_time');
+            $table->integer('feeding_perday')->default(12);
+            $table->integer('feeding_interval')->default(2);
 
-            // Status
-            $table->string('status')->default('Pending');   // Default status
+            $table->string('status')->default('Pending');
             $table->timestamps();
 
             // Relationships

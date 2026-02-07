@@ -22,9 +22,52 @@ class RequestController extends Controller
         return view('doctor.doctor_milk-request-form', compact('parents'));
     }
 
-    public function viewRequestDoctor()
+    public function viewRequestDoctor(Request $request)
     {
-        $requests = MilkRequest::with(['parent', 'doctor'])->latest()->get();
+        // Start with Eager Loading
+        $query = MilkRequest::with(['parent', 'doctor'])->latest();
+
+        // --- 1. Search Filter (Patient Name or ID) ---
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('parent', function($q) use ($search) {
+                $q->where('pr_BabyName', 'like', "%{$search}%")
+                ->orWhere('pr_ID', 'like', "%{$search}%"); // Assuming ID is searchable
+            });
+        }
+
+        // --- 2. Request Status Filter ---
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // --- 3. Volume Range Filter ---
+        if ($request->filled('vol_min')) {
+            $query->where('total_daily_volume', '>=', $request->vol_min);
+        }
+        if ($request->filled('vol_max')) {
+            $query->where('total_daily_volume', '<=', $request->vol_max);
+        }
+
+        // --- 4. Date Requested Range ---
+        if ($request->filled('req_date_from')) {
+            $query->whereDate('created_at', '>=', $request->req_date_from);
+        }
+        if ($request->filled('req_date_to')) {
+            $query->whereDate('created_at', '<=', $request->req_date_to);
+        }
+
+        // --- 5. Feeding Date Range ---
+        if ($request->filled('feed_date_from')) {
+            $query->whereDate('feeding_start_date', '>=', $request->feed_date_from);
+        }
+        if ($request->filled('feed_date_to')) {
+            $query->whereDate('feeding_start_date', '<=', $request->feed_date_to);
+        }
+
+        // Pagination: 10 per page, appending query params so filters persist across pages
+        $requests = $query->paginate(10)->withQueryString();
+
         return view('doctor.doctor_milk-request', compact('requests'));
     }
 
@@ -170,66 +213,39 @@ class RequestController extends Controller
     //CRUD other than viewing//
     public function store(Request $request)
     {
-        // 1. Validate the Incoming Data
-        $validated = $request->validate([
-            'pr_ID'           => 'required|exists:parent,pr_ID', // Ensure parent exists
-            'weight'          => 'required|numeric|min:0.1',
-            'entered_volume'  => 'required|numeric|min:1',
-            'baby_age'        => 'required|integer|min:0',
-            'age_unit'        => 'required|in:days,months',
-            'gestational_age' => 'nullable|integer|min:20|max:42',
-            'kinship_method'  => 'required|in:yes,no',
-            'feeding_tube'    => 'nullable|string',
-            'oral_feeding'    => 'nullable|string',
-            'feeding_date'    => 'required|date',
-            'start_time'      => 'required',
-            'feeds_per_day'   => 'required|integer|min:1',
-            'interval_hours'  => 'required|integer|min:1',
+        $request->validate([
+            'pr_ID'              => 'required|exists:parent,pr_ID',
+            'weight'             => 'required|numeric',
+            'entered_volume'     => 'required|numeric',
+            'baby_age'           => 'required|string', // Validating the string format
+            'gestational_age'    => 'nullable|integer',
+            'kinship_method'     => 'required',
+            'feeding_date'       => 'required|date',
+            'start_time'         => 'required',
         ]);
 
-        // 2. Get the logged-in Doctor's ID
-        // Assumes your User model has a 'doctor' relationship: return $this->hasOne(Doctor::class);
-        $doctorID = Auth::user()->doctor->dr_ID;
-
-        // 3. Create the Record
         MilkRequest::create([
-            'dr_ID'              => $doctorID,
+            'dr_ID'              => auth()->user()->doctor->dr_ID,
             'pr_ID'              => $request->pr_ID,
-            
-            // Map Form Inputs to DB Columns
             'current_weight'     => $request->weight,
             'total_daily_volume' => $request->entered_volume,
-            
-            'baby_age'           => $request->baby_age,
-            'age_unit'           => $request->age_unit,
+            'current_baby_age'   => $request->baby_age, // "0 years 2 months 5 days"
             'gestational_age'    => $request->gestational_age,
-            
             'kinship_method'     => $request->kinship_method,
+            'volume_per_feed'    => $request->volume_per_feed,
+            'drip_total'         => $request->drip_total,
+            'oral_total'         => $request->oral_total,
+            'oral_per_feed'      => $request->oral_per_feed,
             'feeding_tube'       => $request->feeding_tube,
             'oral_feeding'       => $request->oral_feeding,
-            
-            'baby_age' => $request->baby_age,
-            'gestational_age' => $request->gestational_age,
-            'kinship_method' => $request->kinship_method,
-            'volume_per_feed' => $request->volume_per_feed,
-            'drip_total' => $request->drip_total,
-            'oral_total' => $request->oral_total,
-            'oral_per_feed' => $request->oral_per_feed,
-            'feeding_tube' => $request->feeding_tube,
-            'oral_feeding' => $request->oral_feeding,
             'feeding_start_date' => $request->feeding_date,
             'feeding_start_time' => $request->start_time,
             'feeding_perday'     => $request->feeds_per_day,
             'feeding_interval'   => $request->interval_hours,
-            
-            'status'             => 'Pending'
+            'status'             => 'Waiting'
         ]);
 
-        // 4. Return JSON Response (for your Fetch API)
-        return response()->json([
-            'success' => true,
-            'message' => 'Milk request submitted successfully!'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Submitted successfully!']);
     }
     
     public function allocateMilk(Request $request)

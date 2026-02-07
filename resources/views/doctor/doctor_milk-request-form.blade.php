@@ -18,10 +18,12 @@
       <h2>👶 Patient Information</h2>
       <div class="form-group">
         <label for="patient_id">Select Patient <span class="required">*</span></label>
+        {{-- ADDED ID for JS targeting --}}
         <select id="patient_id" name="pr_ID" required>
           <option value="">Select...</option>
           @foreach($parents as $parent)
-            <option value="{{ $parent->pr_ID }}">
+            {{-- ADDED data-dob attribute here --}}
+            <option value="{{ $parent->pr_ID }}" data-dob="{{ $parent->pr_BabyDOB }}">
               {{ $parent->formattedID }} - {{ $parent->pr_BabyName }}
             </option>
           @endforeach
@@ -47,16 +49,10 @@
       </div>
 
       <div class="grid-2">
-        {{-- Baby Age Input --}}
+        {{-- Baby Age Input (Auto-calculated) --}}
         <div class="form-group">
-            <label>Baby Age <span class="required">*</span></label>
-            <div class="age-input-group">
-                <input type="number" name="baby_age" placeholder="e.g. 5" min="0" required style="flex: 2;">
-                <select name="age_unit" style="flex: 1;">
-                    <option value="days">Days</option>
-                    <option value="months">Months</option>
-                </select>
-            </div>
+            <label>Current Baby Age (Auto-calculated)</label>
+            <input type="text" id="baby_age" name="baby_age" placeholder="Select patient..."  style="background-color: #f3f4f6; font-weight: bold; color: #1A5F7A;" readonly required>
         </div>
 
         {{-- Gestational Age --}}
@@ -97,11 +93,11 @@
                 <label for="feeding_tube">Feeding Tube Method</label>
                 <select id="feeding_tube" name="feeding_tube" class="form-control">
                     <option value="">-- Select Tube Method --</option>
-                    <option value="orogastric">Orogastric</option>
-                    <option value="nasogastric">Nasogastric</option>
-                    <option value="orojenhunal">Orojenhunal</option>
-                    <option value="nasojejunal">Nasojejunal</option>
-                    <option value="gastrostomy">Gastrostomy</option>
+                    <option value="Orogastric">Orogastric</option>
+                    <option value="Nasogastric">Nasogastric</option>
+                    <option value="Orojenhunal">Orojenhunal</option>
+                    <option value="Nasojejunal">Nasojejunal</option>
+                    <option value="Gastrostomy">Gastrostomy</option>
                 </select>
             </div>
 
@@ -109,9 +105,9 @@
                 <label for="oral_feeding">Oral Feeding Method</label>
                 <select id="oral_feeding" name="oral_feeding" class="form-control">
                     <option value="">-- Select Oral Method --</option>
-                    <option value="cup">Cup</option>
-                    <option value="syringe">Syringe</option>
-                    <option value="bottle">Bottle</option>
+                    <option value="Cup">Cup</option>
+                    <option value="Syringe">Syringe</option>
+                    <option value="Bottle">Bottle</option>
                 </select>
             </div>
         </div>
@@ -297,6 +293,42 @@
             display.className = 'consent-status';
             document.getElementById('parent-consent-val').textContent = '-';
             document.getElementById('donor-consent-val').textContent = '-';
+        }
+    });
+
+
+    document.getElementById('patient_id').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const dobString = selectedOption.getAttribute('data-dob'); 
+        const ageInput = document.getElementById('baby_age');
+
+        if (dobString) {
+            const birthDate = new Date(dobString);
+            const today = new Date();
+
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            let days = today.getDate() - birthDate.getDate();
+
+            // Adjust if days are negative
+            if (days < 0) {
+                months--;
+                // Get last day of previous month
+                const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+
+            // Adjust if months are negative
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            // Create the string: "X years X months X days"
+            const ageResult = `${years} years ${months} months ${days} days`;
+            ageInput.value = ageResult;
+        } else {
+            ageInput.value = '';
         }
     });
 
