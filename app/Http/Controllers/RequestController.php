@@ -8,6 +8,8 @@ use App\Models\Request as MilkRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Model\Doctor;
 use App\Models\Milk;
+use App\Models\PostBottle;
+use App\Models\PreBottle;
 use App\Models\Allocation;
 use Carbon\Carbon;
 
@@ -54,10 +56,16 @@ class RequestController extends Controller
         $requests->appends(['search' => $search, 'status' => $status]);
 
         // Only NON-EXPIRED milk
-        $milks = Milk::whereDate('milk_expiryDate', '>=', Carbon::today())
-                    ->where('milk_Status', 'Distributing Completed')
-                    ->where('milk_shariahApproval', '1')
-                    ->get();
+        $milks = Milk::whereHas('postBottles', function($query) {
+                    $query->whereDate('post_expiry_date', '>=', Carbon::today());
+                })
+                ->where('milk_Status', 'Storage Completed') // Use your updated status
+                ->where('milk_shariahApproval', '1')
+                ->with(['postBottles' => function($query) {
+                    
+                    $query->whereDate('post_expiry_date', '>=', Carbon::today());
+                }])
+                ->get();
 
         return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
     }
