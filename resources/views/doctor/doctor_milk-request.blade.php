@@ -80,11 +80,12 @@
                         dateRequested: '{{ $req->created_at->format('M d, Y') }}',
                         dateTimeToGive: '{{ \Carbon\Carbon::parse($req->feeding_start_date)->format('M d, Y') }} • {{ \Carbon\Carbon::parse($req->feeding_start_time)->format('h:i A') }}',
                         status: '{{ $req->status ?? 'Waiting' }}',
-                        requestedVolume: '{{ $req->recommended_volume }} ml',
+                        requestedVolume: '{{ $req->total_daily_volume }} ml',
                         doctorName: '{{ $req->doctor->dr_Name ?? 'N/A' }}',
                         notes: '{{ $req->notes ?? 'No notes' }}',
                         allergyInfo: '{{ $req->parent->pr_Allergy ?? 'None' }}',
-                        weight: '{{ $req->current_weight }} kg'
+                        currentWeight: '{{ $req->current_weight }} kg',
+                        birthWeight: '{{ $req->parent->pr_BabyBirthWeight ?? 'N/A' }} kg'
                       })">
                       <i class="fas fa-eye"></i>
                     </button>
@@ -113,10 +114,13 @@
         </div>
 
       <div class="modal-body">
+        <h3>Patient Information</h3>
         <p><strong>Patient ID:</strong> <span id="modal-patient-id"></span></p>
         <p><strong>Patient Name:</strong> <span id="modal-patient-name"></span></p>
         <p><strong>NICU Ward:</strong> <span id="modal-nicu"></span></p>
-        <p><strong>Weight:</strong> <span id="modal-weight"></span></p>
+        <p><strong>Birth Weight:</strong> <span id="modal-birth-weight"></span></p>
+        <p><strong>Current Weight:</strong> <span id="modal-current-weight"></span></p>
+
 
         <hr>
 
@@ -144,7 +148,8 @@
       document.getElementById("modal-patient-id").textContent = data.patientId;
       document.getElementById("modal-patient-name").textContent = data.patientName;
       document.getElementById("modal-nicu").textContent = data.nicu;
-      document.getElementById("modal-weight").textContent = data.weight;
+      document.getElementById("modal-birth-weight").textContent = data.birthWeight;
+      document.getElementById("modal-current-weight").textContent = data.currentWeight;
       document.getElementById("modal-date-requested").textContent = data.dateRequested;
       document.getElementById("modal-datetime-give").textContent = data.dateTimeToGive;
       document.getElementById("modal-volume").textContent = data.requestedVolume;

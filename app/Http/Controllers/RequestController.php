@@ -108,41 +108,56 @@ class RequestController extends Controller
 
     public function store(Request $request)
     {
-        // $doctor = \App\Models\Doctor::where('dr_ID', auth()->id())->first();
-
-        $request->validate([
-            'pr_ID'             => 'required',
-            'weight'            => 'required|numeric',
-            'entered_volume'    => 'required|numeric',
-            'baby_age'    => 'required|numeric',
-            'gestational_age'    => 'required|numeric',
-            'feeding_date'      => 'required|date',
-            'start_time'        => 'required',
-            'feeds_per_day'     => 'required|integer',
-            'interval_hours'    => 'required|integer',
+        // 1. Validate the Incoming Data
+        $validated = $request->validate([
+            'pr_ID'           => 'required|exists:parent,pr_ID', // Ensure parent exists
+            'weight'          => 'required|numeric|min:0.1',
+            'entered_volume'  => 'required|numeric|min:1',
+            'baby_age'        => 'required|integer|min:0',
+            'age_unit'        => 'required|in:days,months',
+            'gestational_age' => 'nullable|integer|min:20|max:42',
+            'kinship_method'  => 'required|in:yes,no',
+            'feeding_tube'    => 'nullable|string',
+            'oral_feeding'    => 'nullable|string',
+            'feeding_date'    => 'required|date',
+            'start_time'      => 'required',
+            'feeds_per_day'   => 'required|integer|min:1',
+            'interval_hours'  => 'required|integer|min:1',
         ]);
 
+        // 2. Get the logged-in Doctor's ID
+        // Assumes your User model has a 'doctor' relationship: return $this->hasOne(Doctor::class);
+        $doctorID = Auth::user()->doctor->dr_ID;
+
+        // 3. Create the Record
         MilkRequest::create([
-            'dr_ID'              => auth()->user()->doctor->dr_ID, // Get dr_ID from logged-in user
-            // 'dr_ID'              => $doctor->dr_ID,
+            'dr_ID'              => $doctorID,
             'pr_ID'              => $request->pr_ID,
+            
+            // Map Form Inputs to DB Columns
             'current_weight'     => $request->weight,
-            'recommended_volume' => $request->entered_volume,
-            'baby_age' => $request->baby_age,
-            'gestational_age' => $request->gestational_age,
-            'kinship_method' => $request->kinship_method,
-            'feeding_tube' => $request->feeding_tube,
-            'oral_feeding' => $request->oral_feeding,
+            'total_daily_volume' => $request->entered_volume,
+            
+            'baby_age'           => $request->baby_age,
+            'age_unit'           => $request->age_unit,
+            'gestational_age'    => $request->gestational_age,
+            
+            'kinship_method'     => $request->kinship_method,
+            'feeding_tube'       => $request->feeding_tube,
+            'oral_feeding'       => $request->oral_feeding,
+            
             'feeding_start_date' => $request->feeding_date,
             'feeding_start_time' => $request->start_time,
             'feeding_perday'     => $request->feeds_per_day,
             'feeding_interval'   => $request->interval_hours,
-            'status'             => "Waiting", // Default status
+            
+            'status'             => 'Pending'
         ]);
 
+        // 4. Return JSON Response (for your Fetch API)
         return response()->json([
             'success' => true,
-            'message' => 'Milk Request submitted successfully!'
+            'message' => 'Milk request submitted successfully!'
         ]);
     }
     
