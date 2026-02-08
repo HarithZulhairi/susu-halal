@@ -77,19 +77,6 @@ class RequestController extends Controller
         // 1. Base Query with Eager Loading
         // Assuming relationship is 'allocations' (plural) for a request having multiple allocated bottles
         $query = MilkRequest::with([
-<<<<<<< Updated upstream
-            'parent', 
-            'doctor', 
-            'allocations.milk' // Changed 'allocation' to 'allocations' (standard naming)
-        ])->latest();
-
-        // 2. Apply Filters
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('parent', function($q) use ($search) {
-                $q->where('pr_BabyName', 'like', "%{$search}%")
-                ->orWhere('formattedID', 'like', "%{$search}%");
-=======
             'parent',
             'doctor',
             'allocation.postBottle.milk'
@@ -105,7 +92,6 @@ class RequestController extends Controller
             $query->whereHas('parent', function ($q) use ($search) {
                 $q->where('pr_BabyName', 'LIKE', "%{$search}%")
                 ->orWhere('formattedID', 'LIKE', "%{$search}%");
->>>>>>> Stashed changes
             });
         }
 
@@ -141,38 +127,6 @@ class RequestController extends Controller
         $requests->getCollection()->transform(function ($req) {
     // ... (keep allocation mapping) ...
 
-<<<<<<< Updated upstream
-            $req->json_data = [
-                // --- EXISTING FIELDS ---
-                'patient_name'   => $req->parent->pr_BabyName ?? '-',
-                'patient_dob'    => \Carbon\Carbon::parse($req->parent->pr_BabyDOB)->format('d-m-Y') ?? '-',
-                'formatted_id'   => $req->parent->formattedID ?? '-',
-                'cubicle'        => $req->parent->pr_NICU ?? '-',
-                'parent_consent' => $req->parent->pr_ConsentStatus ?? 'Pending',
-                'weight'         => $req->current_weight ?? 0,
-                'age'            => $req->current_baby_age ?? '-',
-                'gestational'    => $req->gestational_age ?? '-',
-                'total_vol'      => $req->total_daily_volume,
-                'date_requested' => $req->created_at->format('d-m-Y'),
-                'feed_time'      => \Carbon\Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i'),
-                'feeds'          => $req->feeding_perday,
-                'interval'       => $req->feeding_interval,
-                'kinship_method' => $req->kinship_method,
-                
-                'volume_per_feed'=> $req->volume_per_feed,
-                'drip_total'     => $req->drip_total,
-                'oral_total'     => $req->oral_total,
-                'oral_per_feed'  => $req->oral_per_feed,
-                'tube_method'    => $req->feeding_tube,
-                'oral_method'    => $req->oral_feeding,
-                'allocated_items'=> $req->allocated_items, // (mapped previously)
-
-                // --- NEW FIELDS ADDED FOR FULL VIEW ---
-                'status'         => $req->status,
-                'doctor_name'    => $req->doctor->dr_Name ?? 'Unknown',
-                'allergy_info'   => $req->parent->pr_Allergy ?? 'None',
-            ];
-=======
             // Prepare allocated items for Dispense Modal
             $pendingAllocations = $req->allocation
                 ->whereNull('dispensed_at');
@@ -222,7 +176,6 @@ class RequestController extends Controller
 
 
                         
->>>>>>> Stashed changes
 
             return $req;
         });
@@ -234,19 +187,6 @@ class RequestController extends Controller
                 $q->where('post_expiry_date', '>=', now())
                 ->whereNull('pr_ID'); // 👈 THIS is now your allocation flag
             })
-<<<<<<< Updated upstream
-            ->get();
-
-        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', Carbon::today())
-            ->where('post_micro_status', 'NOT CONTAMINATED')
-            ->whereHas('milk', function ($q) {
-                $q->where('milk_Status', 'Storage Completed')
-                  ->where('milk_shariahApproval', 1);
-            })
-            ->get();
-
-        return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles'));
-=======
 
             ->with(['postBottles' => function ($q) {
                 $q->where('post_expiry_date', '>=', now())
@@ -264,7 +204,6 @@ class RequestController extends Controller
          * ----------------------------------------------------
          */
         return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
->>>>>>> Stashed changes
     }
 
 
@@ -339,10 +278,6 @@ class RequestController extends Controller
             'status'             => 'Waiting'
         ]);
 
-<<<<<<< Updated upstream
-        return response()->json(['success' => true, 'message' => 'Submitted successfully!']);
-    }
-=======
         return response()->json([
             'success' => true,
             'message' => 'Milk Request submitted successfully!'
@@ -400,7 +335,6 @@ public function allocateMilk(Request $request)
         'message' => 'Milk allocated and assigned to patient successfully'
     ]);
 }
->>>>>>> Stashed changes
 
     public function delete($id)
     {
@@ -413,8 +347,6 @@ public function allocateMilk(Request $request)
         ]);
     }
 
-<<<<<<< Updated upstream
-=======
     public function deleteAllocation(Request $request)
     {
         $request->validate([
@@ -473,7 +405,6 @@ public function dispenseMilk(Request $request)
 
 
 
->>>>>>> Stashed changes
     //Infant Weight Record//
 
     public function viewInfantWeightHMMC(Request $request)

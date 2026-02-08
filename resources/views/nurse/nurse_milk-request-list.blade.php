@@ -153,10 +153,6 @@
 
   </style>
 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
   <div class="container">
     <div class="main-content">
 
@@ -285,11 +281,6 @@
             </table>
         </div>
 
-<<<<<<< Updated upstream
-        <div class="pagination-wrapper">
-            {{ $requests->links() }}
-        </div>
-=======
         <table class="records-table" id="requestTable">
           <thead>
             <tr>
@@ -354,7 +345,6 @@
                         <i class="fas fa-edit"></i>
                     </button>
                   @endif
->>>>>>> Stashed changes
 
       </div>
     </div>
@@ -450,10 +440,7 @@
             </div>
 
         </div>
-<<<<<<< Updated upstream
-=======
       </div>
->>>>>>> Stashed changes
     </div>
 </div>
 
@@ -466,12 +453,6 @@
       </div>
       <div class="modal-body">
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 12px; border: 1px solid #bae6fd;">
-<<<<<<< Updated upstream
-            <div style="background: white; padding: 10px; border-radius: 50%; color: #0ea5e9;"> <i class="fas fa-user fa-lg"></i> </div>
-            <div>
-                <h3 style="margin: 0; color: #0c4a6e; font-size: 16px;">Patient: <span id="modalPatientID"></span></h3>
-                <span style="font-size: 13px; color: #64748b;" id="modalPatientName"></span>
-=======
           <div style="background: white; padding: 10px; border-radius: 50%; color: #0ea5e9;"> <i class="fas fa-user fa-lg"></i> </div>
           <div>
               <h3 style="margin: 0; color: #0c4a6e; font-size: 16px;">Patient: <span id="modalPatientID"></span></h3>
@@ -527,7 +508,6 @@
                 @endforeach
             @endforeach
 
->>>>>>> Stashed changes
             </div>
         </div>
         <form id="milkAllocationForm" method="POST" action="{{ route('nurse.allocate.milk') }}">
@@ -632,43 +612,6 @@
         document.getElementById('view-total-vol').textContent = data.total_vol;
 
         document.getElementById('view-start-date').textContent = data.date_requested;
-<<<<<<< Updated upstream
-        document.getElementById('view-start-time').textContent = data.feed_time.split(' ')[1] || '-';
-        document.getElementById('view-feeds').textContent = data.feeds;
-        document.getElementById('view-interval').textContent = data.interval;
-
-        // --- Consent Logic ---
-        const consentContainer = document.getElementById('consent-badge-container');
-        let badgeHtml = '';
-        if (data.parent_consent === 'Approved') {
-            badgeHtml = `<div class="consent-badge approved"><i class="fas fa-check-circle"></i> Parent Consent Approved</div>`;
-        } else if (data.parent_consent === 'Pending') {
-            badgeHtml = `<div class="consent-badge pending"><i class="fas fa-clock"></i> Consent Pending</div>`;
-        } else if (data.parent_consent === 'Rejected') {
-            badgeHtml = `<div class="consent-badge rejected"><i class="fas fa-times-circle"></i> Consent Rejected</div>`;
-        } else {
-            badgeHtml = `<div class="consent-badge unknown"><i class="fas fa-question-circle"></i> Status Unknown</div>`;
-        }
-        consentContainer.innerHTML = badgeHtml;
-
-        // --- Dispensing Logic ---
-        const kinshipYes = document.getElementById('method-kinship-yes');
-        const kinshipNo = document.getElementById('method-kinship-no');
-
-        if (data.kinship_method === 'yes') {
-            kinshipYes.style.display = 'block';
-            kinshipNo.style.display = 'none';
-            document.getElementById('view-kinship-vol').textContent = data.volume_per_feed || '-';
-            document.getElementById('view-kinship-oral-method').textContent = data.oral_method || 'N/A';
-        } else {
-            kinshipYes.style.display = 'none';
-            kinshipNo.style.display = 'block';
-            document.getElementById('view-drip-vol').textContent = data.drip_total || '0';
-            document.getElementById('view-oral-vol').textContent = data.oral_per_feed || '0';
-            document.getElementById('view-tube-method').textContent = data.tube_method || 'N/A';
-            document.getElementById('view-oral-method').textContent = data.oral_method || 'N/A';
-        }
-=======
         document.getElementById('view-start-time').textContent = data.feed_time?.split(' ')[1] ?? '-';
         document.getElementById('view-feeds').textContent = data.feeding_perday;
         document.getElementById('view-interval').textContent = data.feeding_interval;
@@ -692,7 +635,6 @@
         document.getElementById('view-oral-method').textContent =
             capitalize(data.oral_feeding);
 
->>>>>>> Stashed changes
 
         document.getElementById('viewRequestModal').style.display = 'flex';
     }
@@ -711,19 +653,6 @@
         document.getElementById("totalVolume").textContent = total;
     }
 
-<<<<<<< Updated upstream
-    // Helper to toggle a single milk item
-    function toggleMilkSelection(checkbox, isChecked) {
-        const id = checkbox.value;
-        const volume = checkbox.getAttribute("data-volume");
-        const itemDiv = checkbox.closest(".milk-item");
-
-        checkbox.checked = isChecked; // Force visual state
-
-        if (isChecked) {
-            // Add if not exists
-            if (!selectedMilkUnits.find(m => m.id == id)) {
-=======
    function handleSelectionChange(checkbox, milkItemDiv) {
         const id = parseInt(checkbox.value, 10);   // ✅ BIGINT-safe
         const volume = parseFloat(
@@ -732,23 +661,15 @@
 
         if (checkbox.checked) {
             if (!selectedMilkUnits.find(m => m.id === id)) {
->>>>>>> Stashed changes
                 selectedMilkUnits.push({ id, volume });
             }
             itemDiv.classList.add("selected");
         } else {
-<<<<<<< Updated upstream
-            // Remove
-            selectedMilkUnits = selectedMilkUnits.filter(m => m.id != id);
-            itemDiv.classList.remove("selected");
-        }
-=======
             selectedMilkUnits = selectedMilkUnits.filter(m => m.id !== id);
             milkItemDiv.classList.remove("selected");
         }
 
         updateTotalVolume();
->>>>>>> Stashed changes
     }
 
     // Individual Checkbox Event
@@ -774,12 +695,7 @@
     // OPEN MODAL
     function openMilkModal(button) {
         selectedRequestId = button.getAttribute('data-id');
-<<<<<<< Updated upstream
-        // ... (Existing populate logic: Name, ID, Weight, etc.) ...
-        document.getElementById('modalPatientID').textContent = button.getAttribute('data-patient-id');
-=======
         document.getElementById('modalPatientID').textContent = button.getAttribute('data-formatted-id');
->>>>>>> Stashed changes
         document.getElementById('modalPatientName').textContent = button.getAttribute('data-patient-name');
         document.getElementById('modalWeight').value = button.getAttribute('data-weight');
         document.getElementById('modalDob').value = button.getAttribute('data-dob');
@@ -850,9 +766,6 @@
         document.getElementById('milkModal').style.display = 'none';
     }
 
-<<<<<<< Updated upstream
-    // --- 3. DISPENSE MODAL LOGIC ---
-=======
     document.getElementById('milkAllocationForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -913,37 +826,12 @@
     });
 
     // --- 3. DISPENSE MODAL LOGIC (NEW) ---
->>>>>>> Stashed changes
     function openDispenseModal(reqData) {
 
         document.getElementById('dispensePatientName').textContent = reqData.patient_name;
         const container = document.getElementById('dispenseListContainer');
         container.innerHTML = '';
 
-<<<<<<< Updated upstream
-        if(reqData.allocated_items.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999;">No items allocated yet.</p>';
-        } else {
-            reqData.allocated_items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'dispense-item';
-                const nurseName = "{{ Auth::user()->name }}";
-                
-                div.innerHTML = `
-                    <input type="checkbox" class="dispense-check" style="width:18px; height:18px; cursor:pointer;" onchange="toggleDispense(this)">
-                    <div style="flex:1;">
-                        <div style="font-weight:600; color:#1A5F7A;">${item.id}</div>
-                        <div style="font-size:13px; color:#64748b;">Volume: ${item.vol} ml</div>
-                        <div class="auto-fill-info">
-                            <i class="fas fa-clock"></i> <span class="dispense-time">--:--</span> &nbsp;|&nbsp; 
-                            <i class="fas fa-user-nurse"></i> ${nurseName}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-=======
         reqData.allocated_items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'dispense-item';
@@ -977,7 +865,6 @@
             container.appendChild(div);
         });
 
->>>>>>> Stashed changes
         document.getElementById('dispenseModal').style.display = 'flex';
 }
 
@@ -1001,23 +888,6 @@
     }
 
     function saveDispense() {
-<<<<<<< Updated upstream
-        const checked = document.querySelectorAll('.dispense-check:checked');
-        if (checked.length === 0) {
-            Swal.fire('No Selection', 'Please check at least one milk bottle to dispense.', 'warning');
-            return;
-        }
-        closeDispenseModal();
-        Swal.fire({
-            icon: 'success',
-            title: 'Dispensed!',
-            text: `${checked.length} bottles marked as dispensed.`,
-            confirmButtonColor: '#0ea5e9'
-        }).then(() => location.reload());
-    }
-
-    // Modal Closing Logic (Outside Click)
-=======
 
     
 
@@ -1081,7 +951,6 @@ console.groupEnd();
 }
 
 
->>>>>>> Stashed changes
     window.addEventListener("click", function(e) {
         if (e.target.classList.contains('modal-overlay')) {
             e.target.style.display = 'none';
