@@ -36,13 +36,13 @@ class AllocationController extends Controller
             foreach ($request->selected_milk as $item) {
                 Allocation::create([
                     'request_ID'          => $milkRequest->request_ID,
-                    'milk_ID'             => $item['id'],
+                    'post_ID'             => $item['id'],
                     'total_selected_milk' => $item['volume'], // Volume of THIS bottle
                     'storage_location'    => $request->storage_location,
                     
                     // You requested saving time, assuming current time if not provided
                     'allocation_milk_date_time' => [
-                        'milk_id' => $item['id'],
+                        'post_ID' => $item['id'],
                         'datetime' => now()->toDateTimeString()
                     ]
                 ]);

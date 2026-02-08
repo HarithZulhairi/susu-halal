@@ -379,10 +379,10 @@
 
                 <div id="milkListSelect" class="milk-list">
                     @foreach($postbottles as $pb)
-                    <div class="milk-item" data-id="{{ $pb->id}}">
+                    <div class="milk-item" data-id="{{ $pb->post_ID }}">
                         <div style="display: flex; align-items: flex-start; gap: 10px; width: 100%;">
                             {{-- Add name="milk_ids[]" for easier selection, but we use JS mainly --}}
-                            <input type="checkbox" class="milk-checkbox" value="{{ $pb->id }}" data-volume="{{ $pb->post_volume }}" style="margin-top: 5px; cursor: pointer;">
+                            <input type="checkbox" class="milk-checkbox" value="{{ $pb->post_ID }}" data-volume="{{ $pb->post_volume }}" style="margin-top: 5px; cursor: pointer;">
                             <div style="flex-grow: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                                     <strong>{{ $pb->post_bottle_code }} — {{ $pb->post_volume }} ml</strong>

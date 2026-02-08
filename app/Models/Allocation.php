@@ -21,10 +21,10 @@ class Allocation extends Model
         'allocation_milk_date_time' => 'array',
     ];
 
-    // Relationship to Milk
-    public function milk()
+    // Relationship to Post Bottle
+    public function postBottles()
     {
-        return $this->belongsTo(Milk::class, 'milk_ID', 'milk_ID');
+        return $this->belongsTo(PostBottle::class, 'post_ID', 'post_ID');
     }
 
     // Relationship to the Milk Request

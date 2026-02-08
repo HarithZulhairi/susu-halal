@@ -78,8 +78,8 @@ class RequestController extends Controller
         $query = MilkRequest::with([
             'parent', 
             'doctor', 
-            'allocations.milk' // Changed 'allocation' to 'allocations' (standard naming)
-        ])->latest();
+            'allocations.postBottles' 
+        ]);
 
         // 2. Apply Filters
         if ($request->filled('search')) {
@@ -120,7 +120,13 @@ class RequestController extends Controller
 
         // 4. Transform Data for JavaScript
         $requests->getCollection()->transform(function ($req) {
-    // ... (keep allocation mapping) ...
+            $req->allocated_items = $req->allocations ? $req->allocations->map(function ($alloc) {
+                return [
+                    // CHANGED: Access postBottles relation, then get code/ID
+                    'id'  => $alloc->postBottles->post_bottle_code ?? 'Unknown', 
+                    'vol' => $alloc->total_selected_milk ?? 0,
+                ];
+            }) : [];
 
             $req->json_data = [
                 // --- EXISTING FIELDS ---
