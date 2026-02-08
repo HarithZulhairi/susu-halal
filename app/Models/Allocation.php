@@ -12,9 +12,12 @@ class Allocation extends Model
     protected $fillable = [
         'request_ID',
         'post_ID',
+        'ns_ID',
         'total_selected_milk',
         'storage_location',
         'allocation_milk_date_time',
+        'dispense_date',
+        'dispense_time',
     ];
 
     protected $casts = [
@@ -25,6 +28,12 @@ class Allocation extends Model
     public function postBottles()
     {
         return $this->belongsTo(PostBottle::class, 'post_ID', 'post_ID');
+    }
+
+    // Relationship to Nurse
+    public function nurse()
+    {
+        return $this->belongsTo(Nurse::class, 'ns_ID', 'ns_ID');
     }
 
     // Relationship to the Milk Request

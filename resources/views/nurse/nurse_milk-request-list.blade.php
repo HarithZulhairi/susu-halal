@@ -8,6 +8,15 @@
   
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+  {{-- Flash Messages --}}
+  @if(session('success'))
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          Swal.fire({ icon: 'success', title: 'Success', text: "{{ session('success') }}", confirmButtonColor: '#0ea5e9' });
+      });
+  </script>
+  @endif
+
   <style>
         /* --- SORTING STYLES --- */
     th { cursor: pointer; user-select: none; position: relative; }
@@ -108,6 +117,13 @@
     .dispense-item.checked { background-color: #f0fdf4; }
     .auto-fill-info { font-size: 12px; color: #64748b; margin-top: 4px; display: none; }
     .dispense-item.checked .auto-fill-info { display: block; }
+
+    /* New Styles for Dispense Inputs */
+    .dispense-inputs { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+    .dispense-group { margin-bottom: 10px; }
+    .dispense-group label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+    .dispense-group input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .total-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #e0f2fe; border-radius: 6px; margin-top: 10px; font-weight: bold; color: #0369a1; }
   </style>
 
   <div class="container">
@@ -413,20 +429,37 @@
     </div>
   </div>
 
-  {{-- 3. Dispense Modal --}}
+  {{-- 3. DISPENSE MODAL (Redesigned) --}}
   <div id="dispenseModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
       <div class="modal-header">
-        <h2><i class="fas fa-clipboard-check"></i> Dispense Milk</h2>
+        <h2>Dispense Milk</h2>
         <button class="modal-close-btn" onclick="closeDispenseModal()">Close</button>
       </div>
-      <div class="modal-body">
-        <p style="color:#64748b; margin-bottom: 15px;">Check the bottles you are dispensing to <strong><span id="dispensePatientName"></span></strong>.</p>
-        <div class="dispense-list" id="dispenseListContainer"></div>
-        <button type="button" class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveDispense()">
-            Complete Dispensing
-        </button>
-      </div>
+      
+      <form id="dispenseForm" method="POST" action="{{ route('nurse.dispense.milk') }}" onsubmit="return validateDispenseForm()">
+          @csrf
+          <div class="modal-body">
+            <p style="color:#64748b; margin-bottom: 15px;">Dispensing for: <strong><span id="dispensePatientName"></span></strong></p>
+            
+            {{-- DYNAMIC INPUTS SECTION --}}
+            <div class="dispense-inputs" id="dispenseInputSection">
+                {{-- JS will inject Oral/Tube inputs here based on Kinship --}}
+            </div>
+
+            <p style="font-size:12px; font-weight:600; color:#64748b; margin-bottom:5px;">Select Bottles Used:</p>
+            <div class="dispense-list" id="dispenseListContainer">
+                {{-- JS populates bottles --}}
+            </div>
+
+            <div class="total-bar">
+                <span>Total Selected:</span>
+                <span id="dispenseTotalSelected">0 ml</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">Complete Dispensing</button>
+          </div>
+      </form>
     </div>
   </div>
 
@@ -619,34 +652,87 @@
     }
 
     // --- 3. DISPENSE MODAL LOGIC ---
-    function openDispenseModal(reqData) {
-        document.getElementById('dispensePatientName').textContent = reqData.patient_name;
+    function openDispenseModal(reqData, kinshipMethod) {
+        document.getElementById('dispensePatientName').textContent = reqData.parent?.pr_BabyName || '-';
+        
+        // 1. Build Inputs based on Kinship
+        const inputSection = document.getElementById('dispenseInputSection');
+        inputSection.innerHTML = '';
+
+        if (kinshipMethod === 'yes') {
+            // Kinship YES: Only Oral
+            inputSection.innerHTML = `
+                <div class="dispense-group">
+                    <label>Oral Feeding Volume (ml)</label>
+                    <input type="number" name="oral_volume" required placeholder="Enter amount fed orally">
+                </div>
+            `;
+        } else {
+            // Kinship NO: Both
+            inputSection.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div class="dispense-group">
+                        <label>Oral Feeding (ml)</label>
+                        <input type="number" name="oral_volume" placeholder="0">
+                    </div>
+                    <div class="dispense-group">
+                        <label>Tube/Drip Feeding (ml)</label>
+                        <input type="number" name="tube_volume" placeholder="0">
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2. Build Bottle List
         const container = document.getElementById('dispenseListContainer');
         container.innerHTML = '';
+        
+        // SAFE CHECK for allocations array
+        const allocations = reqData.allocations || [];
+        
+        allocations.forEach((item, index) => {
+            const isDispensed = item.dispense_date !== null;
+            const bottleCode = item.post_bottles ? item.post_bottles.post_bottle_code : 'Unknown';
+            const volume = item.total_selected_milk || 0;
 
-        if(reqData.allocated_items.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999;">No items allocated yet.</p>';
-        } else {
-            reqData.allocated_items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'dispense-item';
-                const nurseName = "{{ Auth::user()->name }}";
-                
-                div.innerHTML = `
-                    <input type="checkbox" class="dispense-check" style="width:18px; height:18px; cursor:pointer;" onchange="toggleDispense(this)">
-                    <div style="flex:1;">
-                        <div style="font-weight:600; color:#1A5F7A;">${item.id}</div>
-                        <div style="font-size:13px; color:#64748b;">Volume: ${item.vol} ml</div>
-                        <div class="auto-fill-info">
-                            <i class="fas fa-clock"></i> <span class="dispense-time">--:--</span> &nbsp;|&nbsp; 
-                            <i class="fas fa-user-nurse"></i> ${nurseName}
-                        </div>
+            const inputHtml = isDispensed ? '' : 
+                `<input type="checkbox" name="items[${index}][allocation_id]" value="${item.allocation_ID}" 
+                  class="dispense-check" data-vol="${volume}" style="width:18px; height:18px;" onchange="updateDispenseTotal()">`;
+
+            const div = document.createElement('div');
+            div.className = `dispense-item ${isDispensed ? 'checked' : ''}`;
+            div.innerHTML = `
+                <label style="display:flex; width:100%; align-items:center; cursor:pointer;">
+                    ${inputHtml}
+                    <div style="flex:1; margin-left:10px;">
+                        <div style="font-weight:600; color:#1A5F7A;">${bottleCode} ${isDispensed ? '(Dispensed)' : ''}</div>
+                        <div style="font-size:13px; color:#64748b;">Volume: ${volume} ml</div>
                     </div>
-                `;
-                container.appendChild(div);
-            });
-        }
+                </label>
+            `;
+            container.appendChild(div);
+        });
+
+        updateDispenseTotal(); // Reset count
         document.getElementById('dispenseModal').style.display = 'flex';
+    }
+    
+    function validateDispenseForm() {
+        const checked = document.querySelectorAll('.dispense-check:checked');
+        if (checked.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'No Bottles Selected', text: 'Please check the bottles used for this feed.' });
+            return false;
+        }
+        return true;
+    }
+
+    function updateDispenseTotal() {
+        const checked = document.querySelectorAll('.dispense-check:checked');
+        let total = 0;
+        checked.forEach(cb => {
+            total += parseFloat(cb.getAttribute('data-vol')) || 0;
+        });
+        document.getElementById('dispenseTotalSelected').textContent = total + ' ml';
     }
 
     function closeDispenseModal() {
@@ -681,6 +767,9 @@
             confirmButtonColor: '#0ea5e9'
         }).then(() => location.reload());
     }
+    
+
+    
 
     // Modal Closing Logic (Outside Click)
     window.addEventListener("click", function(e) {

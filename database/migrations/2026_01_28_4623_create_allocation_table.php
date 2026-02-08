@@ -14,21 +14,25 @@ return new class extends Migration
         Schema::create('allocation', function (Blueprint $table) {
             $table->id('allocation_ID'); // Primary Key
 
+
             // Foreign Keys
             $table->unsignedBigInteger('request_ID');
             $table->unsignedBigInteger('post_ID');
+            $table->unsignedBigInteger('ns_ID');
 
             // Milk attributes
             $table->integer('total_selected_milk');
             $table->string('storage_location');
-            // $table->date('allocation_date')->nullable();
-            // $table->time('allocation_time')->nullable();
             $table->string('allocation_milk_date_time')->nullable();
+            $table->date('dispense_date')->nullable();
+            $table->time('dispense_time')->nullable();
+
             $table->timestamps();
 
             // Define Foreign Key Relationships
             $table->foreign('request_ID')->references('request_ID')->on('request')->onDelete('cascade');
             $table->foreign('post_ID')->references('post_ID')->on('post_bottles')->onDelete('cascade');
+            $table->foreign('ns_ID')->references('ns_ID')->on('nurse')->onDelete('cascade');
         });
     }
 

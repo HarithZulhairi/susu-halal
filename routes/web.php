@@ -225,6 +225,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('/nurse/allocate-milk', 'nurse.nurse_allocate-milk')->name('nurse.allocate-milk');
     Route::post('/nurse/allocate/delete', [RequestController::class, 'deleteAllocation'])->name('nurse.allocate.delete');
+    Route::post('/nurse/dispense-milk', [AllocationController::class, 'dispenseMilk'])->name('nurse.dispense.milk');
 
     // Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::get('/nurse/milk-request-list', [RequestController::class, 'viewRequestNurse'])->name('nurse.nurse_milk-request-list');
