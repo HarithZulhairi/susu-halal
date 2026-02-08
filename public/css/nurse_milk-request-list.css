@@ -84,8 +84,7 @@ body {
 /* ========== Table Styles ========== */
 .records-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+  border-collapse: collapse;  
 }
 
 .records-table th {
@@ -145,7 +144,6 @@ th:hover {
     border-radius: 6px;
     color: #64748b;
     text-decoration: none;
-    font-size: 14px;
     transition: all 0.2s;
 }
 
@@ -185,7 +183,6 @@ nav[role="navigation"] {
 
 .patient-info strong {
   color: #111827;
-  font-size: 14px;
 }
 
 .patient-info span {
@@ -233,9 +230,6 @@ nav[role="navigation"] {
   transform: translateY(-2px);
 }
 
-.actions .btn-view i {
-  color: #16a34a;
-}
 
 .milk-icon {
   font-size: 28px;
@@ -327,8 +321,7 @@ nav[role="navigation"] {
 }
 
 .info-item p {
-    margin: 0;
-    font-size: 14px;
+    margin: 0;  
     font-weight: 500;
     color: #334155;
 }
@@ -404,3 +397,105 @@ nav[role="navigation"] {
     background: #1A5F7A;
     color: white;
 }
+
+/* --- VIEW MODAL SPECIFIC STYLES --- */
+.info-section {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 16px; margin-bottom: 20px;
+}
+
+.info-section h3 {
+    margin: 0 0 15px 0; font-size: 16px; color: #1A5F7A;
+    border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+}
+
+.info-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+}
+
+.info-item label {
+    display: block; font-size: 11px; color: #64748b; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 4px;
+}
+
+.info-item p { margin: 0;  font-weight: 500; color: #334155; }
+.info-item p.highlight { font-weight: 700; color: #0ea5e9; font-size: 16px; }
+
+/* Method Boxes (Green/Orange) */
+.method-box {
+    padding: 15px; border-radius: 8px; border-left: 4px solid; margin-bottom: 15px;
+}
+
+.method-box h4 { margin: 0 0 5px 0; color: #1e293b;  font-weight: 700; }
+.method-box p { font-size: 13px; color: #64748b; margin: 0; }
+.method-box hr { border: 0; border-top: 1px dashed #cbd5e1; margin: 10px 0; }
+
+/* Kinship YES Style */
+.method-green { background: #f0fdf4; border-color: #22c55e; }
+/* Kinship NO Style */
+.method-orange { background: #fff7ed; border-color: #f97316; }
+
+
+/* Filter Bar Styles */
+.filter-bar {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end; /* Align buttons with inputs */
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+.filter-input {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    color: #334155;
+}
+.filter-input:focus { border-color: #1A5F7A; }
+
+.btn-filter {
+    background: #1A5F7A; color: white; border: none; padding: 9px 16px; 
+    border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;
+    transition: background 0.2s;
+}
+.btn-filter:hover { background: #134b61; }
+
+.btn-reset {
+    background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; 
+    padding: 9px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;
+    text-decoration: none; transition: background 0.2s;
+}
+.btn-reset:hover { background: #e2e8f0; }
+
+/* Pagination Styles Override */
+.pagination-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+/* Laravel Pagination Default Styles Fix */
+.pagination { display: flex; gap: 5px; list-style: none; padding: 0; }
+.page-item .page-link {
+    padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; 
+    color: #64748b; text-decoration: none; background: white;
+}
+.page-item.active .page-link {
+    background: #1A5F7A; color: white; border-color: #1A5F7A;
+}
+.page-item.disabled .page-link { opacity: 0.6; pointer-events: none; }

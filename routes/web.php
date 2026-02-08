@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetOTPController;
 use App\Http\Controllers\MilkController;
+use App\Http\Controllers\AllocationController;
 use App\Http\Controllers\RequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
@@ -227,7 +228,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::get('/nurse/milk-request-list', [RequestController::class, 'viewRequestNurse'])->name('nurse.nurse_milk-request-list');
-    Route::post('/nurse/milk-request-list/store', [RequestController::class, 'allocateMilk'])->name('nurse.allocate.milk');
+    Route::post('/nurse/milk-request-list/store', [AllocationController::class, 'allocateMilk'])->name('nurse.allocate.milk');
 
     // Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');

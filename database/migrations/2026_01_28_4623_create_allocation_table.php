@@ -16,7 +16,7 @@ return new class extends Migration
 
             // Foreign Keys
             $table->unsignedBigInteger('request_ID');
-            $table->unsignedBigInteger('milk_ID');
+            $table->unsignedBigInteger('post_ID');
 
             // Milk attributes
             $table->integer('total_selected_milk');
@@ -28,7 +28,7 @@ return new class extends Migration
 
             // Define Foreign Key Relationships
             $table->foreign('request_ID')->references('request_ID')->on('request')->onDelete('cascade');
-            $table->foreign('milk_ID')->references('milk_ID')->on('milk')->onDelete('cascade');
+            $table->foreign('post_ID')->references('post_ID')->on('post_bottles')->onDelete('cascade');
         });
     }
 

@@ -73,104 +73,106 @@ class RequestController extends Controller
 
     public function viewRequestNurse(Request $request)
     {
-        $search = $request->input('search');
-        $status = $request->input('status');
-
-        /**
-         * ----------------------------------------------------
-         * 1. Build base query
-         * ----------------------------------------------------
-         */
+        // 1. Base Query with Eager Loading
+        // Assuming relationship is 'allocations' (plural) for a request having multiple allocated bottles
         $query = MilkRequest::with([
-            'parent',
-            'doctor',
-            'allocation.milk.postBottles'
-        ]);
+            'parent', 
+            'doctor', 
+            'allocations.milk' // Changed 'allocation' to 'allocations' (standard naming)
+        ])->latest();
 
-        /**
-         * ----------------------------------------------------
-         * 2. Search (Baby Name or Parent ID)
-         * ----------------------------------------------------
-         */
-        if (!empty($search)) {
-            $query->whereHas('parent', function ($q) use ($search) {
-                $q->where('pr_BabyName', 'LIKE', "%{$search}%")
-                ->orWhere('formattedID', 'LIKE', "%{$search}%");
+        // 2. Apply Filters
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('parent', function($q) use ($search) {
+                $q->where('pr_BabyName', 'like', "%{$search}%")
+                ->orWhere('formattedID', 'like', "%{$search}%");
             });
         }
 
-        /**
-         * ----------------------------------------------------
-         * 3. Status Filter (Tabs)
-         * ----------------------------------------------------
-         */
-        if (!empty($status) && $status !== 'All') {
-            $query->where('status', $status);
+        if ($request->filled('status') && $request->status !== 'All') {
+            $query->where('status', $request->status);
         }
 
-        /**
-         * ----------------------------------------------------
-         * 4. Order + Paginate
-         * ----------------------------------------------------
-         */
-        $requests = $query->latest()->paginate(10);
-        $requests->appends(compact('search', 'status'));
+        if ($request->filled('vol_min')) {
+            $query->where('total_daily_volume', '>=', $request->vol_min);
+        }
+        if ($request->filled('vol_max')) {
+            $query->where('total_daily_volume', '<=', $request->vol_max);
+        }
 
-        /**
-         * ----------------------------------------------------
-         * 5. Transform data for NEW UI
-         * ----------------------------------------------------
-         */
+        if ($request->filled('req_date_from')) {
+            $query->whereDate('created_at', '>=', $request->req_date_from);
+        }
+        if ($request->filled('req_date_to')) {
+            $query->whereDate('created_at', '<=', $request->req_date_to);
+        }
+
+        if ($request->filled('feed_date_from')) {
+            $query->whereDate('feeding_start_date', '>=', $request->feed_date_from);
+        }
+        if ($request->filled('feed_date_to')) {
+            $query->whereDate('feeding_start_date', '<=', $request->feed_date_to);
+        }
+
+        // 3. Paginate & Persist Query Strings (FIXED)
+        $requests = $query->paginate(10)->withQueryString(); 
+
+        // 4. Transform Data for JavaScript
         $requests->getCollection()->transform(function ($req) {
+    // ... (keep allocation mapping) ...
 
-            // Prepare allocated items for Dispense Modal
-            $req->allocated_items = $req->allocation->map(function ($alloc) {
-                return (object) [
-                    'id'  => $alloc->milk->formattedID ?? '-',
-                    'vol' => $alloc->allocated_volume ?? 0,
-                ];
-            });
+            $req->json_data = [
+                // --- EXISTING FIELDS ---
+                'patient_name'   => $req->parent->pr_BabyName ?? '-',
+                'patient_dob'    => \Carbon\Carbon::parse($req->parent->pr_BabyDOB)->format('d-m-Y') ?? '-',
+                'formatted_id'   => $req->parent->formattedID ?? '-',
+                'cubicle'        => $req->parent->pr_NICU ?? '-',
+                'parent_consent' => $req->parent->pr_ConsentStatus ?? 'Pending',
+                'weight'         => $req->current_weight ?? 0,
+                'age'            => $req->current_baby_age ?? '-',
+                'gestational'    => $req->gestational_age ?? '-',
+                'total_vol'      => $req->total_daily_volume,
+                'date_requested' => $req->created_at->format('d-m-Y'),
+                'feed_time'      => \Carbon\Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i'),
+                'feeds'          => $req->feeding_perday,
+                'interval'       => $req->feeding_interval,
+                'kinship_method' => $req->kinship_method,
+                
+                'volume_per_feed'=> $req->volume_per_feed,
+                'drip_total'     => $req->drip_total,
+                'oral_total'     => $req->oral_total,
+                'oral_per_feed'  => $req->oral_per_feed,
+                'tube_method'    => $req->feeding_tube,
+                'oral_method'    => $req->oral_feeding,
+                'allocated_items'=> $req->allocated_items, // (mapped previously)
 
-            // Flatten common fields for Blade / JS
-            $req->patient_name = $req->parent->pr_BabyName ?? '-';
-            $req->formatted_id    = $req->parent->formattedID ?? '-';
-            $req->cubicle      = $req->parent->pr_NICU ?? '-';
-            $req->parent_consent = $req->parent->pr_ConsentStatus ?? '-';
-            $req->date_requested = $req->created_at ? $req->created_at->format('d-m-Y') : '-';
-            $req->feed_time = ($req->feeding_start_date && $req->feeding_start_time) ? 
-            Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i') : '-';
-
-            $req->weight       = $req->parent->pr_BabyCurrentWeight ?? 0;
-            $req->age          = $req->baby_age ?? '-';
-            $req->gestational  = $req->gestational_age ?? '-';
-            $req->feeding_perday  = $req->feeding_perday ?? '-';
-            $req->feeding_interval  = $req->feeding_interval ?? '-';
-            
+                // --- NEW FIELDS ADDED FOR FULL VIEW ---
+                'status'         => $req->status,
+                'doctor_name'    => $req->doctor->dr_Name ?? 'Unknown',
+                'allergy_info'   => $req->parent->pr_Allergy ?? 'None',
+            ];
 
             return $req;
         });
 
-        /**
-         * ----------------------------------------------------
-         * 6. Available Milk (NON-EXPIRED, SHARIAH OK)
-         * ----------------------------------------------------
-         */
+        // 5. Get Available Milk
         $milks = Milk::where('milk_Status', 'Storage Completed')
             ->where('milk_shariahApproval', 1)
             ->whereHas('postBottles', function ($q) {
                 $q->whereDate('post_expiry_date', '>=', Carbon::today());
             })
-            ->with(['postBottles' => function ($q) {
-                $q->whereDate('post_expiry_date', '>=', Carbon::today());
-            }])
             ->get();
 
-        /**
-         * ----------------------------------------------------
-         * 7. Return View
-         * ----------------------------------------------------
-         */
-        return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
+        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', Carbon::today())
+            ->where('post_micro_status', 'NOT CONTAMINATED')
+            ->whereHas('milk', function ($q) {
+                $q->where('milk_Status', 'Storage Completed')
+                  ->where('milk_shariahApproval', 1);
+            })
+            ->get();
+
+        return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles'));
     }
 
 
@@ -247,40 +249,6 @@ class RequestController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Submitted successfully!']);
     }
-    
-    public function allocateMilk(Request $request)
-    {
-        $request->validate([
-            'request_id'      => 'required|exists:request,request_ID',
-            'selected_milk'   => 'required|array',
-            'allocation_times'=> 'required|array',
-            'total_volume'    => 'required',
-            'storage_location'=> 'required'
-        ]);
-
-        foreach ($request->selected_milk as $milk) {
-            Allocation::create([
-                'request_ID'          => $request->request_id,
-                'milk_ID'             => $milk['id'],
-                'total_selected_milk' => $request->total_volume,
-                'storage_location'    => $request->storage_location,
-                
-                // REMOVE json_encode HERE. Pass the array directly.
-                // Eloquent will convert it to JSON because of the 'array' cast in Model.
-                'allocation_milk_date_time' => [
-                    'milk_id' => $milk['id'],
-                    'datetime' => $request->allocation_times[$milk['id']] ?? null
-                ]
-            ]);
-        }
-
-        // Update request status to approved
-        $milkRequest = MilkRequest::findOrFail($request->request_id);
-        $milkRequest->status = 'Approved';
-        $milkRequest->save();
-
-        return response()->json(['success' => true]);
-    }
 
     public function delete($id)
     {
@@ -292,27 +260,6 @@ class RequestController extends Controller
             'message' => 'Milk request deleted successfully.'
         ]);
     }
-
-    public function deleteAllocation(Request $request)
-    {
-        $request->validate([
-            'request_id' => 'required|exists:request,request_ID',
-        ]);
-
-        // 1. Delete all allocation records associated with this request ID
-        Allocation::where('request_ID', $request->request_id)->delete();
-
-        // 2. Find the Milk Request and revert status to 'Waiting'
-        $milkRequest = MilkRequest::findOrFail($request->request_id);
-        $milkRequest->status = 'Waiting';
-        $milkRequest->save();
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Allocation reverted successfully.'
-        ]);
-    }
-
 
     //Infant Weight Record//
 

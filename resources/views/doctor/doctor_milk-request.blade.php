@@ -143,7 +143,7 @@
                     <th data-sort="created_at">Date Requested</th>
                     <th data-sort="feeding_time">Feeding Time</th>
                     <th data-sort="status">Status</th>
-                    <th data-sort="volume">Volume (ml)</th>
+                    <th data-sort="volume">Daily Volume (ml)</th>
                     <th>Actions</th>
                 </tr>
               </thead>
@@ -250,7 +250,7 @@
         <h3>Request Information</h3>
         <p><strong>Date Requested:</strong> <span id="modal-date-requested"></span></p>
         <p><strong>Scheduled Feeding Time:</strong> <span id="modal-datetime-give"></span></p>
-        <p><strong>Requested Volume:</strong> <span id="modal-volume"></span></p>
+        <p><strong>Daily Volume:</strong> <span id="modal-volume"></span></p>
         <p><strong>Request Status:</strong> <span id="modal-status"></span></p>
         <p><strong>Gestational Age:</strong> <span id="modal-gestation-age"></span></p>
         

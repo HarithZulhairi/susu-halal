@@ -109,7 +109,6 @@ th.active-sort .sort-arrow {
 .status {
   padding: 4px 10px;
   border-radius: 12px;
-  font-size: 13px;
 }
 
 .status.approved {
@@ -170,3 +169,4 @@ th.active-sort .sort-arrow {
   padding-bottom: 16px;
   padding-top: 30px;
 }
+
