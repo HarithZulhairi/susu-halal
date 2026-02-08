@@ -219,7 +219,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Route::view('/doctor/milk-request/create', 'doctor.doctor_milk-request-form')->name('doctor.milk-request-form');
     Route::get('/doctor/milk-request/create', [RequestController::class, 'create'])->name('doctor.doctor_milk-request-form');
-    Route::post('/doctor/milk-request/create/store', [RequestController::class, 'storeM'])->name('doctor.doctor_milk-request-store');
+    Route::post('/doctor/milk-request/create/store', [RequestController::class, 'store'])->name('doctor.doctor_milk-request-store');
     Route::delete('/doctor/milk-request/{id}/delete', [RequestController::class, 'delete'])->name('doctor.milk-request-delete');
     
 

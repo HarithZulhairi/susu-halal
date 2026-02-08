@@ -212,7 +212,9 @@
 
     function calculateDispensing() {
         const totalVolume = parseFloat(document.getElementById("entered_volume").value);
-        const method = document.querySelector('input[name="kinship_method"]:checked').value;
+        // Get the selected method value ('yes' or 'no')
+        const methodRadio = document.querySelector('input[name="kinship_method"]:checked');
+        const method = methodRadio ? methodRadio.value : null;
 
         const resultBox = document.getElementById("calculation-result");
         const resYes = document.getElementById("kinship-yes-result");
@@ -223,6 +225,10 @@
         const dripTotalInput     = document.getElementById("drip_total");
         const oralTotalInput     = document.getElementById("oral_total");
         const oralPerFeedInput   = document.getElementById("oral_per_feed");
+
+        // Input Elements to Toggle
+        const tubeSelect = document.getElementById("feeding_tube");
+        // const oralSelect = document.getElementById("oral_feeding"); // Always active per your request
 
         if (isNaN(totalVolume) || totalVolume <= 0) {
             resultBox.style.display = "none";
@@ -239,22 +245,31 @@
 
         if (method === 'yes') {
             /**
-             * ✅ KINSHIP INVOLVED
+             * ✅ KINSHIP INVOLVED (Full Nursing)
+             * - Disable Tube Feeding (not applicable for full nursing/mahram usually)
+             * - Only Oral Feeding active
              */
             resYes.style.display = "block";
             resNo.style.display  = "none";
 
-            // UI
+            // UI Updates
             document.getElementById("vol-per-feed-yes").textContent = `${perFeedKinship} ml`;
+            
+            // Disable Tube Select
+            tubeSelect.disabled = true;
+            tubeSelect.value = ""; // Reset value
+            tubeSelect.style.backgroundColor = "#e9ecef"; // Visual cue
+            tubeSelect.required = false; // Remove required attribute if it was set
 
         } else {
             /**
-             * ❌ NO KINSHIP
+             * ❌ NO KINSHIP (Restricted)
+             * - Enable BOTH Tube and Oral Feeding
              */
             resYes.style.display = "none";
             resNo.style.display  = "block";
 
-            // UI
+            // UI Updates
             document.getElementById("vol-drip").textContent = `${dripTotal} ml`;
             document.getElementById("vol-oral").textContent = `${oralPerFeed} ml`;
 
@@ -262,6 +277,11 @@
                 `<strong>Calculation:</strong>
                 Total ${totalVolume}ml → ${dripTotal}ml (Drip) + ${oralTotal}ml (Oral)<br>
                 Oral ${oralTotal}ml ÷ 12 feeds = <strong>${oralPerFeed} ml/feed</strong>`;
+            
+            // Enable Tube Select
+            tubeSelect.disabled = false;
+            tubeSelect.style.backgroundColor = ""; // Reset style
+            // tubeSelect.required = true; // Optional: Make it required if 'no kinship' is selected
         }
 
         // 🔐 STORE EVERYTHING (ALWAYS)
@@ -294,6 +314,11 @@
             document.getElementById('parent-consent-val').textContent = '-';
             document.getElementById('donor-consent-val').textContent = '-';
         }
+    });
+
+    // Run once on load to set initial state
+    document.addEventListener("DOMContentLoaded", function() {
+        calculateDispensing();
     });
 
 
