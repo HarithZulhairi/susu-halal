@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ParentModel;
 use App\Models\Request as MilkRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Model\Doctor;
 use App\Models\Milk;
 use App\Models\PostBottle;
@@ -76,6 +77,7 @@ class RequestController extends Controller
         // 1. Base Query with Eager Loading
         // Assuming relationship is 'allocations' (plural) for a request having multiple allocated bottles
         $query = MilkRequest::with([
+<<<<<<< Updated upstream
             'parent', 
             'doctor', 
             'allocations.milk' // Changed 'allocation' to 'allocations' (standard naming)
@@ -87,6 +89,23 @@ class RequestController extends Controller
             $query->whereHas('parent', function($q) use ($search) {
                 $q->where('pr_BabyName', 'like', "%{$search}%")
                 ->orWhere('formattedID', 'like', "%{$search}%");
+=======
+            'parent',
+            'doctor',
+            'allocation.postBottle.milk'
+        ]);
+
+
+        /**
+         * ----------------------------------------------------
+         * 2. Search (Baby Name or Parent ID)
+         * ----------------------------------------------------
+         */
+        if (!empty($search)) {
+            $query->whereHas('parent', function ($q) use ($search) {
+                $q->where('pr_BabyName', 'LIKE', "%{$search}%")
+                ->orWhere('formattedID', 'LIKE', "%{$search}%");
+>>>>>>> Stashed changes
             });
         }
 
@@ -122,6 +141,7 @@ class RequestController extends Controller
         $requests->getCollection()->transform(function ($req) {
     // ... (keep allocation mapping) ...
 
+<<<<<<< Updated upstream
             $req->json_data = [
                 // --- EXISTING FIELDS ---
                 'patient_name'   => $req->parent->pr_BabyName ?? '-',
@@ -152,6 +172,57 @@ class RequestController extends Controller
                 'doctor_name'    => $req->doctor->dr_Name ?? 'Unknown',
                 'allergy_info'   => $req->parent->pr_Allergy ?? 'None',
             ];
+=======
+            // Prepare allocated items for Dispense Modal
+            $pendingAllocations = $req->allocation
+                ->whereNull('dispensed_at');
+
+            $req->allocated_items = $pendingAllocations->map(function ($alloc) {
+                return (object) [
+                    'allocation_ID'    => $alloc->allocation_ID,
+                    'post_bottle_code' => $alloc->postBottle->post_bottle_code ?? 'Unknown',
+                    'vol'              => $alloc->allocated_volume,
+                ];
+            });
+
+            // Flatten common fields for Blade / JS
+            $req->patient_name = $req->parent->pr_BabyName ?? '-';
+            $req->formatted_id    = $req->parent->formattedID ?? '-';
+            $req->cubicle      = $req->parent->pr_NICU ?? '-';
+            $req->parent_consent = $req->parent->pr_ConsentStatus ?? '-';
+            $req->date_requested = $req->created_at ? $req->created_at->format('d-m-Y') : '-';
+            $req->feed_time = ($req->feeding_start_date && $req->feeding_start_time) ? 
+            Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i') : '-';
+
+            $req->weight       = $req->parent->pr_BabyCurrentWeight ?? 0;
+            $req->age          = $req->baby_age ?? '-';
+            $req->gestational  = $req->gestational_age ?? '-';
+            $req->feeding_perday  = $req->feeding_perday ?? '-';
+            $req->feeding_interval  = $req->feeding_interval ?? '-';
+
+            $req->volume_per_feed = (float) $req->volume_per_feed;
+            $req->drip_total      = (float) $req->drip_total;
+            $req->oral_total      = (float) $req->oral_total;
+            $req->oral_per_feed   = (float) $req->oral_per_feed;
+
+            $totalAllocations = $req->allocation->count();
+            $dispensedCount   = $req->allocation->whereNotNull('dispensed_at')->count();
+
+            $req->is_fully_dispensed = (
+                $totalAllocations > 0 &&
+                $totalAllocations === $dispensedCount
+            );
+
+            $availableBottleCount = PostBottle::whereNull('pr_ID')
+                ->where('post_expiry_date', '>=', now())
+                ->count();
+
+            $req->can_allocate = $availableBottleCount > 0;
+
+
+
+                        
+>>>>>>> Stashed changes
 
             return $req;
         });
@@ -160,8 +231,10 @@ class RequestController extends Controller
         $milks = Milk::where('milk_Status', 'Storage Completed')
             ->where('milk_shariahApproval', 1)
             ->whereHas('postBottles', function ($q) {
-                $q->whereDate('post_expiry_date', '>=', Carbon::today());
+                $q->where('post_expiry_date', '>=', now())
+                ->whereNull('pr_ID'); // 👈 THIS is now your allocation flag
             })
+<<<<<<< Updated upstream
             ->get();
 
         $postbottles = PostBottle::whereDate('post_expiry_date', '>=', Carbon::today())
@@ -173,6 +246,25 @@ class RequestController extends Controller
             ->get();
 
         return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles'));
+=======
+
+            ->with(['postBottles' => function ($q) {
+                $q->where('post_expiry_date', '>=', now())
+                ->whereNull('pr_ID');
+            }])
+
+            ->get();
+
+
+
+
+        /**
+         * ----------------------------------------------------
+         * 7. Return View
+         * ----------------------------------------------------
+         */
+        return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
+>>>>>>> Stashed changes
     }
 
 
@@ -247,8 +339,68 @@ class RequestController extends Controller
             'status'             => 'Waiting'
         ]);
 
+<<<<<<< Updated upstream
         return response()->json(['success' => true, 'message' => 'Submitted successfully!']);
     }
+=======
+        return response()->json([
+            'success' => true,
+            'message' => 'Milk Request submitted successfully!'
+        ]);
+    }
+    
+public function allocateMilk(Request $request)
+{
+    \Log::info('🔥 ALLOCATE MILK HIT', $request->all());
+
+    $request->validate([
+        'request_id'              => 'required|exists:request,request_ID',
+        'selected_milk'           => 'required|array|min:1',
+        'selected_milk.*.id'      => 'required|exists:post_bottles,id',
+        'selected_milk.*.volume'  => 'required|numeric|min:1',
+        'storage_location'        => 'required|string',
+    ]);
+
+
+    DB::transaction(function () use ($request) {
+
+        // 1. Get the milk request + patient
+        $milkRequest = MilkRequest::with('parent')
+            ->where('request_ID', $request->request_id)
+            ->firstOrFail();
+
+        $patientId = $milkRequest->pr_ID; // 👈 THIS is the receiver
+
+        foreach ($request->selected_milk as $bottle) {
+
+            // 2. Create allocation record
+            Allocation::create([
+                'request_ID'       => $milkRequest->request_ID,
+                'postBottle_ID'    => $bottle['id'],
+                'allocated_volume' => $bottle['volume'],
+                'storage_location' => $request->storage_location,
+                'allocated_at'     => now(),
+            ]);
+
+            // 3. Assign bottle to patient + lock it
+            PostBottle::where('id', $bottle['id'])->update([
+                'pr_ID'                => $patientId,
+                'post_storage_location'=> $request->storage_location,
+            ]);
+        }
+
+        // 4. Update request status
+        $milkRequest->update([
+            'status' => 'Approved'
+        ]);
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Milk allocated and assigned to patient successfully'
+    ]);
+}
+>>>>>>> Stashed changes
 
     public function delete($id)
     {
@@ -261,6 +413,67 @@ class RequestController extends Controller
         ]);
     }
 
+<<<<<<< Updated upstream
+=======
+    public function deleteAllocation(Request $request)
+    {
+        $request->validate([
+            'request_id' => 'required|exists:request,request_ID',
+        ]);
+
+        // 1. Delete all allocation records associated with this request ID
+        Allocation::where('request_ID', $request->request_id)->delete();
+
+        // 2. Find the Milk Request and revert status to 'Waiting'
+        $milkRequest = MilkRequest::findOrFail($request->request_id);
+        $milkRequest->status = 'Waiting';
+        $milkRequest->save();
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Allocation reverted successfully.'
+        ]);
+    }
+
+public function dispenseMilk(Request $request)
+{
+    \Log::info('🧪 DISPENSE REQUEST', $request->all());
+
+    $request->validate([
+        'items' => 'required|array|min:1',
+        'items.*.allocation_id' => 'required|exists:allocation,allocation_ID',
+    ]);
+
+    $dispensedCount = 0;
+
+    DB::transaction(function () use ($request, &$dispensedCount) {
+
+        foreach ($request->items as $item) {
+
+            $allocation = Allocation::where('allocation_ID', $item['allocation_id'])
+                ->whereNull('dispensed_at')
+                ->firstOrFail();
+
+            $allocation->update([
+                'dispensed_at' => now(),
+                'dispensed_by' => auth()->id(),
+            ]);
+
+            $dispensedCount++;
+        }
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => "{$dispensedCount} bottles dispensed successfully."
+    ]);
+}
+
+
+
+
+
+>>>>>>> Stashed changes
     //Infant Weight Record//
 
     public function viewInfantWeightHMMC(Request $request)

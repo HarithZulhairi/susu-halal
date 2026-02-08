@@ -228,7 +228,19 @@ Route::middleware(['auth'])->group(function () {
 
     // Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::get('/nurse/milk-request-list', [RequestController::class, 'viewRequestNurse'])->name('nurse.nurse_milk-request-list');
+<<<<<<< Updated upstream
     Route::post('/nurse/milk-request-list/store', [AllocationController::class, 'allocateMilk'])->name('nurse.allocate.milk');
+=======
+    // Allocate milk (nurse)
+    Route::post(
+        '/nurse/milk-request/allocate',
+        [RequestController::class, 'allocateMilk']
+    )->name('nurse.allocate.milk');
+
+    Route::post('/nurse/dispense-milk', [RequestController::class, 'dispenseMilk'])
+    ->name('nurse.dispense.milk');
+
+>>>>>>> Stashed changes
 
     // Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');

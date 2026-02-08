@@ -5,7 +5,8 @@
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/nurse_milk-request-list.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
@@ -108,8 +109,54 @@
     .dispense-item.checked { background-color: #f0fdf4; }
     .auto-fill-info { font-size: 12px; color: #64748b; margin-top: 4px; display: none; }
     .dispense-item.checked .auto-fill-info { display: block; }
+
+    .consent-badge {
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .consent-badge.approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .consent-badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .consent-badge.rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .consent-badge.unknown {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .status.success {
+    background: #dcfce7;
+    color: #166534;
+    }
+
+    .status.approved {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+
   </style>
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
   <div class="container">
     <div class="main-content">
 
@@ -238,9 +285,76 @@
             </table>
         </div>
 
+<<<<<<< Updated upstream
         <div class="pagination-wrapper">
             {{ $requests->links() }}
         </div>
+=======
+        <table class="records-table" id="requestTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">Patient Name <i class="fas fa-sort sort-icon"></i></th>
+              <th onclick="sortTable(1)">NICU Cubicle <i class="fas fa-sort sort-icon"></i></th>
+              <th onclick="sortTable(2)">Date Requested <i class="fas fa-sort sort-icon"></i></th>
+              <th onclick="sortTable(3)">Feeding Time <i class="fas fa-sort sort-icon"></i></th>
+              <th onclick="sortTable(4)">Status <i class="fas fa-sort sort-icon"></i></th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($requests as $req)
+              <tr>
+                <td>
+                  <div class="patient-info">
+                    <i class="fas fa-baby milk-icon"></i>
+                    <div>
+                      <strong>{{ $req->formatted_id }}</strong><br>
+                      <span>{{ $req->patient_name }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ $req->cubicle }}</td>
+                <td>{{ $req->date_requested }}</td>
+                <td>{{ $req->feed_time }}</td>
+                <td>
+                  @if($req->is_fully_dispensed)
+                    <span class="status success">Fully Dispensed</span>
+
+                @elseif(count($req->allocated_items) > 0)
+                    <span class="status approved">Partially Dispensed</span>
+
+                @else
+                    <span class="status {{ strtolower($req->status) }}">
+                        {{ $req->status }}
+                    </span>
+                @endif
+                </td>
+                <td>
+                   {{-- 1. View Details Icon --}}
+                  <button type="button" class="btn-view" 
+                        onclick='openViewModal(@json($req))' 
+                        title="View Details">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  
+                  {{-- 2. Allocate/Edit Icon --}}
+                  @if($req->can_allocate)
+                    <button type="button" class="btn-view"
+                        style="color: #f59e0b;" 
+                        onclick='openMilkModal(this)'
+                        data-id="{{ $req->request_ID }}"
+                        data-status="{{ $req->status }}"
+                        data-formatted-id="{{ $req->formatted_id }}"
+                        data-patient-name="{{ $req->patient_name }}"
+                        data-weight="{{ $req->weight }}"
+                        data-dob="{{ $req->parent->pr_BabyDOB }}"
+                        data-ward="{{ $req->cubicle }}"
+                        data-volume="{{ $req->total_daily_volume }}"
+                        title="Allocate Milk">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                  @endif
+>>>>>>> Stashed changes
 
       </div>
     </div>
@@ -336,6 +450,10 @@
             </div>
 
         </div>
+<<<<<<< Updated upstream
+=======
+      </div>
+>>>>>>> Stashed changes
     </div>
 </div>
 
@@ -348,10 +466,68 @@
       </div>
       <div class="modal-body">
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 12px; border: 1px solid #bae6fd;">
+<<<<<<< Updated upstream
             <div style="background: white; padding: 10px; border-radius: 50%; color: #0ea5e9;"> <i class="fas fa-user fa-lg"></i> </div>
             <div>
                 <h3 style="margin: 0; color: #0c4a6e; font-size: 16px;">Patient: <span id="modalPatientID"></span></h3>
                 <span style="font-size: 13px; color: #64748b;" id="modalPatientName"></span>
+=======
+          <div style="background: white; padding: 10px; border-radius: 50%; color: #0ea5e9;"> <i class="fas fa-user fa-lg"></i> </div>
+          <div>
+              <h3 style="margin: 0; color: #0c4a6e; font-size: 16px;">Patient: <span id="modalPatientID"></span></h3>
+              <span style="font-size: 13px; color: #64748b;" id="modalPatientName"></span>
+          </div>
+        </div>
+        <form id="milkAllocationForm">
+          <div class="modal-section">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div><label>Baby Current Weight</label><input type="text" class="form-control" id="modalWeight" readonly></div>
+                  <div><label>Date of Birth</label><input type="text" class="form-control" id="modalDob" readonly></div>
+              </div>
+          </div>
+          <div class="modal-section">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                  <div><label>Ward</label><input type="text" class="form-control" id="modalWard" readonly></div>
+                   <div><label>Prescribed Volume (ml)</label><input type="text" class="form-control" id="modalVolume" readonly></div>
+              </div>
+          </div>
+          <div class="modal-section">
+            <label>Milk Unit ID (Select from Inventory)</label>
+            <div id="milkListSelect" class="milk-list">
+              @foreach($milks as $milk)
+                @foreach($milk->postBottles as $bottle)
+                    <div class="milk-item" data-id="{{ $bottle->id }}">
+                        <div style="display: flex; align-items: flex-start; gap: 10px; width: 100%;">
+                            
+                            <input type="checkbox"
+                                name="selected_milk[]"
+                                class="milk-checkbox"
+                                value="{{ $bottle->id }}"
+                                data-volume="{{ $bottle->post_volume }}"
+                                style="margin-top: 5px; cursor: pointer;">
+
+                            <div style="flex-grow: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <strong>
+                                        {{ $bottle->post_bottle_code }}
+                                        — {{ $bottle->post_volume }} ml
+                                    </strong>
+
+                                    <span class="badge-consent">
+                                        <i class="fas fa-check-circle"></i> Donor Consent
+                                    </span>
+                                </div>
+
+                                <span style="font-size: 12px; color: #666;">
+                                    Expires {{ \Carbon\Carbon::parse($bottle->post_expiry_date)->format('M d, Y') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endforeach
+
+>>>>>>> Stashed changes
             </div>
         </div>
         <form id="milkAllocationForm" method="POST" action="{{ route('nurse.allocate.milk') }}">
@@ -431,6 +607,12 @@
   </div>
 
   <script>
+
+    function capitalize(value) {
+        if (!value || typeof value !== 'string') return '-';
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
     // --- 1. VIEW DETAILS LOGIC ---
     function openViewModal(data) {
         // --- Populate Basic Data ---
@@ -450,6 +632,7 @@
         document.getElementById('view-total-vol').textContent = data.total_vol;
 
         document.getElementById('view-start-date').textContent = data.date_requested;
+<<<<<<< Updated upstream
         document.getElementById('view-start-time').textContent = data.feed_time.split(' ')[1] || '-';
         document.getElementById('view-feeds').textContent = data.feeds;
         document.getElementById('view-interval').textContent = data.interval;
@@ -485,9 +668,35 @@
             document.getElementById('view-tube-method').textContent = data.tube_method || 'N/A';
             document.getElementById('view-oral-method').textContent = data.oral_method || 'N/A';
         }
+=======
+        document.getElementById('view-start-time').textContent = data.feed_time?.split(' ')[1] ?? '-';
+        document.getElementById('view-feeds').textContent = data.feeding_perday;
+        document.getElementById('view-interval').textContent = data.feeding_interval;
+
+        // === VOLUMES FROM DATABASE (NO CALCULATION) ===
+        document.getElementById('view-kinship-vol').textContent =
+            data.volume_per_feed ? `${data.volume_per_feed} ml` : '-';
+
+        document.getElementById('view-kinship-interval').textContent =
+            data.feeding_interval ?? '-';
+
+        document.getElementById('view-drip-vol').textContent =
+            data.drip_total ? `${data.drip_total} ml` : '-';
+
+        document.getElementById('view-oral-vol').textContent =
+            data.oral_per_feed ? `${data.oral_per_feed} ml` : '-';
+
+        document.getElementById('view-tube-method').textContent =
+            capitalize(data.feeding_tube);
+
+        document.getElementById('view-oral-method').textContent =
+            capitalize(data.oral_feeding);
+
+>>>>>>> Stashed changes
 
         document.getElementById('viewRequestModal').style.display = 'flex';
     }
+
 
     function closeViewModal() {
         document.getElementById('viewRequestModal').style.display = 'none';
@@ -502,6 +711,7 @@
         document.getElementById("totalVolume").textContent = total;
     }
 
+<<<<<<< Updated upstream
     // Helper to toggle a single milk item
     function toggleMilkSelection(checkbox, isChecked) {
         const id = checkbox.value;
@@ -513,14 +723,32 @@
         if (isChecked) {
             // Add if not exists
             if (!selectedMilkUnits.find(m => m.id == id)) {
+=======
+   function handleSelectionChange(checkbox, milkItemDiv) {
+        const id = parseInt(checkbox.value, 10);   // ✅ BIGINT-safe
+        const volume = parseFloat(
+            checkbox.getAttribute("data-volume")
+        );                                         // ✅ numeric
+
+        if (checkbox.checked) {
+            if (!selectedMilkUnits.find(m => m.id === id)) {
+>>>>>>> Stashed changes
                 selectedMilkUnits.push({ id, volume });
             }
             itemDiv.classList.add("selected");
         } else {
+<<<<<<< Updated upstream
             // Remove
             selectedMilkUnits = selectedMilkUnits.filter(m => m.id != id);
             itemDiv.classList.remove("selected");
         }
+=======
+            selectedMilkUnits = selectedMilkUnits.filter(m => m.id !== id);
+            milkItemDiv.classList.remove("selected");
+        }
+
+        updateTotalVolume();
+>>>>>>> Stashed changes
     }
 
     // Individual Checkbox Event
@@ -546,8 +774,12 @@
     // OPEN MODAL
     function openMilkModal(button) {
         selectedRequestId = button.getAttribute('data-id');
+<<<<<<< Updated upstream
         // ... (Existing populate logic: Name, ID, Weight, etc.) ...
         document.getElementById('modalPatientID').textContent = button.getAttribute('data-patient-id');
+=======
+        document.getElementById('modalPatientID').textContent = button.getAttribute('data-formatted-id');
+>>>>>>> Stashed changes
         document.getElementById('modalPatientName').textContent = button.getAttribute('data-patient-name');
         document.getElementById('modalWeight').value = button.getAttribute('data-weight');
         document.getElementById('modalDob').value = button.getAttribute('data-dob');
@@ -618,12 +850,77 @@
         document.getElementById('milkModal').style.display = 'none';
     }
 
+<<<<<<< Updated upstream
     // --- 3. DISPENSE MODAL LOGIC ---
+=======
+    document.getElementById('milkAllocationForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (selectedMilkUnits.length === 0) {
+            Swal.fire('No Selection', 'Please select at least one bottle.', 'warning');
+            return;
+        }
+
+        console.group("🧪 ALLOCATION DEBUG");
+        console.log("request_id:", selectedRequestId);
+        console.log("selectedMilkUnits:", selectedMilkUnits);
+        console.log("selected_milk (IDs):", selectedMilkUnits.map(m => m.id));
+        console.log("total_volume:", selectedMilkUnits.reduce((s, m) => s + m.volume, 0));
+        console.log("storage_location:", document.getElementById('storageLocation').value);
+        console.groupEnd();
+
+
+        fetch("{{ route('nurse.allocate.milk') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                request_id: selectedRequestId,
+                selected_milk: selectedMilkUnits,
+                storage_location: document.getElementById('storageLocation').value
+            })
+
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+
+                // 1️⃣ Close allocation modal FIRST
+                closeMilkModal();
+
+                // 2️⃣ Then show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Allocated!',
+                    text: data.message || 'Milk allocated successfully',
+                    confirmButtonColor: '#10b981'
+                }).then(() => {
+                    // 3️⃣ Optional: reload after user confirms
+                    location.reload();
+                });
+
+            } else {
+                Swal.fire('Error', data.message || 'Allocation failed', 'error');
+            }
+        })
+
+        .catch(err => {
+            console.error(err);
+            Swal.fire('Error', 'Server error occurred', 'error');
+        });
+    });
+
+    // --- 3. DISPENSE MODAL LOGIC (NEW) ---
+>>>>>>> Stashed changes
     function openDispenseModal(reqData) {
+
         document.getElementById('dispensePatientName').textContent = reqData.patient_name;
         const container = document.getElementById('dispenseListContainer');
         container.innerHTML = '';
 
+<<<<<<< Updated upstream
         if(reqData.allocated_items.length === 0) {
             container.innerHTML = '<p style="text-align:center; color:#999;">No items allocated yet.</p>';
         } else {
@@ -646,8 +943,44 @@
                 container.appendChild(div);
             });
         }
+=======
+        reqData.allocated_items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'dispense-item';
+
+            // ✅ ALWAYS send allocation_ID to backend
+            div.dataset.allocationId = item.allocation_ID;
+
+            const nurseName = "{{ Auth::check() ? Auth::user()->name : 'Nurse Sarah' }}";
+
+            div.innerHTML = `
+                <input type="checkbox" class="dispense-check"
+                    style="width:18px; height:18px; cursor:pointer;"
+                    onchange="toggleDispense(this)">
+
+                <div style="flex:1;">
+                    <div style="font-weight:600; color:#1A5F7A;">
+                        ${item.post_bottle_code}
+                    </div>
+                    <div style="font-size:13px; color:#64748b;">
+                        Volume: ${item.vol} ml
+                    </div>
+                    <div class="auto-fill-info">
+                        <i class="fas fa-clock"></i>
+                        <span class="dispense-time">--:--</span>
+                        &nbsp;|&nbsp;
+                        <i class="fas fa-user-nurse"></i> ${nurseName}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(div);
+        });
+
+>>>>>>> Stashed changes
         document.getElementById('dispenseModal').style.display = 'flex';
-    }
+}
+
 
     function closeDispenseModal() {
         document.getElementById('dispenseModal').style.display = 'none';
@@ -668,6 +1001,7 @@
     }
 
     function saveDispense() {
+<<<<<<< Updated upstream
         const checked = document.querySelectorAll('.dispense-check:checked');
         if (checked.length === 0) {
             Swal.fire('No Selection', 'Please check at least one milk bottle to dispense.', 'warning');
@@ -683,6 +1017,71 @@
     }
 
     // Modal Closing Logic (Outside Click)
+=======
+
+    
+
+    const checkedItems = document.querySelectorAll('.dispense-check:checked');
+
+    console.group("🧪 DISPENSE DEBUG");
+
+    checkedItems.forEach(cb => {
+        const item = cb.closest('.dispense-item');
+        console.log({
+            allocation_id: item.dataset.allocationId,
+            time: item.querySelector('.dispense-time')?.textContent
+        });
+    });
+
+console.groupEnd();
+
+    if (checkedItems.length === 0) {
+        Swal.fire('No Selection', 'Please check at least one milk bottle to dispense.', 'warning');
+        return;
+    }
+
+    const dispenseData = [];
+
+    checkedItems.forEach(cb => {
+        const item = cb.closest('.dispense-item');
+        dispenseData.push({
+            allocation_id: item.dataset.allocationId,
+            dispensed_time: item.querySelector('.dispense-time').textContent
+        });
+    });
+
+    console.group("🧪 DISPENSE DEBUG");
+    console.log(dispenseData);
+    console.groupEnd();
+
+    fetch("{{ route('nurse.dispense.milk') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            items: dispenseData
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            closeDispenseModal();
+            Swal.fire('Dispensed!', data.message, 'success')
+                .then(() => location.reload());
+        } else {
+            Swal.fire('Error', data.message || 'Dispense failed', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire('Error', 'Server error occurred', 'error');
+    });
+}
+
+
+>>>>>>> Stashed changes
     window.addEventListener("click", function(e) {
         if (e.target.classList.contains('modal-overlay')) {
             e.target.style.display = 'none';
