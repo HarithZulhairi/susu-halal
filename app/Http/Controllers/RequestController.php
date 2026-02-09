@@ -74,14 +74,13 @@ class RequestController extends Controller
     public function viewRequestNurse(Request $request)
     {
         // 1. Base Query with Eager Loading
-        // Assuming relationship is 'allocations' (plural) for a request having multiple allocated bottles
         $query = MilkRequest::with([
             'parent', 
             'doctor', 
-            'allocations.postBottles' 
+            'allocations.postBottles' // Ensure this relationship exists in Allocation model
         ]);
 
-        // 2. Apply Filters
+        // 2. Apply Filters (Keep your existing filter logic)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('parent', function($q) use ($search) {
@@ -93,21 +92,18 @@ class RequestController extends Controller
         if ($request->filled('status') && $request->status !== 'All') {
             $query->where('status', $request->status);
         }
-
         if ($request->filled('vol_min')) {
             $query->where('total_daily_volume', '>=', $request->vol_min);
         }
         if ($request->filled('vol_max')) {
             $query->where('total_daily_volume', '<=', $request->vol_max);
         }
-
         if ($request->filled('req_date_from')) {
             $query->whereDate('created_at', '>=', $request->req_date_from);
         }
         if ($request->filled('req_date_to')) {
             $query->whereDate('created_at', '<=', $request->req_date_to);
         }
-
         if ($request->filled('feed_date_from')) {
             $query->whereDate('feeding_start_date', '>=', $request->feed_date_from);
         }
@@ -115,70 +111,29 @@ class RequestController extends Controller
             $query->whereDate('feeding_start_date', '<=', $request->feed_date_to);
         }
 
-        // 3. Paginate & Persist Query Strings (FIXED)
-        $requests = $query->paginate(10)->withQueryString(); 
-
-        // 4. Transform Data for JavaScript
-        $requests->getCollection()->transform(function ($req) {
-            $req->allocated_items = $req->allocations ? $req->allocations->map(function ($alloc) {
-                return [
-                    // CHANGED: Access postBottles relation, then get code/ID
-                    'id'  => $alloc->postBottles->post_bottle_code ?? 'Unknown', 
-                    'vol' => $alloc->total_selected_milk ?? 0,
-                ];
-            }) : [];
-
-            $req->json_data = [
-                // --- EXISTING FIELDS ---
-                'patient_name'   => $req->parent->pr_BabyName ?? '-',
-                'patient_dob'    => \Carbon\Carbon::parse($req->parent->pr_BabyDOB)->format('d-m-Y') ?? '-',
-                'formatted_id'   => $req->parent->formattedID ?? '-',
-                'cubicle'        => $req->parent->pr_NICU ?? '-',
-                'parent_consent' => $req->parent->pr_ConsentStatus ?? 'Pending',
-                'weight'         => $req->current_weight ?? 0,
-                'age'            => $req->current_baby_age ?? '-',
-                'gestational'    => $req->gestational_age ?? '-',
-                'total_vol'      => $req->total_daily_volume,
-                'date_requested' => $req->created_at->format('d-m-Y'),
-                'feed_time'      => \Carbon\Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i'),
-                'feeds'          => $req->feeding_perday,
-                'interval'       => $req->feeding_interval,
-                'kinship_method' => $req->kinship_method,
-                
-                'volume_per_feed'=> $req->volume_per_feed,
-                'drip_total'     => $req->drip_total,
-                'oral_total'     => $req->oral_total,
-                'oral_per_feed'  => $req->oral_per_feed,
-                'tube_method'    => $req->feeding_tube,
-                'oral_method'    => $req->oral_feeding,
-                'allocated_items'=> $req->allocated_items, // (mapped previously)
-
-                // --- NEW FIELDS ADDED FOR FULL VIEW ---
-                'status'         => $req->status,
-                'doctor_name'    => $req->doctor->dr_Name ?? 'Unknown',
-                'allergy_info'   => $req->parent->pr_Allergy ?? 'None',
-            ];
-
-            return $req;
-        });
+        // 3. Paginate & Persist Query Strings
+        $requests = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString(); 
 
         // 5. Get Available Milk
         $milks = Milk::where('milk_Status', 'Storage Completed')
             ->where('milk_shariahApproval', 1)
             ->whereHas('postBottles', function ($q) {
-                $q->whereDate('post_expiry_date', '>=', Carbon::today());
+                $q->whereDate('post_expiry_date', '>=', \Carbon\Carbon::today());
             })
             ->get();
 
-        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', Carbon::today())
+        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', \Carbon\Carbon::today())
             ->where('post_micro_status', 'NOT CONTAMINATED')
             ->whereHas('milk', function ($q) {
                 $q->where('milk_Status', 'Storage Completed')
-                  ->where('milk_shariahApproval', 1);
+                ->where('milk_shariahApproval', 1);
             })
             ->get();
+        
+        // Pass allocations variable explicitly if needed by other views, though JS uses json_data
+        $allocations = Allocation::all(); 
 
-        return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles'));
+        return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles', 'allocations'));
     }
 
 

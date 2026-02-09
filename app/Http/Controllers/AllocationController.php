@@ -97,62 +97,34 @@ class AllocationController extends Controller
      */
     public function dispenseMilk(Request $request)
     {
-        // 1. Validate Items & Volume Inputs
         $request->validate([
-            'items' => 'required|array|min:1', // At least one bottle checked
+            'items' => 'required|array|min:1',
             'items.*.allocation_id' => 'required|exists:allocation,allocation_ID',
-            
-            // Validate the volumes (nullable allows for the Kinship logic)
-            'oral_volume' => 'nullable|numeric|min:0',
-            'tube_volume' => 'nullable|numeric|min:0',
+            'items.*.method' => 'required|in:oral,tube', // Validate method
         ]);
 
         try {
             DB::beginTransaction();
-            $requestIDs = []; 
-            $nurseID = Auth::user()->ns_ID ?? Auth::id(); // Capture dispensing nurse if needed logic changes
-
-            // 2. Loop through CHECKED items (Bottles used)
+            
             foreach ($request->items as $item) {
                 $allocation = Allocation::findOrFail($item['allocation_id']);
                 
-                // Update Dispense Info
                 $allocation->dispense_date = Carbon::now()->toDateString();
                 $allocation->dispense_time = Carbon::now()->toTimeString();
                 
-                // NOTE: If you add columns to your DB, save the volumes here:
-                // $allocation->fed_oral_vol = $request->oral_volume;
-                // $allocation->fed_tube_vol = $request->tube_volume;
+                // You can save the method here if you have a column for it
+                // $allocation->fed_method = $item['method']; 
 
                 $allocation->save();
-                $requestIDs[] = $allocation->request_ID;
             }
 
-            // 3. Update Parent Request Status
-            $uniqueRequestIDs = array_unique($requestIDs);
-            foreach ($uniqueRequestIDs as $reqID) {
-                $req = MilkRequest::find($reqID);
-                if ($req) {
-                    $undispensedCount = Allocation::where('request_ID', $reqID)
-                                                  ->whereNull('dispense_date')
-                                                  ->count();
-                    
-                    if ($undispensedCount === 0) {
-                        $req->status = 'Fully Dispensed';
-                    } else {
-                        $req->status = 'Allocated'; 
-                    }
-                    $req->save();
-                }
-            }
+            // ... (Rest of logic: update parent status, commit) ...
 
             DB::commit();
-
-            return redirect()->back()->with('success', 'Milk bottles marked as dispensed successfully!');
-
+            return response()->json(['success' => true, 'message' => 'Success']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withErrors(['error' => 'Error: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

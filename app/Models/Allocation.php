@@ -41,4 +41,9 @@ class Allocation extends Model
     {
         return $this->belongsTo(Request::class, 'request_ID', 'request_ID');
     }
+
+    public function request()
+    {
+        return $this->belongsTo(Request::class, 'request_ID', 'request_ID');
+    }
 }
