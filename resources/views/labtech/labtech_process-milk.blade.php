@@ -178,7 +178,7 @@
         </div>
 
         <div class="stage-footer">
-            <button type="button" class="btn-submit-stage" onclick="saveStage2Data()">
+            <button type="button" class="btn-submit-stage" onclick="saveStage2Data()" id="btn-save-thaw-status" disabled>
                 <i class="fas fa-save"></i> Save Thawing Status
             </button>
         </div>
@@ -190,7 +190,7 @@
     </div>
 
    {{-- ================================================================================== --}}
-    {{-- STAGE 3: PASTEURIZATION (UPDATED) --}}
+    {{-- STAGE 3: PASTEURIZATION  --}}
     {{-- ================================================================================== --}}
     <div class="process-card stage-content" id="stage3-content"
         data-start="{{ $milk->milk_stage3StartDate ?? '' }}"
@@ -269,14 +269,14 @@
         </div>
 
         <div class="stage-footer">
-        @if(!$milk->milk_stage3StartDate)
-            {{-- You might want to remove simulateSubmit(3) if you want them to save the table instead --}}
-            <button type="button" class="btn-submit-stage" onclick="saveStage3Data()">
-                <i class="fas fa-save"></i> Save Pasteurization Data
-            </button>
-        @else
-            <div class="time-status active">IN PROGRESS / COMPLETED</div>
-        @endif
+            @if(!$milk->milk_stage3StartDate)
+                {{-- ADDED ID HERE --}}
+                <button type="button" class="btn-submit-stage" onclick="saveStage3Data()" id="btn-save-pasteur" disabled>
+                    <i class="fas fa-save"></i> Save Pasteurization Data
+                </button>
+            @else
+                <div class="time-status active">IN PROGRESS / COMPLETED</div>
+            @endif
         </div>
     </form>
 
@@ -366,7 +366,7 @@
         </div>
 
         <div class="stage-footer">
-            <button type="button" class="btn-submit-stage" onclick="saveStage4Data()">
+            <button type="button" class="btn-submit-stage" onclick="saveStage4Data()" id="btn-save-micro" disabled>
                 <i class="fas fa-save"></i> Save Test Results
             </button>
         </div>
@@ -447,7 +447,7 @@
 
         <div class="stage-footer">
         @if(!$milk->milk_stage5StartDate)
-            <button type="button" class="btn-submit-stage" onclick="saveStage5Data()">
+            <button type="button" class="btn-submit-stage" onclick="saveStage5Data()" id="btn-save-storage" disabled>
                 <i class="fas fa-check-circle"></i> Complete Process & Save
             </button>
         @else
@@ -497,55 +497,113 @@
         calculateTotalVolume();        // Stage 1 Calc
         calculatePasteurTotalVolume(); // Stage 3 Calc (Add this line)
 
-        // --- CHECK & UNLOCK NEXT BUTTONS BASED ON SAVED DATA ---
+        // --- BUTTON ELEMENTS ---
+        const btnSave1 = document.querySelector('button[onclick="saveStage1Data()"]');
+        const btnNext1 = document.getElementById('btn-next-stage1');
         
-        // Check Stage 1 Data (Pre-Bottles exist)
-        // We use the PHP variable rendered into JS, or check the DOM table rows
-        const hasStage1Data = {{ $milk->preBottles->count() > 0 ? 'true' : 'false' }};
-        if (hasStage1Data) {
-            const btn1 = document.getElementById('btn-next-stage1');
-            if(btn1) {
-                btn1.disabled = false;
-                btn1.classList.remove('disabled'); // Optional styling class
+        const btnSave2 = document.getElementById('btn-save-thaw-status'); // Ensure ID matches HTML
+        const btnNext2 = document.getElementById('btn-next-stage2');
+
+        const btnSave3 = document.getElementById('btn-save-pasteur'); 
+        const btnNext3 = document.getElementById('btn-next-stage3');
+
+        const btnSave4 = document.querySelector('button[onclick="saveStage4Data()"]');
+        const btnNext4 = document.getElementById('btn-next-stage4');
+
+        const btnSave5 = document.querySelector('button[onclick="saveStage5Data()"]');
+        const btnDone5 = document.getElementById('btn-done-stage5');
+
+        // --- CHECK STAGE COMPLETION STATUS ---
+        // Use PHP variables to check if data exists in DB
+        const isStage1Done = {{ $milk->preBottles->count() > 0 ? 'true' : 'false' }};
+        const isStage2Done = {{ $milk->milk_stage2StartDate ? 'true' : 'false' }};
+        const isStage3Done = {{ $milk->postBottles->count() > 0 ? 'true' : 'false' }};
+        const isStage4Done = {{ $milk->milk_stage4StartDate ? 'true' : 'false' }};
+        const isStage5Done = {{ $milk->milk_stage5StartDate ? 'true' : 'false' }};
+
+        // --- STAGE 1: Always enabled initially ---
+        if (isStage1Done) {
+            if(btnNext1) btnNext1.disabled = false;
+            // Optional: You can disable Save button if you want to lock Stage 1 after saving
+            // if(btnSave1) btnSave1.disabled = true; 
+        }
+
+        // --- STAGE 2: Dependent on Stage 1 ---
+        if (isStage1Done) {
+            if(btnSave2) btnSave2.disabled = false; // Enable Save
+        } else {
+            if(btnSave2) {
+                btnSave2.disabled = true;
+                btnSave2.title = "Complete Stage 1 first";
+                btnSave2.style.opacity = "0.5";
+                btnSave2.style.cursor = "not-allowed";
             }
         }
-
-        // Check Stage 2 Data (Stage 2 End Date is set)
-        const hasStage2Data = {{ $milk->milk_stage2StartDate ? 'true' : 'false' }};
-        if (hasStage2Data) {
-            const btn2 = document.getElementById('btn-next-stage2');
-            if(btn2) btn2.disabled = false;
-        }
-
-        // Check Stage 3 Data (Post-Bottles exist)
-        const hasStage3Data = {{ $milk->postBottles->count() > 0 ? 'true' : 'false' }};
-        if (hasStage3Data) {
-            const btn3 = document.getElementById('btn-next-stage3');
-            if(btn3) btn3.disabled = false;
-        }
-
-        // Check Stage 4 Data (Stage 4 Start Date is set OR Micro results exist)
-        const hasStage4Data = {{ $milk->milk_stage4StartDate ? 'true' : 'false' }};
-        if (hasStage4Data) {
-            const btn4 = document.getElementById('btn-next-stage4');
-            if(btn4) btn4.disabled = false;
-        }
-
-        // --- CHECK STAGE 5 DATA TO UNLOCK DONE BUTTON ---
-        const hasStage5Data = {{ $milk->milk_stage5StartDate ? 'true' : 'false' }};
         
-        if (hasStage5Data) {
-            const btn5 = document.getElementById('btn-done-stage5');
-            if(btn5) {
-                btn5.disabled = false;
-                btn5.style.cursor = 'pointer'; // Restore pointer cursor
-                // Optional: Add a visual cue that it's active
-                btn5.style.opacity = '1'; 
+        if (isStage2Done) {
+            if(btnNext2) btnNext2.disabled = false;
+        }
+
+        // --- STAGE 3: Dependent on Stage 2 ---
+        if (isStage2Done) {
+            if(btnSave3) {
+                btnSave3.disabled = false;
+                btnSave3.style.opacity = "1";
+                btnSave3.style.cursor = "pointer";
             }
         } else {
-            // Ensure it looks disabled if data is missing
-            const btn5 = document.getElementById('btn-done-stage5');
-            if(btn5) btn5.style.opacity = '0.6';
+            if(btnSave3) {
+                btnSave3.disabled = true; // FORCE DISABLE
+                btnSave3.style.opacity = "0.5";
+                btnSave3.style.cursor = "not-allowed";
+                btnSave3.title = "Complete Stage 2 first";
+            }
+        }
+
+        if (isStage3Done) {
+            if(btnNext3) btnNext3.disabled = false;
+        }
+
+        // --- STAGE 4: Dependent on Stage 3 ---
+        if (isStage3Done) {
+            if(btnSave4) btnSave4.disabled = false; // Enable Save
+        } else {
+            if(btnSave4) {
+                btnSave4.disabled = true;
+                btnSave4.title = "Complete Stage 3 first";
+                btnSave4.style.opacity = "0.5";
+                btnSave4.style.cursor = "not-allowed";
+            }
+        }
+
+        if (isStage4Done) {
+            if(btnNext4) btnNext4.disabled = false;
+        }
+
+        // --- STAGE 5: Dependent on Stage 4 ---
+        if (isStage4Done) {
+            if(btnSave5) btnSave5.disabled = false; // Enable Save
+        } else {
+            if(btnSave5) {
+                btnSave5.disabled = true;
+                btnSave5.title = "Complete Stage 4 first";
+                btnSave5.style.opacity = "0.5";
+                btnSave5.style.cursor = "not-allowed";
+            }
+        }
+
+        if (isStage5Done) {
+            if(btnDone5) {
+                btnDone5.disabled = false;
+                btnDone5.style.cursor = 'pointer';
+                btnDone5.style.background = '#10b981'; // Green to indicate success
+            }
+            // Lock previous save buttons if process is fully done (Optional)
+            if(btnSave1) btnSave1.disabled = true;
+            if(btnSave2) btnSave2.disabled = true;
+            if(btnSave3) btnSave3.disabled = true;
+            if(btnSave4) btnSave4.disabled = true;
+            if(btnSave5) btnSave5.disabled = true; 
         }
 
         // --- NEW: AUTO-CALCULATE MICRO STATUS ON LOAD ---

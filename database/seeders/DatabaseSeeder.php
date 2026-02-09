@@ -10,8 +10,13 @@ use App\Models\LabTech;
 use App\Models\Nurse;
 use App\Models\ParentModel;
 use App\Models\ShariahCommittee;
+use App\Models\Milk;
+use App\Models\PreBottle;
+use App\Models\PostBottle;
+use App\Models\Request as MilkRequest;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,8 +25,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1️⃣ Admin
-        HmmcAdmin::create([
+        // --- 1. SEED DEFAULT USERS ---
+
+        $admin = HmmcAdmin::create([
             'ad_NRIC' => '900101010101',
             'ad_Name' => 'HMMC Administrator',
             'ad_Username' => 'hmmc_admin',
@@ -32,8 +38,7 @@ class DatabaseSeeder extends Seeder
             'ad_Gender' => 'Male',
         ]);
 
-        // 2️⃣ Doctor
-        Doctor::create([
+        $doctor = Doctor::create([
             'dr_NRIC' => '910101010101',
             'dr_Name' => 'Default Doctor',
             'dr_Username' => 'dr_default',
@@ -48,8 +53,7 @@ class DatabaseSeeder extends Seeder
             'dr_YearsOfExperience' => 8,
         ]);
 
-        // 3️⃣ Donor
-        Donor::create([
+        $donor = Donor::create([
             'dn_NRIC' => '920202020202',
             'dn_FullName' => 'Default Donor',
             'dn_Username' => 'dn_default',
@@ -63,7 +67,7 @@ class DatabaseSeeder extends Seeder
             'dn_DonationType' => 'Voluntary',
             'dn_Religion' => 'Islam',
             'dn_ExcessBreastMilk' => 'Yes',
-            'dn_MilkQuantity' => ['quantity' => 500, 'unit' => 'ml'], // Saved as JSON array
+            'dn_MilkQuantity' => ['quantity' => 500, 'unit' => 'ml'],
             'dn_InfectionDeseaseRisk' => 'None',
             'dn_Medication' => 'None',
             'dn_RecentIllness' => 'None',
@@ -72,11 +76,10 @@ class DatabaseSeeder extends Seeder
             'dn_MentalHealth' => 'Good',
             'dn_TobaccoAlcohol' => 0,
             'dn_DietaryAlerts' => 'None',
-            'dn_ConsentStatus' => 'Pending',
+            'dn_ConsentStatus' => 'Approved',
         ]);
 
-        // 4️⃣ Lab Technician
-        LabTech::create([
+        $labtech = LabTech::create([
             'lt_Name' => 'Default LabTech',
             'lt_Username' => 'lt_default',
             'lt_Password' => Hash::make('LabTech123'),
@@ -91,8 +94,7 @@ class DatabaseSeeder extends Seeder
             'lt_YearsOfExperience' => 5,
         ]);
 
-        // 5️⃣ Nurse
-        Nurse::create([
+        $nurse = Nurse::create([
             'ns_NRIC' => '940404040404',
             'ns_Name' => 'Default Nurse',
             'ns_Username' => 'ns_default',
@@ -107,8 +109,7 @@ class DatabaseSeeder extends Seeder
             'ns_YearsOfExperience' => 6,
         ]);
 
-        // 6️⃣ Parent
-        ParentModel::create([
+        $parent = ParentModel::create([
             'pr_Name' => 'Default Parent',
             'pr_Password' => Hash::make('Parent123'),
             'pr_NRIC' => '950505050505',
@@ -123,20 +124,122 @@ class DatabaseSeeder extends Seeder
             'pr_BabyCurrentWeight' => '5.1',
         ]);
 
-        // 7️⃣ Shariah Committee
-        ShariahCommittee::create([
-            'sc_NRIC' => '960606060606',
-            'sc_Name' => 'Default Shariah Officer',
+        $shariahCommittee = ShariahCommittee::create([
+            'sc_Name' => 'Default Shariah Member',
             'sc_Username' => 'sc_default',
             'sc_Password' => Hash::make('Shariah123'),
-            'sc_Address' => '89 Shariah Lane, Klang',
             'sc_Contact' => '0186789012',
             'sc_Email' => 'shariah@hmmc.org',
-            'sc_Qualification' => 'BA Islamic Studies',
-            'sc_Certification' => 'Shariah Certified',
-            'sc_Institution' => 'IIUM',
-            'sc_Specialization' => 'Bioethics',
-            'sc_YearsOfExperience' => 4,
+            'sc_NRIC' => '960606060606',
+            'sc_Address' => '89 Shariah Lane, Klang',
+            'sc_Qualification' => 'Bachelor of Islamic Studies',
+            'sc_Certification' => 'Shariah Advisor Certified',
+            'sc_Institution' => 'UIA',
+            'sc_Specialization' => 'Islamic Finance',
+            'sc_YearsOfExperience' => 7,
+        ]);
+
+        // --- 2. SEED MILK DATA ---
+
+        // MILK 1: Storage Completed, Shariah Approved, 100mL
+        $milk1 = Milk::create([
+            'dn_ID' => $donor->dn_ID,
+            'milk_volume' => 120,
+            'milk_Status' => 'Storage Completed',
+            'milk_shariahApproval' => 1, // Approved
+        ]);
+
+        // Create PreBottles for Milk 1
+        PreBottle::create([
+            'milk_ID' => $milk1->milk_ID,
+            'pre_bottle_code' => '#M1-B1',
+            'pre_volume' => 120,
+        ]);
+
+        // Create PostBottles for Milk 1 (Simulate 2 bottles of 50ml)
+        PostBottle::create([
+            'milk_ID' => $milk1->milk_ID,
+            'post_bottle_code' => '#M1-P1',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+        PostBottle::create([
+            'milk_ID' => $milk1->milk_ID,
+            'post_bottle_code' => '#M1-P2',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+        PostBottle::create([
+            'milk_ID' => $milk1->milk_ID,
+            'post_bottle_code' => '#M1-P3',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+        PostBottle::create([
+            'milk_ID' => $milk1->milk_ID,
+            'post_bottle_code' => '#M1-P4',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+
+        // MILK 2: Labelling Completed, 200mL
+        $milk2 = Milk::create([
+            'dn_ID' => $donor->dn_ID,
+            'milk_volume' => 200,
+            'milk_Status' => 'Labelling Completed',
+            'milk_shariahApproval' => 0, // Pending
+        ]);
+
+        PreBottle::create([
+            'milk_ID' => $milk2->milk_ID,
+            'pre_bottle_code' => '#M2-B1',
+            'pre_volume' => 200,
+        ]);
+
+        // --- 3. SEED REQUEST DATA ---
+
+        MilkRequest::create([
+            'dr_ID' => $doctor->dr_ID,
+            'pr_ID' => $parent->pr_ID,
+            'current_weight' => 5.1,
+            'total_daily_volume' => 90,
+            'current_baby_age' => '9 months',
+            'gestational_age' => 38,
+            'kinship_method' => 'no', // Standard non-kinship
+            'volume_per_feed' => 37.5,
+            'drip_total' => 60,
+            'oral_total' => 30,
+            'oral_per_feed' => 7.5,
+            'feeding_tube' => 'Orgogastric',
+            'oral_feeding' => 'Syringe',
+            'feeding_start_date' => Carbon::now()->toDateString(),
+            'feeding_start_time' => '08:00:00',
+            'feeding_perday' => 12,
+            'feeding_interval' => 2,
+            'status' => 'Waiting',
+        ]);
+
+        MilkRequest::create([
+            'dr_ID' => $doctor->dr_ID,
+            'pr_ID' => $parent->pr_ID,
+            'current_weight' => 6.1,
+            'total_daily_volume' => 60,
+            'current_baby_age' => '8 months',
+            'gestational_age' => 38,
+            'kinship_method' => 'yes', // Standard non-kinship
+            'volume_per_feed' => 37.5,
+            'oral_total' => 60,
+            'oral_per_feed' => 7.5,
+            'oral_feeding' => 'Syringe',
+            'feeding_start_date' => Carbon::now()->toDateString(),
+            'feeding_start_time' => '08:00:00',
+            'feeding_perday' => 12,
+            'feeding_interval' => 2,
+            'status' => 'Waiting',
         ]);
     }
 }

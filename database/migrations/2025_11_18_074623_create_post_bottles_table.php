@@ -13,7 +13,6 @@ return new class extends Migration
             
             // Foreign Keys
             $table->unsignedBigInteger('milk_ID'); 
-            $table->unsignedBigInteger('pr_ID')->nullable(); 
             
             // Stage 3, 4 & 5 Attributes (Prefixed with 'post_')
             $table->string('post_bottle_code'); // e.g., "M1-P1"
@@ -36,7 +35,6 @@ return new class extends Migration
 
             // Constraints
             $table->foreign('milk_ID')->references('milk_ID')->on('milk')->onDelete('cascade');
-            $table->foreign('pr_ID')->references('pr_ID')->on('parent')->onDelete('set null');
         });
     }
 

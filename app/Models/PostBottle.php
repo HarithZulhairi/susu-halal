@@ -13,7 +13,6 @@ class PostBottle extends Model
 
     protected $fillable = [
         'milk_ID', 
-        'pr_ID', 
         'post_bottle_code', 
         'post_volume',
         'post_pasteurization_date', 
@@ -30,9 +29,9 @@ class PostBottle extends Model
         return $this->belongsTo(Milk::class, 'milk_ID', 'milk_ID');
     }
 
-    // Relationship to Parent (Receiver)
-    public function parent()
+    public function allocations()
     {
-        return $this->belongsTo(ParentModel::class, 'pr_ID', 'pr_ID');
+        return $this->hasMany(Allocation::class, 'post_ID', 'post_ID');
     }
+
 }

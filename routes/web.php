@@ -225,17 +225,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::view('/nurse/allocate-milk', 'nurse.nurse_allocate-milk')->name('nurse.allocate-milk');
     Route::post('/nurse/allocate/delete', [RequestController::class, 'deleteAllocation'])->name('nurse.allocate.delete');
+    Route::post('/nurse/dispense-milk', [AllocationController::class, 'dispenseMilk'])->name('nurse.dispense.milk');
 
     // Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::get('/nurse/milk-request-list', [RequestController::class, 'viewRequestNurse'])->name('nurse.nurse_milk-request-list');
-    // Allocate milk (nurse)
-    Route::post(
-        '/nurse/milk-request/allocate',
-        [RequestController::class, 'allocateMilk']
-    )->name('nurse.allocate.milk');
-
-    Route::post('/nurse/dispense-milk', [RequestController::class, 'dispenseMilk'])
-    ->name('nurse.dispense.milk');
+    Route::post('/nurse/milk-request-list/store', [AllocationController::class, 'allocateMilk'])->name('nurse.allocate.milk');
+    Route::post('/nurse/log-feed-record', [AllocationController::class, 'logFeedRecord'])->name('nurse.log-feed-record');
+    Route::post('/nurse/save-feeding-plan', [AllocationController::class, 'saveFeedingPlan'])->name('nurse.save-feeding-plan');
 
     // Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');

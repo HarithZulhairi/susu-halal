@@ -11,17 +11,30 @@ class Allocation extends Model
 
     protected $fillable = [
         'request_ID',
-        'postBottle_ID',
-        'allocated_volume',
+        'post_ID',
+        'ns_ID',
+        'total_selected_milk',
         'storage_location',
-        'allocated_at',
-        'dispensed_at',
-        'dispensed_by',
+        'allocation_milk_date_time',
+        'feeding_method',
+        'is_consumed',
     ];
 
-    public function postBottle()
+    protected $casts = [
+        'allocation_milk_date_time' => 'array',
+        'is_consumed' => 'boolean',
+    ];
+
+    // Relationship to Post Bottle
+    public function postBottles()
     {
-        return $this->belongsTo(PostBottle::class, 'postBottle_ID');
+        return $this->belongsTo(PostBottle::class, 'post_ID', 'post_ID');
+    }
+
+    // Relationship to Nurse
+    public function nurse()
+    {
+        return $this->belongsTo(Nurse::class, 'ns_ID', 'ns_ID');
     }
 
     // Relationship to the Milk Request
@@ -29,5 +42,14 @@ class Allocation extends Model
     {
         return $this->belongsTo(Request::class, 'request_ID', 'request_ID');
     }
-}
 
+    public function request()
+    {
+        return $this->belongsTo(Request::class, 'request_ID', 'request_ID');
+    }
+
+    public function feedRecords()
+    {
+        return $this->hasMany(FeedRecord::class, 'allocation_ID', 'allocation_ID');
+    }
+}

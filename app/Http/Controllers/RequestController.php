@@ -75,44 +75,37 @@ class RequestController extends Controller
     public function viewRequestNurse(Request $request)
     {
         // 1. Base Query with Eager Loading
-        // Assuming relationship is 'allocations' (plural) for a request having multiple allocated bottles
         $query = MilkRequest::with([
-            'parent',
-            'doctor',
-            'allocation.postBottle.milk'
+            'parent', 
+            'doctor', 
+            'allocations.postBottles',
+            'allocations.feedRecords.nurse' 
         ]);
 
-
-        /**
-         * ----------------------------------------------------
-         * 2. Search (Baby Name or Parent ID)
-         * ----------------------------------------------------
-         */
-        if (!empty($search)) {
-            $query->whereHas('parent', function ($q) use ($search) {
-                $q->where('pr_BabyName', 'LIKE', "%{$search}%")
-                ->orWhere('formattedID', 'LIKE', "%{$search}%");
+        // 2. Apply Filters (Keep your existing filter logic)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('parent', function($q) use ($search) {
+                $q->where('pr_BabyName', 'like', "%{$search}%")
+                ->orWhere('formattedID', 'like', "%{$search}%");
             });
         }
 
         if ($request->filled('status') && $request->status !== 'All') {
             $query->where('status', $request->status);
         }
-
         if ($request->filled('vol_min')) {
             $query->where('total_daily_volume', '>=', $request->vol_min);
         }
         if ($request->filled('vol_max')) {
             $query->where('total_daily_volume', '<=', $request->vol_max);
         }
-
         if ($request->filled('req_date_from')) {
             $query->whereDate('created_at', '>=', $request->req_date_from);
         }
         if ($request->filled('req_date_to')) {
             $query->whereDate('created_at', '<=', $request->req_date_to);
         }
-
         if ($request->filled('feed_date_from')) {
             $query->whereDate('feeding_start_date', '>=', $request->feed_date_from);
         }
@@ -120,90 +113,30 @@ class RequestController extends Controller
             $query->whereDate('feeding_start_date', '<=', $request->feed_date_to);
         }
 
-        // 3. Paginate & Persist Query Strings (FIXED)
-        $requests = $query->paginate(10)->withQueryString(); 
-
-        // 4. Transform Data for JavaScript
-        $requests->getCollection()->transform(function ($req) {
-    // ... (keep allocation mapping) ...
-
-            // Prepare allocated items for Dispense Modal
-            $pendingAllocations = $req->allocation
-                ->whereNull('dispensed_at');
-
-            $req->allocated_items = $pendingAllocations->map(function ($alloc) {
-                return (object) [
-                    'allocation_ID'    => $alloc->allocation_ID,
-                    'post_bottle_code' => $alloc->postBottle->post_bottle_code ?? 'Unknown',
-                    'vol'              => $alloc->allocated_volume,
-                ];
-            });
-
-            // Flatten common fields for Blade / JS
-            $req->patient_name = $req->parent->pr_BabyName ?? '-';
-            $req->formatted_id    = $req->parent->formattedID ?? '-';
-            $req->cubicle      = $req->parent->pr_NICU ?? '-';
-            $req->parent_consent = $req->parent->pr_ConsentStatus ?? '-';
-            $req->date_requested = $req->created_at ? $req->created_at->format('d-m-Y') : '-';
-            $req->feed_time = ($req->feeding_start_date && $req->feeding_start_time) ? 
-            Carbon::parse($req->feeding_start_date . ' ' . $req->feeding_start_time)->format('d-m-Y H:i') : '-';
-
-            $req->weight       = $req->parent->pr_BabyCurrentWeight ?? 0;
-            $req->age          = $req->baby_age ?? '-';
-            $req->gestational  = $req->gestational_age ?? '-';
-            $req->feeding_perday  = $req->feeding_perday ?? '-';
-            $req->feeding_interval  = $req->feeding_interval ?? '-';
-
-            $req->volume_per_feed = (float) $req->volume_per_feed;
-            $req->drip_total      = (float) $req->drip_total;
-            $req->oral_total      = (float) $req->oral_total;
-            $req->oral_per_feed   = (float) $req->oral_per_feed;
-
-            $totalAllocations = $req->allocation->count();
-            $dispensedCount   = $req->allocation->whereNotNull('dispensed_at')->count();
-
-            $req->is_fully_dispensed = (
-                $totalAllocations > 0 &&
-                $totalAllocations === $dispensedCount
-            );
-
-            $availableBottleCount = PostBottle::whereNull('pr_ID')
-                ->where('post_expiry_date', '>=', now())
-                ->count();
-
-            $req->can_allocate = $availableBottleCount > 0;
-
-
-
-                        
-
-            return $req;
-        });
+        // 3. Paginate & Persist Query Strings
+        $requests = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString(); 
 
         // 5. Get Available Milk
         $milks = Milk::where('milk_Status', 'Storage Completed')
             ->where('milk_shariahApproval', 1)
             ->whereHas('postBottles', function ($q) {
-                $q->where('post_expiry_date', '>=', now())
-                ->whereNull('pr_ID'); // 👈 THIS is now your allocation flag
+                $q->whereDate('post_expiry_date', '>=', \Carbon\Carbon::today());
             })
-
-            ->with(['postBottles' => function ($q) {
-                $q->where('post_expiry_date', '>=', now())
-                ->whereNull('pr_ID');
-            }])
-
             ->get();
 
+        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', \Carbon\Carbon::today())
+            ->where('post_micro_status', 'NOT CONTAMINATED')
+            ->whereDoesntHave('allocations')
+            ->whereHas('milk', function ($q) {
+                $q->where('milk_Status', 'Storage Completed')
+                ->where('milk_shariahApproval', 1);
+            })
+            ->get();
+        
+        // Pass allocations variable explicitly if needed by other views, though JS uses json_data
+        $allocations = Allocation::all(); 
 
-
-
-        /**
-         * ----------------------------------------------------
-         * 7. Return View
-         * ----------------------------------------------------
-         */
-        return view('nurse.nurse_milk-request-list', compact('requests', 'milks'));
+        return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles', 'allocations'));
     }
 
 
