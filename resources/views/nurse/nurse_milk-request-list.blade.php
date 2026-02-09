@@ -358,7 +358,7 @@
                     <div class="info-grid">
                         <div class="info-item"> 
                             <label>Volume Per Feed</label> 
-                            <p class="highlight"><span id="view-kinship-vol"></span> ml</p> 
+                            <p class="highlight"><span id="view-kinship-vol"></span></p> 
                             <small style="color:#64748b;">Direct Oral Feed Via: <b><span id="view-kinship-oral-method"></span></b></small>
                         </div>
                     </div>
@@ -370,12 +370,12 @@
                     <div class="info-grid">
                         <div class="info-item"> 
                             <label>Drip / Tube Feed</label> 
-                            <p class="highlight"><span id="view-drip-vol"></span> ml</p> 
+                            <p class="highlight"><span id="view-drip-vol"></span></p> 
                             <small style="color:#64748b;">Via: <b><span id="view-tube-method"></span></b></small>
                         </div>
                         <div class="info-item"> 
                             <label>Direct Oral Feed</label> 
-                            <p class="highlight"><span id="view-oral-vol"></span> ml</p> 
+                            <p class="highlight"><span id="view-oral-vol"></span></p> 
                             <small style="color:#64748b;">Via: <b><span id="view-oral-method"></span></b></small>
                         </div>
                     </div>
@@ -479,61 +479,67 @@
                     <button class="modal-close-btn" onclick="closeDispenseModal()">Close</button>
                 </div>
                 
-                <div class="modal-body">
-                    {{-- STEP 1: SELECTION SCREEN --}}
-                    <div id="dispense-step-selection">
-                        <div style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="margin:0; font-size: 14px; color: #0369a1;">Total Volume: <strong>450 ml</strong> (15 bottles)</p>
-                                <p style="margin:0; font-size: 12px; color: #0c4a6e;">Select bottles for <strong>Tube Feeding</strong>.</p>
-                            </div>
-                            {{-- REAL TIME COUNTER --}}
-                            <div style="text-align: right; background: white; padding: 8px 15px; border-radius: 8px; border: 1px solid #bae6fd;">
-                                <label style="font-size: 10px; color: #64748b; display: block; text-transform: uppercase;">Selected Tube Vol</label>
-                                <strong style="font-size: 18px; color: #ef4444;"><span id="current-tube-total">0</span> ml</strong>
-                            </div>
-                        </div>
-
-                        <div class="info-section">
-                            <h3><i class="fas fa-tasks"></i> Select Bottles</h3>
-                            <div id="bottle-selection-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 300px; overflow-y: auto; padding: 5px;"></div>
-                        </div>
-
-                        <button type="button" class="btn-filter" style="width:100%; padding: 15px;" onclick="confirmBottleAllocation()">CONFIRM ALLOCATION</button>
-                    </div>
-
-                    {{-- STEP 2: CONFIRMED VIEW --}}
-                    <div id="dispense-step-confirmed" style="display: none;">
-                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1A5F7A;">
-                            <p style="margin:0; font-size: 14px; color: #64748b;">Patient: <strong id="dispensePatientName" style="color:#1e293b;">Baby Default</strong></p>
-                        </div>
-
-                        <div class="info-section">
-                            <h3 style="color: #ef4444;"><i class="fas fa-syringe"></i> 1. Tube / Drip Feeding Results (<span id="final-tube-vol">0</span> ml)</h3>
-                            <div id="tube-confirmed-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px;"></div>
-                            <div class="dispense-item">
-                                <label style="display:flex; width:100%; align-items:center; justify-content: space-between; cursor:pointer;">
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <input type="checkbox" class="feed-check" onchange="markAsDone(this)">
-                                        <strong>Verify Full Tube Feed</strong>
+                    <div class="modal-body">
+                        <form id="dispenseForm" method="POST" action="{{ route('nurse.log-feed-record') }}">
+                            @csrf
+                            <input type="hidden" name="request_id" id="dispenseRequestID" value="">
+                            {{-- STEP 1: SELECTION SCREEN --}}
+                            <div id="dispense-step-selection">
+                                <div style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <p style="margin:0; font-size: 14px; color: #0369a1;">Total Volume: <strong>{{ $req->drip_total }} ml</strong></p>
+                                        <p style="margin:0; font-size: 12px; color: #0c4a6e;">Select bottles for <strong>Tube Feeding</strong>.</p>
                                     </div>
-                                    <div class="stamp-info">--:--</div>
-                                </label>
+                                    {{-- REAL TIME COUNTER --}}
+                                    <div style="text-align: right; background: white; padding: 8px 15px; border-radius: 8px; border: 1px solid #bae6fd;">
+                                        <label style="font-size: 10px; color: #64748b; display: block; text-transform: uppercase;">Selected Tube Vol</label>
+                                        <strong style="font-size: 18px; color: #ef4444;"><span id="current-tube-total">0</span> ml</strong>
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <h3><i class="fas fa-tasks"></i> Select Bottles </h3>
+                                    <div id="bottle-selection-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 300px; overflow-y: auto; padding: 5px;"></div>
+                                </div>
+
+                                <button type="button" class="btn-filter" style="width:100%; padding: 15px;" onclick="confirmBottleAllocation()">CONFIRM ALLOCATION</button>
                             </div>
-                        </div>
 
-                        <div class="info-section">
-                            <h3 style="color: #10b981;"><i class="fas fa-baby-carriage"></i> 2. Oral Feeding Results (<span id="final-oral-vol">0</span> ml)</h3>
-                            <div id="oral-confirmed-container"></div>
-                        </div>
+                            {{-- STEP 2: CONFIRMED VIEW --}}
+                            <div id="dispense-step-confirmed" style="display: none;">
+                                <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #1A5F7A;">
+                                    <p style="margin:0; font-size: 14px; color: #64748b;">Patient: <strong id="dispensePatientName" style="color:#1e293b;">Baby Default</strong></p>
+                                </div>
 
-                        {{-- ACTION BUTTONS --}}
-                        <div id="final-action-buttons" style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button type="button" class="btn-reset" style="flex: 1;" onclick="resetToSelection()">RE-ALLOCATE BOTTLES</button>
-                            <button type="button" class="btn-filter" style="flex: 1;" onclick="finalizeDispensing()">CONFIRM & LOCK</button>
-                        </div>
+                                <div class="info-section">
+                                    <h3 style="color: #ef4444;"><i class="fas fa-syringe"></i> 1. Tube / Drip Feeding Results (<span id="final-tube-vol">0</span> ml)</h3>
+                                    <div id="tube-confirmed-list" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px;"></div>
+                                    <div class="dispense-item">
+                                        <label style="display:flex; width:100%; align-items:center; justify-content: space-between; cursor:pointer;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <input type="checkbox" class="feed-check" onchange="markAsDone(this)">
+                                                <strong>Verify Full Tube Feed</strong>
+                                            </div>
+                                            <div class="stamp-info">--:--</div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="info-section">
+                                    <h3 style="color: #10b981;"><i class="fas fa-baby-carriage"></i> 2. Oral Feeding Results (<span id="final-oral-vol">0</span> ml)</h3>
+                                    <div id="oral-confirmed-container"></div>
+                                </div>
+
+                                {{-- ACTION BUTTONS --}}
+                                <div id="final-action-buttons" style="display: flex; gap: 10px; margin-top: 15px;">
+                                    <button type="button" class="btn-reset" style="flex: 1;" onclick="resetToSelection()">RE-ALLOCATE BOTTLES</button>
+                                    <button type="button" class="btn-filter" style="flex: 1;" onclick="finalizeDispensing()">CONFIRM & LOCK</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </div>
+                
+                
             </div>
         </div>
 
@@ -744,30 +750,63 @@
         const bottleVol = 30;
 
         function openDispenseModal(data) {
+            // 1. Reset UI States
             document.getElementById('dispense-step-selection').style.display = 'block';
             document.getElementById('dispense-step-confirmed').style.display = 'none';
-            document.getElementById('final-action-buttons').style.display = 'flex'; // Reset buttons visibility
+            document.getElementById('final-action-buttons').style.display = 'flex'; 
             document.getElementById('current-tube-total').textContent = "0";
 
+            // 2. Populate Bottle Grid from Data
             const selectionGrid = document.getElementById('bottle-selection-grid');
             selectionGrid.innerHTML = '';
 
-            for (let i = 1; i <= totalBottles; i++) {
-                const bottleId = `B${i < 10 ? '0' + i : i}`;
-                selectionGrid.innerHTML += `
-                    <label style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; background: white;">
-                        <input type="checkbox" class="tube-alloc-check" value="${bottleId}" onchange="updateTubeCounter()">
-                        <span style="font-size: 12px; font-weight: 600;">#${bottleId}</span>
-                    </label>
-                `;
+            // Safety check for allocations array
+            const allocations = data.allocations || [];
+
+            if (allocations.length === 0) {
+                selectionGrid.innerHTML = '<p style="grid-column: span 3; text-align: center; color: #94a3b8; padding: 20px;">No bottles allocated for this request.</p>';
+            } else {
+                allocations.forEach(item => {
+                    // Determine status
+                    const isDispensed = item.dispense_date !== null;
+                    const bottleCode = item.post_bottles ? item.post_bottles.post_bottle_code : 'Unknown';
+                    const volume = item.total_selected_milk || 0;
+                    
+                    // Skip already dispensed bottles if you only want to select fresh ones for the plan
+                    // (Remove this if check if you want to see all)
+                    if (isDispensed) return; 
+
+                    selectionGrid.innerHTML += `
+                        <label style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; background: white; transition: all 0.2s;">
+                            <input type="checkbox" class="tube-alloc-check" 
+                                value="${item.allocation_ID}" 
+                                data-vol="${volume}" 
+                                onchange="updateTubeCounter()">
+                            
+                            <div style="line-height: 1.2;">
+                                <span style="font-size: 12px; font-weight: 700; color: #1e293b; display: block;">${bottleCode}</span>
+                                <span style="font-size: 11px; color: #64748b;">${volume} ml</span>
+                            </div>
+                        </label>
+                    `;
+                });
             }
+            
+            // 3. Show Modal
             document.getElementById('dispenseModal').style.display = 'flex';
         }
 
         // Real-time counter logic
         function updateTubeCounter() {
-            const checkedCount = document.querySelectorAll('.tube-alloc-check:checked').length;
-            document.getElementById('current-tube-total').textContent = checkedCount * bottleVol;
+            let total = 0;
+            const checkboxes = document.querySelectorAll('.tube-alloc-check:checked');
+            
+            checkboxes.forEach(cb => {
+                // Parse the volume from the data attribute we added above
+                total += parseFloat(cb.getAttribute('data-vol')) || 0;
+            });
+
+            document.getElementById('current-tube-total').textContent = total;
         }
 
         function confirmBottleAllocation() {
@@ -811,6 +850,7 @@
         }
 
         function finalizeDispensing() {
+            closeDispenseModal();
             Swal.fire({
                 title: 'Finalize Allocation?',
                 text: "The distribution methods will be locked.",
@@ -843,18 +883,31 @@
             return html;
         }
 
-        function markAsDone(checkbox) {
-            const parent = checkbox.closest('.sub-feed-item') || checkbox.closest('.dispense-item');
-            const stamp = parent.querySelector('.stamp-info');
-            const nurseName = "{{ Auth::user()->name ?? 'Default Nurse' }}"; 
-            
-            if (checkbox.checked) {
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                stamp.innerHTML = `<i class="fas fa-check"></i> ${nurseName} at ${timeStr}`;
-                stamp.style.display = 'inline-block';
-                checkbox.disabled = true; 
-            }
+        function markAsDone(checkbox, allocationId, volume) {
+            if (!checkbox.checked) return;
+
+            fetch("{{ route('nurse.log-feed-record') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    allocation_id: allocationId,
+                    fed_volume: volume // e.g., 7.5
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI with the nurse name and time returned by backend
+                    const parent = checkbox.closest('.sub-feed-item');
+                    const stamp = parent.querySelector('.stamp-info');
+                    stamp.innerHTML = `<i class="fas fa-check"></i> ${data.nurse_name} at ${data.time}`;
+                    stamp.style.display = 'inline-block';
+                    checkbox.disabled = true;
+                }
+            });
         }
 
         function resetToSelection() {
@@ -916,17 +969,37 @@
     }
 
     function toggleDispense(checkbox) {
+        // Find the parent container
         const item = checkbox.closest('.dispense-item');
+        // Find the time span within this container
         const timeSpan = item.querySelector('.dispense-time');
         
         if (checkbox.checked) {
+            // Add highlight class
             item.classList.add('checked');
+            
+            // Get current time
             const now = new Date();
-            timeSpan.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Update time text
+            timeSpan.textContent = timeString;
+            // Make the status text bold and green for better visibility
+            timeSpan.style.color = 'green';
+            timeSpan.style.fontWeight = 'bold';
         } else {
+            // Remove highlight class
             item.classList.remove('checked');
+            
+            // Reset time text
             timeSpan.textContent = '--:--';
+            // Reset styles
+            timeSpan.style.color = '';
+            timeSpan.style.fontWeight = '';
         }
+
+        // Recalculate totals after toggle
+        recalcDispenseTotals();
     }
 
     function saveDispense() {

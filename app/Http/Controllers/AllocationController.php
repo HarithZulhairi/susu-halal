@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Allocation;
+use App\Models\FeedRecord;
+use App\Models\Nurse;
 use App\Models\Request as MilkRequest; 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth; // Import Auth
 use Carbon\Carbon;
+
 
 class AllocationController extends Controller
 {
@@ -146,5 +149,96 @@ class AllocationController extends Controller
             'success' => true, 
             'message' => 'Allocation reverted successfully.'
         ]);
+    }
+
+    /**
+     * STEP 1: Save the Feeding Plan
+     * Triggered when "CONFIRM ALLOCATION" is clicked in the modal selection grid.
+     */
+    public function saveFeedingPlan(Request $request)
+    {
+        $request->validate([
+            'request_id' => 'required|exists:request,request_ID',
+            'items' => 'required|array',
+            'items.*.allocation_id' => 'required|exists:allocation,allocation_ID',
+            'items.*.method' => 'required|in:tube,oral'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($request->items as $item) {
+                Allocation::where('allocation_ID', $item['allocation_id'])->update([
+                    'feeding_method' => $item['method'],
+                    'dispense_date' => now()->toDateString(),
+                    'dispense_time' => now()->toTimeString(),
+                ]);
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Feeding plan saved.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * STEP 2: Log a single feed tick
+     * Triggered when a 7.5ml checkbox is ticked or Tube is verified.
+     */
+    public function logFeedRecord(Request $request)
+    {
+        $request->validate([
+            'allocation_id' => 'required|exists:allocation,allocation_ID',
+            'fed_volume' => 'required|numeric|min:0.1'
+        ]);
+
+        try {
+            // Find current Nurse ID linked to User
+            $nurse = Nurse::where('user_id', Auth::id())->first();
+            if (!$nurse) {
+                return response()->json(['success' => false, 'message' => 'Nurse profile not found.'], 403);
+            }
+
+            $record = FeedRecord::create([
+                'allocation_ID' => $request->allocation_id,
+                'ns_ID' => $nurse->ns_ID,
+                'fed_volume' => $request->fed_volume,
+                'fed_at' => now(),
+            ]);
+
+            // Check if bottle is now fully consumed
+            $allocation = Allocation::with('feedRecords')->find($request->allocation_id);
+            $totalFed = $allocation->feedRecords->sum('fed_volume');
+
+            if ($totalFed >= $allocation->total_selected_milk) {
+                $allocation->update(['is_consumed' => true]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'nurse_name' => $nurse->ns_Name,
+                'time' => $record->fed_at->format('h:i A')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * STEP 3: Finalize ("Confirm & Lock")
+     */
+    public function finalizeDispensing(Request $request)
+    {
+        $request->validate([
+            'request_id' => 'required|exists:request,request_ID'
+        ]);
+
+        $milkRequest = MilkRequest::findOrFail($request->request_id);
+        $milkRequest->status = 'Fully Dispensed';
+        $milkRequest->save();
+
+        return response()->json(['success' => true, 'message' => 'Feeding results locked.']);
     }
 }

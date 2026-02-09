@@ -18,10 +18,13 @@ class Allocation extends Model
         'allocation_milk_date_time',
         'dispense_date',
         'dispense_time',
+        'feeding_method',
+        'is_consumed',
     ];
 
     protected $casts = [
         'allocation_milk_date_time' => 'array',
+        'is_consumed' => 'boolean',
     ];
 
     // Relationship to Post Bottle
@@ -45,5 +48,10 @@ class Allocation extends Model
     public function request()
     {
         return $this->belongsTo(Request::class, 'request_ID', 'request_ID');
+    }
+
+    public function feedRecords()
+    {
+        return $this->hasMany(FeedRecord::class, 'allocation_ID', 'allocation_ID');
     }
 }

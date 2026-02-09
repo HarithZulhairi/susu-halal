@@ -22,10 +22,12 @@ return new class extends Migration
 
             // Milk attributes
             $table->integer('total_selected_milk');
-            $table->string('storage_location');
+            $table->string('storage_location')->nullable();
             $table->string('allocation_milk_date_time')->nullable();
             $table->date('dispense_date')->nullable();
             $table->time('dispense_time')->nullable();
+            $table->string('feeding_method')->nullable();
+            $table->boolean('is_consumed')->default(false);
 
             $table->timestamps();
 
