@@ -16,8 +16,6 @@ class Allocation extends Model
         'total_selected_milk',
         'storage_location',
         'allocation_milk_date_time',
-        'dispense_date',
-        'dispense_time',
         'feeding_method',
         'is_consumed',
     ];

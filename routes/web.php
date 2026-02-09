@@ -230,21 +230,12 @@ Route::middleware(['auth'])->group(function () {
     // Route::view('/nurse/milk-request-list', 'nurse.nurse_milk-request-list')->name('nurse.milk-request-list');
     Route::get('/nurse/milk-request-list', [RequestController::class, 'viewRequestNurse'])->name('nurse.nurse_milk-request-list');
     Route::post('/nurse/milk-request-list/store', [AllocationController::class, 'allocateMilk'])->name('nurse.allocate.milk');
+    Route::post('/nurse/log-feed-record', [AllocationController::class, 'logFeedRecord'])->name('nurse.log-feed-record');
+    Route::post('/nurse/save-feeding-plan', [AllocationController::class, 'saveFeedingPlan'])->name('nurse.save-feeding-plan');
 
     // Route::view('/nurse/set-infant-weight', 'nurse.nurse_set-infant-weight')->name('nurse.set-infant-weight');
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
     Route::post('/nurse/set-infant-weight/update', [RequestController::class, 'updateInfantWeightNurse'])->name('nurse.nurse_infant-weight.update');
-
-    Route::prefix('nurse')->name('nurse.')->middleware(['auth', 'user-access:nurse'])->group(function () {
-        // Selection/Plan logic
-        Route::post('/save-feeding-plan', [AllocationController::class, 'saveFeedingPlan'])->name('save-feeding-plan');
-        
-        // Incremental log logic
-        Route::post('/log-feed-record', [AllocationController::class, 'logFeedRecord'])->name('log-feed-record');
-        
-        // Finalize logic
-        Route::post('/finalize-feeding', [AllocationController::class, 'finalizeDispensing'])->name('finalize-feeding');
-    });
 
     Route::get('/parent/my-infant-request',
     [RequestController::class, 'viewMyInfantMilkRequests'])

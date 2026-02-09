@@ -29,4 +29,9 @@ class PostBottle extends Model
         return $this->belongsTo(Milk::class, 'milk_ID', 'milk_ID');
     }
 
+    public function allocations()
+    {
+        return $this->hasMany(Allocation::class, 'post_ID', 'post_ID');
+    }
+
 }

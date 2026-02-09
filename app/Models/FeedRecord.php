@@ -9,6 +9,8 @@ class FeedRecord extends Model
     protected $table = 'feed_records';
     protected $primaryKey = 'feed_id';
 
+    public $timestamps = false;
+
     protected $fillable = [
         'allocation_ID',
         'ns_ID',

@@ -124,6 +124,21 @@ class DatabaseSeeder extends Seeder
             'pr_BabyCurrentWeight' => '5.1',
         ]);
 
+        $shariahCommittee = ShariahCommittee::create([
+            'sc_Name' => 'Default Shariah Member',
+            'sc_Username' => 'sc_default',
+            'sc_Password' => Hash::make('Shariah123'),
+            'sc_Contact' => '0186789012',
+            'sc_Email' => 'shariah@hmmc.org',
+            'sc_NRIC' => '960606060606',
+            'sc_Address' => '89 Shariah Lane, Klang',
+            'sc_Qualification' => 'Bachelor of Islamic Studies',
+            'sc_Certification' => 'Shariah Advisor Certified',
+            'sc_Institution' => 'UIA',
+            'sc_Specialization' => 'Islamic Finance',
+            'sc_YearsOfExperience' => 7,
+        ]);
+
         // --- 2. SEED MILK DATA ---
 
         // MILK 1: Storage Completed, Shariah Approved, 100mL
@@ -191,15 +206,34 @@ class DatabaseSeeder extends Seeder
             'dr_ID' => $doctor->dr_ID,
             'pr_ID' => $parent->pr_ID,
             'current_weight' => 5.1,
-            'total_daily_volume' => 450,
+            'total_daily_volume' => 90,
             'current_baby_age' => '9 months',
             'gestational_age' => 38,
             'kinship_method' => 'no', // Standard non-kinship
             'volume_per_feed' => 37.5,
-            'drip_total' => 360,
-            'oral_total' => 90,
+            'drip_total' => 60,
+            'oral_total' => 30,
             'oral_per_feed' => 7.5,
             'feeding_tube' => 'Orgogastric',
+            'oral_feeding' => 'Syringe',
+            'feeding_start_date' => Carbon::now()->toDateString(),
+            'feeding_start_time' => '08:00:00',
+            'feeding_perday' => 12,
+            'feeding_interval' => 2,
+            'status' => 'Waiting',
+        ]);
+
+        MilkRequest::create([
+            'dr_ID' => $doctor->dr_ID,
+            'pr_ID' => $parent->pr_ID,
+            'current_weight' => 6.1,
+            'total_daily_volume' => 60,
+            'current_baby_age' => '8 months',
+            'gestational_age' => 38,
+            'kinship_method' => 'yes', // Standard non-kinship
+            'volume_per_feed' => 37.5,
+            'oral_total' => 60,
+            'oral_per_feed' => 7.5,
             'oral_feeding' => 'Syringe',
             'feeding_start_date' => Carbon::now()->toDateString(),
             'feeding_start_time' => '08:00:00',

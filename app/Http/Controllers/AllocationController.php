@@ -161,17 +161,20 @@ class AllocationController extends Controller
             'request_id' => 'required|exists:request,request_ID',
             'items' => 'required|array',
             'items.*.allocation_id' => 'required|exists:allocation,allocation_ID',
-            'items.*.method' => 'required|in:tube,oral'
+            'items.*.method' => 'required|in:tube,oral' // Validate the specific values
         ]);
 
         try {
             DB::beginTransaction();
 
             foreach ($request->items as $item) {
+                // Update the Allocation table
                 Allocation::where('allocation_ID', $item['allocation_id'])->update([
-                    'feeding_method' => $item['method'],
-                    'dispense_date' => now()->toDateString(),
-                    'dispense_time' => now()->toTimeString(),
+                    'feeding_method' => $item['method'], // Save 'tube' or 'oral'
+                    
+                    // Only set dispense timestamp if not already set (optional logic)
+                    // 'dispense_date' => now()->toDateString(),
+                    // 'dispense_time' => now()->toTimeString(),
                 ]);
             }
 
@@ -189,40 +192,56 @@ class AllocationController extends Controller
      */
     public function logFeedRecord(Request $request)
     {
+        // Use the exact primary key column name 'allocation_ID' in validation
         $request->validate([
             'allocation_id' => 'required|exists:allocation,allocation_ID',
-            'fed_volume' => 'required|numeric|min:0.1'
+            'fed_volume'    => 'required|numeric|min:0.1'
         ]);
 
         try {
-            // Find current Nurse ID linked to User
+            // 1. Find the nurse linked to the authenticated user
             $nurse = Nurse::where('user_id', Auth::id())->first();
             if (!$nurse) {
                 return response()->json(['success' => false, 'message' => 'Nurse profile not found.'], 403);
             }
 
+            // 2. Create the record
+            // Force the timestamp to a string format to avoid DB driver issues with Carbon objects
             $record = FeedRecord::create([
                 'allocation_ID' => $request->allocation_id,
-                'ns_ID' => $nurse->ns_ID,
-                'fed_volume' => $request->fed_volume,
-                'fed_at' => now(),
+                'ns_ID'         => $nurse->ns_ID,
+                'fed_volume'    => $request->fed_volume,
+                'fed_at'        => now()->toDateTimeString(),
             ]);
 
-            // Check if bottle is now fully consumed
+            // 3. Find allocation and check consumption
+            // Ensure we load records to calculate the sum correctly
             $allocation = Allocation::with('feedRecords')->find($request->allocation_id);
+
+            if (!$allocation) {
+                return response()->json(['success' => false, 'message' => 'Allocation record not found.'], 404);
+            }
+
             $totalFed = $allocation->feedRecords->sum('fed_volume');
 
+            // 4. Update consumption status if bottle is empty
             if ($totalFed >= $allocation->total_selected_milk) {
                 $allocation->update(['is_consumed' => true]);
             }
 
             return response()->json([
-                'success' => true,
+                'success'    => true,
                 'nurse_name' => $nurse->ns_Name,
-                'time' => $record->fed_at->format('h:i A')
+                'time'       => $record->fed_at->format('h:i A'),
+                'date'       => $record->fed_at->format('d M Y')
             ]);
+
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            // Return the actual error message in the response for easier debugging
+            return response()->json([
+                'success' => false, 
+                'message' => 'Backend Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 

@@ -77,7 +77,8 @@ class RequestController extends Controller
         $query = MilkRequest::with([
             'parent', 
             'doctor', 
-            'allocations.postBottles' // Ensure this relationship exists in Allocation model
+            'allocations.postBottles',
+            'allocations.feedRecords.nurse' 
         ]);
 
         // 2. Apply Filters (Keep your existing filter logic)
@@ -124,6 +125,7 @@ class RequestController extends Controller
 
         $postbottles = PostBottle::whereDate('post_expiry_date', '>=', \Carbon\Carbon::today())
             ->where('post_micro_status', 'NOT CONTAMINATED')
+            ->whereDoesntHave('allocations')
             ->whereHas('milk', function ($q) {
                 $q->where('milk_Status', 'Storage Completed')
                 ->where('milk_shariahApproval', 1);
