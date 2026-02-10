@@ -13,7 +13,10 @@ class PostBottle extends Model
     protected $primaryKey = 'post_ID';
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
 >>>>>>> Stashed changes
     protected $fillable = [
