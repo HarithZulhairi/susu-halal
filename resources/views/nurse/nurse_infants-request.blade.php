@@ -174,7 +174,7 @@
 
                         <td class="actions">
                             {{-- Download PDF Icon --}}
-                            <button class="btn-pdf" title="Download Traceability Report" onclick="downloadReport('{{ $infant->id }}')">
+                            <button class="btn-pdf" title="Download Traceability Report" onclick="downloadReport('{{ $infant->raw_id }}')">
                                 <i class="fa-solid fa-file-pdf"></i>
                             </button>
                         </td>
@@ -312,8 +312,8 @@
 <script>
 
     function downloadReport(patientId) {
-        // Updated to use a cleaner route if available, or keep existing
-        window.open("{{ url('/layouts/milk_report_pdf') }}?patient_id=" + patientId, "_blank");
+        const url = "{{ route('nurse.milk-report') }}?patient_id=" + patientId;
+        window.open(url, "_blank");
     }
 
     function openAllocationModal(details, totalVol) {

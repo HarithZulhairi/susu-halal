@@ -3,7 +3,7 @@
 @section('title', "Infant Milk Traceability")
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/hmmc_infants-request.css') }}">
+<link rel="stylesheet" href="{{ asset('css/nurse_infants-request.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
@@ -96,136 +96,7 @@
     }
 </style>
 
-{{-- DUMMY DATA SETUP --}}
-@php
-    $infants = [
-        (object)[
-            'id' => 'P-2024-001',
-            'name' => 'Baby Adam',
-            'nicu' => 'NICU-A1',
-            'last_updated' => '2026-01-22 09:30 AM',
-            'current_weight' => 2.5,
-            'requests' => [
-                (object)[
-                    'req_id' => 101,
-                    'total_allocated_vol' => 60, 
-                    'details' => (object)[
-                        // Patient Info (Passed via JS)
-                        'patient_name' => 'Baby Adam',
-                        'patient_id' => 'P-2024-001',
-                        'patient_nicu' => 'NICU-A1',
-                        'parent_consent' => 'Consent Granted',
-                        
-                        // Donor Info
-                        'donor_id' => 'D-2024-055',
-                        'donor_name' => 'Sarah Connor',
-                        'consent' => 'Consent Granted (Full)',
-                        
-                        // Dispensing
-                        'method' => 'Milk Kinship', 
-                        'schedule' => 'Every 3 Hours',
-                        'start_time' => '2026-01-22 08:00 AM',
-                        'doctor_id' => 'DR-007',
-                        'doctor_name' => 'Dr. Strange',
-                        
-                        // Allocations
-                        'allocations' => [
-                            (object)[ 'milk_id' => 'M26-001', 'volume' => 30, 'time' => '2026-01-22 08:15 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ],
-                            (object)[ 'milk_id' => 'M26-002', 'volume' => 30, 'time' => '2026-01-22 11:15 AM', 'nurse_id' => 'N-102', 'nurse_name' => 'Nurse Carla' ]
-                        ]
-                    ]
-                ],
-                (object)[
-                    'req_id' => 102,
-                    'total_allocated_vol' => 30,
-                    'details' => (object)[
-                        'patient_name' => 'Baby Adam',
-                        'patient_id' => 'P-2024-001',
-                        'patient_nicu' => 'NICU-A1',
-                        'parent_consent' => 'Consent Granted',
-                        
-                        'donor_id' => 'D-2024-088',
-                        'donor_name' => 'Jane Doe',
-                        'consent' => 'Consent Granted (Restricted)',
-                        'method' => 'No Milk Kinship',
-                        'schedule' => 'Every 4 Hours',
-                        'start_time' => '2026-01-23 10:00 AM',
-                        'doctor_id' => 'DR-009',
-                        'doctor_name' => 'Dr. House',
-                        'allocations' => [
-                            (object)[ 'milk_id' => 'M26-005', 'volume' => 30, 'time' => '2026-01-23 10:05 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ]
-                        ]
-                    ]
-                ]
-            ]
-        ],
-        (object)[
-            'id' => 'P-2024-005',
-            'name' => 'Baby Sarah',
-            'nicu' => 'NICU-B3',
-            'last_updated' => '2026-01-24 08:00 AM',
-            'current_weight' => 3.1,
-            'requests' => [
-                (object)[
-                    'req_id' => 201,
-                    'total_allocated_vol' => 120,
-                    'details' => (object)[
-                        'patient_name' => 'Baby Sarah',
-                        'patient_id' => 'P-2024-005',
-                        'patient_nicu' => 'NICU-B3',
-                        'parent_consent' => 'Consent Granted',
-                        
-                        'donor_id' => 'D-2024-099',
-                        'donor_name' => 'Emily Blunt',
-                        'consent' => 'Consent Granted (Full)',
-                        'method' => 'Milk Kinship',
-                        'schedule' => 'Every 2 Hours',
-                        'start_time' => '2026-01-24 07:00 AM',
-                        'doctor_id' => 'DR-007',
-                        'doctor_name' => 'Dr. Strange',
-                        'allocations' => [
-                            (object)[ 'milk_id' => 'M26-010', 'volume' => 30, 'time' => '2026-01-24 07:15 AM', 'nurse_id' => 'N-103', 'nurse_name' => 'Nurse Wendy' ],
-                            (object)[ 'milk_id' => 'M26-011', 'volume' => 30, 'time' => '2026-01-24 09:15 AM', 'nurse_id' => 'N-103', 'nurse_name' => 'Nurse Wendy' ],
-                            (object)[ 'milk_id' => 'M26-012', 'volume' => 30, 'time' => '2026-01-24 11:15 AM', 'nurse_id' => 'N-101', 'nurse_name' => 'Nurse Joy' ],
-                            (object)[ 'milk_id' => 'M26-013', 'volume' => 30, 'time' => '2026-01-24 01:15 PM', 'nurse_id' => 'N-102', 'nurse_name' => 'Nurse Carla' ]
-                        ]
-                    ]
-                ]
-            ]
-        ],
-        (object)[
-            'id' => 'P-2024-012',
-            'name' => 'Baby Mikail',
-            'nicu' => 'NICU-C2',
-            'last_updated' => '2026-01-23 05:45 PM',
-            'current_weight' => 1.9,
-            'requests' => [
-                 (object)[
-                    'req_id' => 301,
-                    'total_allocated_vol' => 45,
-                    'details' => (object)[
-                        'patient_name' => 'Baby Mikail',
-                        'patient_id' => 'P-2024-012',
-                        'patient_nicu' => 'NICU-C2',
-                        'parent_consent' => 'Consent Granted',
-                        
-                        'donor_id' => 'D-2024-055',
-                        'donor_name' => 'Sarah Connor',
-                        'consent' => 'Consent Granted (Full)',
-                        'method' => 'Milk Kinship',
-                        'schedule' => 'Every 3 Hours',
-                        'start_time' => '2026-01-23 06:00 PM',
-                        'doctor_id' => 'DR-005',
-                        'doctor_name' => 'Dr. Who',
-                        'allocations' => [
-                            (object)[ 'milk_id' => 'M26-020', 'volume' => 45, 'time' => '2026-01-23 06:10 PM', 'nurse_id' => 'N-105', 'nurse_name' => 'Nurse Jackie' ]
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ];
-@endphp
+{{-- DUMMY DATA BLOCK REMOVED --}}
 
 <div class="container">
     <div class="main-content">
@@ -238,7 +109,7 @@
             <div class="card-header">
                 <h2>Infant Milk Information</h2>
                 <div class="actions">
-                    <input type="text" class="form-control" placeholder="Search Patient Name or ID..." id="searchBox" style="padding:6px;font-size:14px;">
+                    <input type="text" class="form-control" placeholder="Search Patient Name or ID..." id="searchBox" style="padding:6px;font-size:14px; width:300px;">
                 </div>
             </div>
 
@@ -248,20 +119,20 @@
                         <th onclick="sortTable(0)">Patient Name <i class="fas fa-sort-down sort-icon sort-active"></i></th>
                         <th onclick="sortTable(1)">NICU Cubicle No. <i class="fas fa-sort sort-icon"></i></th>
                         <th onclick="sortTable(2)">Total Milk Allocation <i class="fas fa-sort sort-icon"></i></th>
-                        <th onclick="sortTable(3)">Last Updated Weight <i class="fas fa-sort sort-icon"></i></th>
-                        <th onclick="sortTable(4)">Current Weight <i class="fas fa-sort sort-icon"></i></th>
+                        <th onclick="sortTable(3)">Last Updated <i class="fas fa-sort sort-icon"></i></th>
+                        <th onclick="sortTable(4)">Baby Gender <i class="fas fa-sort sort-icon"></i></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    @foreach($infants as $infant)
+                    @forelse($infants as $infant)
                     <tr>
                         <td>
                             <div class="patient-info">
                                 <div class="patient-avatar"><i class="fa-solid fa-baby"></i></div>
                                 <div class="patient-details">
-                                    <strong>#{{ $infant->id }}</strong>
+                                    <strong>{{ $infant->id }}</strong>
                                     <span>{{ $infant->name }}</span>
                                 </div>
                             </div>
@@ -283,23 +154,43 @@
                         <td>{{ $infant->last_updated }}</td>
 
                         <td>
-                            <div class="weight-display">
-                                <i class="fa-solid fa-weight-scale"></i>
-                                <span>{{ $infant->current_weight }} kg</span>
-                            </div>
+                            @if($infant->baby_gender === 'Male')
+                                <div class="weight-display" style="color:#1e40af; border:1px solid #93c5fd;">
+                                    <i class="fa-solid fa-mars" style="color:#3b82f6;"></i>
+                                    <span>{{ $infant->baby_gender }}</span>
+                                </div>
+                            @elseif($infant->baby_gender === 'Female')
+                                <div class="weight-display" style="background-color:#fce7f3; color:#9d174d; border:1px solid #fbcfe8;">
+                                    <i class="fa-solid fa-venus" style="color:#ec4899;"></i>
+                                    <span>{{ $infant->baby_gender }}</span>
+                                </div>
+                            @else
+                                <div class="weight-display" style="background-color:#e0e0e0; color:#4b5563; border:1px solid #d1d5db;">
+                                    <i class="fa-solid fa-genderless" style="color:#6b7280;"></i>
+                                    <span>{{ $infant->baby_gender }}</span>
+                                </div>
+                            @endif
                         </td>
 
                         <td class="actions">
                             {{-- Download PDF Icon --}}
-                            <button class="btn-pdf" title="Download Traceability Report" onclick="downloadReport('{{ $infant->id }}')">
+                            <button class="btn-pdf" title="Download Traceability Report" onclick="downloadReport('{{ $infant->raw_id }}')">
                                 <i class="fa-solid fa-file-pdf"></i>
                             </button>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding: 20px; color: #64748b;">No traceability records found.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
+            <!-- implements pagination -->
+            <div id="paginationControls" class="pagination-controls" style="margin-top:15px; text-align:center;"></div>
         </div>
+
+        
 
     </div>
 </div>
@@ -315,7 +206,7 @@
         </div>
         <div class="modal-body">
             
-            {{-- 1. NEW: Patient & Consent Info --}}
+            {{-- 1. Patient & Consent Info --}}
             <div class="section-title"><i class="fas fa-baby"></i> Patient & Consent Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -336,7 +227,7 @@
                 </div>
             </div>
 
-            {{-- 2. Donor & Milk Info --}}
+            {{-- 2. Donor & Consent Info --}}
             <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -361,7 +252,7 @@
             <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Dispensing & Assignment</div>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <label>Dispensing Method</label>
+                    <label>Dispensing Kinship</label>
                     <div id="modalMethodBadge"></div>
                 </div>
                 <div class="detail-item">
@@ -373,6 +264,28 @@
                     <label>Assigned By (Doctor)</label>
                     <p id="modalDoctorName">-</p>
                     <small id="modalDoctorId" style="color:#64748b;">-</small>
+                </div>
+                <div class="detail-item">
+                    <label>Status</label>
+                    <p id="modalStatus" style="color:#166534; font-weight:700;">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Method Feeding</label>
+                    <p id="modalDirectOral"></p>
+
+                    @if('modalFeedingTube')
+                        <p id="modalFeedingTube"></p>
+                    @endif
+
+                </div>
+                <div class="detail-item">
+                    <label>Volume Feed</label>
+                    <p id="modalVolumeFeedOral" ></p>
+
+                    @if('modalVolumeFeedingTube')
+                        <p id="modalVolumeFeedingTube"></p>
+                    @endif
+
                 </div>
             </div>
 
@@ -399,8 +312,9 @@
 <script>
 
     function downloadReport(patientId) {
-            window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
-        }
+        const url = "{{ route('nurse.milk-report') }}?patient_id=" + patientId;
+        window.open(url, "_blank");
+    }
 
     function openAllocationModal(details, totalVol) {
         // 1. Populate Patient Info
@@ -423,29 +337,55 @@
             badgeDiv.innerHTML = `<span class="badge-method badge-no-kinship"><i class="fas fa-ban"></i> No Milk Kinship</span>`;
         }
 
+        // make this bold details.tube_volume
+        const tubeVolumeElement = document.getElementById('modalVolumeFeedingTube');
+        const feedingTubeElement = document.getElementById('modalFeedingTube');
+        const oralVolumeElement = document.getElementById('modalVolumeFeedOral');
+        const directOralElement = document.getElementById('modalDirectOral');
+        
+
         // 4. Schedule & Doctor
         document.getElementById('modalSchedule').textContent = details.schedule;
         document.getElementById('modalStartTime').textContent = "Start: " + details.start_time;
         document.getElementById('modalDoctorName').textContent = details.doctor_name;
         document.getElementById('modalDoctorId').textContent = details.doctor_id;
+        document.getElementById('modalStatus').textContent = details.status;
+
+        directOralElement.innerHTML = `Direct Oral Feeding: <strong>${details.direct_oral}</strong>`;
+        oralVolumeElement.innerHTML = `Oral Feeding Volume: <strong>${details.oral_volume}</strong>`;
+
+        if(details.feeding_tube) {
+            tubeVolumeElement.innerHTML = `Feeding Tube: <strong>${details.tube_volume}</strong>`;
+            feedingTubeElement.innerHTML = `Feeding Tube: <strong>${details.feeding_tube}</strong>`;
+            document.getElementById('modalVolumeFeedingTube').style.display = 'block';
+            document.getElementById('modalFeedingTube').style.display = 'block';
+        } else {
+            document.getElementById('modalFeedingTube').textContent = "";
+            document.getElementById('modalFeedingTube').style.display = 'none';
+            document.getElementById('modalVolumeFeedingTube').style.display = 'none';
+        }
 
         // 5. Populate Table
         const tbody = document.getElementById('allocationTableBody');
         tbody.innerHTML = '';
         
-        details.allocations.forEach(alloc => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-weight:600; color:#0f172a;">${alloc.milk_id}</td>
-                <td>${alloc.volume} ml</td>
-                <td>${alloc.time}</td>
-                <td>
-                    <strong>${alloc.nurse_name}</strong><br>
-                    <span style="color:#64748b; font-size:11px;">${alloc.nurse_id}</span>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
+        if (details.allocations && details.allocations.length > 0) {
+            details.allocations.forEach(alloc => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:600; color:#0f172a;">${alloc.milk_id}</td>
+                    <td>${alloc.volume} ml</td>
+                    <td>${alloc.time}</td>
+                    <td>
+                        <strong>${alloc.nurse_name}</strong><br>
+                        <span style="color:#64748b; font-size:11px;">${alloc.nurse_id}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:10px;">No allocation records found.</td></tr>';
+        }
 
         document.getElementById('allocationDetailModal').style.display = 'flex';
     }
@@ -502,6 +442,130 @@
             row.style.display = text.includes(term) ? "" : "none";
         }
     });
-</script>
 
+    // ==========================================
+    //  PAGINATION LOGIC (Numbered Pages)
+    // ==========================================
+    // ==========================================
+    //  PAGINATION LOGIC (Table Rows)
+    // ==========================================
+    (function setupPagination() {
+        // Correct Selector: The Table Body
+        const tableBody = document.querySelector('#infantsTable tbody');
+        const controls = document.getElementById('paginationControls');
+        const perPage = 10;
+        let currentPage = 1;
+
+        if (!tableBody || !controls) return;
+
+        // Helper to get actual rows (ignoring potential future non-row elements)
+        function getRows() {
+            // Convert HTMLCollection to Array for slicing
+            // Filter only rows that are not hidden by search logic (optional but good)
+            return Array.from(tableBody.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
+        }
+
+        function renderPage(page) {
+            // We need ALL rows to calculate totals, but only VISIBLE rows for paging if search is active
+            // For basic pagination without search interaction:
+            const allRows = Array.from(tableBody.querySelectorAll('tr'));
+            
+            // If you want search + pagination to work together, use getRows() 
+            // but you need to reset display:none on all before reapplying logic.
+            // For simpler logic (Pagination ON TOP of full list):
+            
+            const totalPages = Math.max(1, Math.ceil(allRows.length / perPage));
+
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+
+            // Hide all rows first
+            allRows.forEach(r => r.style.display = 'none');
+
+            // Show current slice
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+            
+            // Display as table-row ('') is standard for <tr>
+            allRows.slice(start, end).forEach(r => r.style.display = ''); 
+
+            renderControls(totalPages);
+        }
+
+        function renderControls(totalPages) {
+            controls.innerHTML = '';
+
+            // Prev Button
+            const prev = document.createElement('button');
+            prev.className = 'page-btn';
+            prev.innerHTML = '&lsaquo; Prev';
+            prev.disabled = currentPage === 1;
+            prev.style.margin = "0 5px";
+            prev.onclick = () => renderPage(currentPage - 1);
+            controls.appendChild(prev);
+
+            // Numbered Buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                btn.style.margin = "0 2px";
+                btn.style.padding = "5px 10px";
+                
+                if (i === currentPage) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = "#0ea5e9";
+                    btn.style.color = "white";
+                    btn.style.border = "1px solid #0ea5e9";
+                } else {
+                    btn.style.backgroundColor = "white";
+                    btn.style.border = "1px solid #ddd";
+                }
+                
+                btn.textContent = i;
+                btn.onclick = () => renderPage(i);
+                controls.appendChild(btn);
+            }
+
+            // Next Button
+            const next = document.createElement('button');
+            next.className = 'page-btn';
+            next.innerHTML = 'Next &rsaquo;';
+            next.disabled = currentPage === totalPages;
+            next.style.margin = "0 5px";
+            next.onclick = () => renderPage(currentPage + 1);
+            controls.appendChild(next);
+        }
+
+        // Hook into Search to reset pagination
+        const searchBox = document.getElementById("searchBox");
+        if(searchBox) {
+            searchBox.addEventListener("input", function () {
+                // If searching, we might want to disable pagination or 
+                // just show all matching rows. 
+                // Simple approach: Show all if searching, paginate if empty.
+                const term = this.value.toLowerCase().trim();
+                const allRows = Array.from(tableBody.querySelectorAll('tr'));
+
+                if (term === "") {
+                    renderPage(1); // Restore pagination
+                } else {
+                    controls.innerHTML = ''; // Hide controls
+                    allRows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        row.style.display = text.includes(term) ? "" : "none";
+                    });
+                }
+            });
+        }
+
+        // Expose function if needed
+        window.__rebuildPagination = function(page) {
+            renderPage(page || 1);
+        };
+
+        // Initial Render
+        renderPage(1);
+    })();
+</script>
 @endsection

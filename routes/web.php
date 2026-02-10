@@ -270,7 +270,22 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/nurse/view-milk-processing', 'nurse.nurse_view-milk-processing')->name('nurse.view-milk-processing');
 
     // Route::view('/nurse/infants-request', 'nurse.nurse_infants-request')->name('nurse.infants-request');
+
+    // Traceability and Milk Report
     Route::get('/nurse/infants-request', [AllocationController::class, 'viewTraceabilityNurse'])->name('nurse.infants-request');
+    Route::get('/nurse/milk-report', [AllocationController::class, 'generateMilkReport'])->name('nurse.milk-report');
+
+    Route::get('/doctor/infants-request', [AllocationController::class, 'viewTraceabilityDoctor'])->name('doctor.infants-request');
+    Route::get('/doctor/milk-report', [AllocationController::class, 'generateMilkReportDoctor'])->name('doctor.milk-report');
+
+    Route::get('/hmmc/infants-request', [AllocationController::class, 'viewTraceabilityHMMC'])->name('hmmc.infants-request');
+    Route::get('/hmmc/milk-report', [AllocationController::class, 'generateMilkReportHMMC'])->name('hmmc.milk-report');
+
+    Route::get('/shariah/infants-request', [AllocationController::class, 'viewTraceabilityShariah'])->name('shariah.infants-request');
+    Route::get('/shariah/milk-report', [AllocationController::class, 'generateMilkReportShariah'])->name('shariah.milk-report');
+
+    Route::get('/donor/infants-request', [AllocationController::class, 'viewTraceabilityDonor'])->name('donor.infants-request');
+    Route::get('/donor/milk-report', [AllocationController::class, 'generateMilkReportDonor'])->name('donor.milk-report');
 
 
     // Appointment Module
