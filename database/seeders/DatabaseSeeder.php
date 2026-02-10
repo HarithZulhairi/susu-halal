@@ -55,13 +55,39 @@ class DatabaseSeeder extends Seeder
 
         $donor = Donor::create([
             'dn_NRIC' => '920202020202',
-            'dn_FullName' => 'Default Donor',
+            'dn_FullName' => 'Default Donor 1',
             'dn_Username' => 'dn_default',
             'dn_Password' => Hash::make('Donor123'),
             'dn_DOB' => '1992-02-02',
             'dn_Contact' => '0142345678',
             'dn_Email' => 'donor@hmmc.org',
             'dn_Address' => '45 Donor Avenue, Klang',
+            'dn_MaritalStatus' => 'Married',
+            'dn_HusbandConsent' => 'Yes',
+            'dn_DonationType' => 'Voluntary',
+            'dn_Religion' => 'Islam',
+            'dn_ExcessBreastMilk' => 'Yes',
+            'dn_MilkQuantity' => ['quantity' => 500, 'unit' => 'ml'],
+            'dn_InfectionDeseaseRisk' => 'None',
+            'dn_Medication' => 'None',
+            'dn_RecentIllness' => 'None',
+            'dn_SmokingStatus' => 'Non-smoker',
+            'dn_PhysicalHealth' => 'Good',
+            'dn_MentalHealth' => 'Good',
+            'dn_TobaccoAlcohol' => 0,
+            'dn_DietaryAlerts' => 'None',
+            'dn_ConsentStatus' => 'Approved',
+        ]);
+
+        $donor1 = Donor::create([
+            'dn_NRIC' => '930303030303',
+            'dn_FullName' => 'Default Donor 2',
+            'dn_Username' => 'dn_default2',
+            'dn_Password' => Hash::make('Donor123'),
+            'dn_DOB' => '1993-03-03',
+            'dn_Contact' => '0145545678',
+            'dn_Email' => 'donor2@hmmc.org',
+            'dn_Address' => '46 Donor Avenue, Klang',
             'dn_MaritalStatus' => 'Married',
             'dn_HusbandConsent' => 'Yes',
             'dn_DonationType' => 'Voluntary',
@@ -124,6 +150,22 @@ class DatabaseSeeder extends Seeder
             'pr_BabyCurrentWeight' => '5.1',
         ]);
 
+        $parent2 = ParentModel::create([
+            'pr_Name' => 'Default Parent 2',
+            'pr_Password' => Hash::make('Parent123'),
+            'pr_NRIC' => '950505050506',
+            'pr_Address' => '124 Parent Street, Klang',
+            'pr_Contact' => '0175678902',
+            'pr_Email' => 'parent2@hmmc.org',
+            'pr_BabyName' => 'Baby Default 2',
+            'pr_BabyDOB' => '2023-05-11',
+            'pr_BabyGender' => 'Male',
+            'pr_NICU' => 'No',
+            'pr_BabyBirthWeight' => '3.5',
+            'pr_BabyCurrentWeight' => '5.3',
+        ]);
+
+
         $shariahCommittee = ShariahCommittee::create([
             'sc_Name' => 'Default Shariah Member',
             'sc_Username' => 'sc_default',
@@ -149,11 +191,38 @@ class DatabaseSeeder extends Seeder
             'milk_shariahApproval' => 1, // Approved
         ]);
 
+        $milk2 = Milk::create([
+            'dn_ID' => $donor1->dn_ID,
+            'milk_volume' => 150,
+            'milk_Status' => 'Storage Completed',
+            'milk_shariahApproval' => 1, // Approved
+        ]);
+
+        // MILK 2: Labelling Completed, 200mL
+        $milk3 = Milk::create([
+            'dn_ID' => $donor->dn_ID,
+            'milk_volume' => 200,
+            'milk_Status' => 'Labelling Completed',
+            'milk_shariahApproval' => 0, // Pending
+        ]);
+
         // Create PreBottles for Milk 1
         PreBottle::create([
             'milk_ID' => $milk1->milk_ID,
             'pre_bottle_code' => '#M1-B1',
             'pre_volume' => 120,
+        ]);
+
+        PreBottle::create([
+            'milk_ID' => $milk2->milk_ID,
+            'pre_bottle_code' => '#M2-B1',
+            'pre_volume' => 150,
+        ]);
+
+        PreBottle::create([
+            'milk_ID' => $milk2->milk_ID,
+            'pre_bottle_code' => '#M2-B1',
+            'pre_volume' => 200,
         ]);
 
         // Create PostBottles for Milk 1 (Simulate 2 bottles of 50ml)
@@ -186,18 +255,33 @@ class DatabaseSeeder extends Seeder
             'post_micro_status' => 'NOT CONTAMINATED',
         ]);
 
-        // MILK 2: Labelling Completed, 200mL
-        $milk2 = Milk::create([
-            'dn_ID' => $donor->dn_ID,
-            'milk_volume' => 200,
-            'milk_Status' => 'Labelling Completed',
-            'milk_shariahApproval' => 0, // Pending
-        ]);
-
-        PreBottle::create([
+        PostBottle::create([
             'milk_ID' => $milk2->milk_ID,
-            'pre_bottle_code' => '#M2-B1',
-            'pre_volume' => 200,
+            'post_bottle_code' => '#M2-P1',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+        PostBottle::create([
+            'milk_ID' => $milk2->milk_ID,
+            'post_bottle_code' => '#M2-P2',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+        PostBottle::create([
+            'milk_ID' => $milk2->milk_ID,
+            'post_bottle_code' => '#M2-P3',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
+        ]);
+        PostBottle::create([
+            'milk_ID' => $milk2->milk_ID,
+            'post_bottle_code' => '#M2-P4',
+            'post_volume' => 30,
+            'post_expiry_date' => Carbon::now()->addMonths(6),
+            'post_micro_status' => 'NOT CONTAMINATED',
         ]);
 
         // --- 3. SEED REQUEST DATA ---
@@ -226,6 +310,25 @@ class DatabaseSeeder extends Seeder
         MilkRequest::create([
             'dr_ID' => $doctor->dr_ID,
             'pr_ID' => $parent->pr_ID,
+            'current_weight' => 6.1,
+            'total_daily_volume' => 60,
+            'current_baby_age' => '8 months',
+            'gestational_age' => 38,
+            'kinship_method' => 'yes', // Standard non-kinship
+            'volume_per_feed' => 37.5,
+            'oral_total' => 60,
+            'oral_per_feed' => 7.5,
+            'oral_feeding' => 'Syringe',
+            'feeding_start_date' => Carbon::now()->toDateString(),
+            'feeding_start_time' => '08:00:00',
+            'feeding_perday' => 12,
+            'feeding_interval' => 2,
+            'status' => 'Waiting',
+        ]);
+
+        MilkRequest::create([
+            'dr_ID' => $doctor->dr_ID,
+            'pr_ID' => $parent2->pr_ID,
             'current_weight' => 6.1,
             'total_daily_volume' => 60,
             'current_baby_age' => '8 months',

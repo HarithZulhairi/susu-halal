@@ -10,6 +10,7 @@ class PreBottle extends Model
     use HasFactory;
 
     protected $table = 'pre_bottles';
+    protected $primaryKey = 'pre_ID';
     
     protected $fillable = [
         'milk_ID', 

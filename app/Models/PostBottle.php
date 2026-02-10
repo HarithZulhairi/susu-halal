@@ -10,6 +10,7 @@ class PostBottle extends Model
     use HasFactory;
 
     protected $table = 'post_bottles';
+    protected $primaryKey = 'post_ID';
 
     protected $fillable = [
         'milk_ID', 
@@ -34,4 +35,7 @@ class PostBottle extends Model
         return $this->hasMany(Allocation::class, 'post_ID', 'post_ID');
     }
 
+    public function donor() {
+        return $this->belongsTo(Donor::class, 'dn_ID', 'dn_ID');
+    }
 }

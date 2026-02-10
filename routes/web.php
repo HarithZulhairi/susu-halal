@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\DonorScreeningController;
 use App\Http\Controllers\DonorAppointmentController;
+use App\Models\Allocation;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Mail;
 Route::view('/labtech/inventory-quality-control', 'labtech.labtech_quality-control')->name('labtech.quality-control');
 Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
 Route::view('/hmmc/infants-request', 'hmmc.hmmc_infants-request')->name('hmmc.infants-request');
-Route::view('/nurse/infants-request', 'nurse.nurse_infants-request')->name('nurse.infants-request');
 Route::view('/doctor/infants-request', 'doctor.doctor_infants-request')->name('doctor.infants-request');
 Route::view('/shariah/infants-request', 'shariah.shariah_infants-request')->name('shariah.infants-request');
 Route::view('/donor/infants-request', 'donor.donor_infants-request')->name('donor.infants-request');
@@ -237,6 +237,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
     Route::post('/nurse/set-infant-weight/update', [RequestController::class, 'updateInfantWeightNurse'])->name('nurse.nurse_infant-weight.update');
 
+    Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
+
     Route::get('/parent/my-infant-request',
     [RequestController::class, 'viewMyInfantMilkRequests'])
     ->name('parent.my-infant-request');
@@ -265,9 +267,26 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/nurse/manage-milk-records', [MilkController::class, 'viewMilkNurse'])->name('nurse.manage-milk-records');
     Route::get('/nurse/milk-statuses', [MilkController::class, 'milkStatuses'])->name('nurse.milk-statuses');
-
-
     Route::view('/nurse/view-milk-processing', 'nurse.nurse_view-milk-processing')->name('nurse.view-milk-processing');
+
+    // Route::view('/nurse/infants-request', 'nurse.nurse_infants-request')->name('nurse.infants-request');
+
+    // Traceability and Milk Report
+    Route::get('/nurse/infants-request', [AllocationController::class, 'viewTraceabilityNurse'])->name('nurse.infants-request');
+    Route::get('/nurse/milk-report', [AllocationController::class, 'generateMilkReport'])->name('nurse.milk-report');
+
+    Route::get('/doctor/infants-request', [AllocationController::class, 'viewTraceabilityDoctor'])->name('doctor.infants-request');
+    Route::get('/doctor/milk-report', [AllocationController::class, 'generateMilkReportDoctor'])->name('doctor.milk-report');
+
+    Route::get('/hmmc/infants-request', [AllocationController::class, 'viewTraceabilityHMMC'])->name('hmmc.infants-request');
+    Route::get('/hmmc/milk-report', [AllocationController::class, 'generateMilkReportHMMC'])->name('hmmc.milk-report');
+
+    Route::get('/shariah/infants-request', [AllocationController::class, 'viewTraceabilityShariah'])->name('shariah.infants-request');
+    Route::get('/shariah/milk-report', [AllocationController::class, 'generateMilkReportShariah'])->name('shariah.milk-report');
+
+    Route::get('/donor/infants-request', [AllocationController::class, 'viewTraceabilityDonor'])->name('donor.infants-request');
+    Route::get('/donor/milk-report', [AllocationController::class, 'generateMilkReportDonor'])->name('donor.milk-report');
+
 
     // Appointment Module
     Route::view('/donor/appointments', 'donor.donor_appointments')->name('donor.appointments');
