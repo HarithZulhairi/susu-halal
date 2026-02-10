@@ -12,13 +12,6 @@ class PostBottle extends Model
     protected $table = 'post_bottles';
     protected $primaryKey = 'post_ID';
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-
->>>>>>> Stashed changes
     protected $fillable = [
         'milk_ID', 
         'post_bottle_code', 
