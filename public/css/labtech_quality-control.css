@@ -344,7 +344,7 @@
     display: none; /* Hidden by default */
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 1;
 }
 
 /* MODAL BOX */
@@ -355,6 +355,7 @@
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     animation: popup 0.3s ease;
+    z-index: 1;
 }
 
 /* Make the view modal larger and scrollable when content is long */

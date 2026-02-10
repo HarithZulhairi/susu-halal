@@ -12,8 +12,6 @@ class PostBottle extends Model
     protected $table = 'post_bottles';
     protected $primaryKey = 'post_ID';
 
-    protected $primaryKey = 'post_ID';
-
     protected $fillable = [
         'milk_ID', 
         'post_bottle_code', 
