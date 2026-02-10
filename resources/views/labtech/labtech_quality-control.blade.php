@@ -417,6 +417,7 @@
 
         if(!totalViable || !entero || !staph) {
             Swal.fire('Incomplete', 'Please enter all test results.', 'warning');
+            closeQCModal();
             return;
         }
 
