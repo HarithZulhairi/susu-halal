@@ -30,70 +30,152 @@
                 </div>
             </div>
 
-            <div class="records-list">
-                <div class="record-header">
-                    <button class="sortable-header">POST BOTTLE CODE</button>
-                    <button class="sortable-header">LOCATION</button>
-                    <button class="sortable-header">EXPIRY DATE</button>
-                    <button class="sortable-header">LAST QC DATE</button>
-                    <button class="sortable-header">QC STATUS</button>
-                    <span>ACTION</span>
-                </div>
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="switchTab('active')">
+                    <i class="fas fa-flask"></i> Active Bottles 
+                    <span class="tab-count">{{ $activeBottles->count() }}</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('disposed')">
+                    <i class="fas fa-trash-alt"></i> Disposed Bottles 
+                    <span class="tab-count">{{ $disposedBottles->count() }}</span>
+                </button>
+            </div>
 
-                <div id="bottlesList">
-                    @foreach($postBottles as $bottle)
-                        <div class="record-item" data-bottle-code="{{ $bottle->post_bottle_code }}" 
-                             data-donor-name="{{ $bottle->milk->donor->dn_FullName ?? 'Unknown' }}" 
-                             data-location="{{ $bottle->post_storage_location ?? 'N/A' }}"
-                             data-status="{{ $bottle->post_micro_status ?? 'Pending' }}">
-                            <div class="milk-donor-info">
-                                <div class="milk-icon-wrapper" style="background:#e0f2fe; color:#0369a1;">
-                                    <i class="fas fa-box-archive"></i>
+            <!-- Active Bottles Tab -->
+            <div id="activeTab" class="tab-content active">
+                <div class="records-list">
+                    <div class="record-header">
+                        <button class="sortable-header">POST BOTTLE CODE</button>
+                        <button class="sortable-header">LOCATION</button>
+                        <button class="sortable-header">EXPIRY DATE</button>
+                        <button class="sortable-header">LAST QC DATE</button>
+                        <button class="sortable-header">QC STATUS</button>
+                        <span>ACTION</span>
+                    </div>
+
+                    <div id="bottlesList">
+                        @forelse($activeBottles as $bottle)
+                            <div class="record-item" data-bottle-code="{{ $bottle->post_bottle_code }}" 
+                                 data-donor-name="{{ $bottle->milk->donor->dn_FullName ?? 'Unknown' }}" 
+                                 data-location="{{ $bottle->post_storage_location ?? 'N/A' }}"
+                                 data-status="{{ $bottle->post_micro_status ?? 'Pending' }}">
+                                <div class="milk-donor-info">
+                                    <div class="milk-icon-wrapper" style="background:#e0f2fe; color:#0369a1;">
+                                        <i class="fas fa-box-archive"></i>
+                                    </div>
+                                    <div>
+                                        <span class="milk-id">{{ $bottle->post_bottle_code }}</span>
+                                        <span class="donor-name">{{ $bottle->milk->donor->dn_FullName ?? 'Unknown' }}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="milk-id">{{ $bottle->post_bottle_code }}</span>
-                                    <span class="donor-name">{{ $bottle->milk->donor->dn_FullName ?? 'Unknown' }}</span>
-                                </div>
-                            </div>
 
-                            <div>{{ $bottle->post_storage_location ?? 'N/A' }}</div>
-                            <div class="expiry-date">{{ $bottle->post_expiry_date }}</div>
-                            <div>{{ $bottle->updated_at ? $bottle->updated_at->format('Y-m-d') : '-' }}</div> 
+                                <div>{{ $bottle->post_storage_location ?? 'N/A' }}</div>
+                                <div class="expiry-date">{{ $bottle->post_expiry_date }}</div>
+                                <div>{{ $bottle->updated_at ? $bottle->updated_at->format('Y-m-d') : '-' }}</div> 
 
-                            <div class="clinical-status">
-                                @if($bottle->post_micro_status == 'NOT CONTAMINATED')
-                                    <span class="status-tag status-approved">Not Contaminated</span>
-                                @elseif($bottle->post_micro_status == 'CONTAMINATED')
-                                    <span class="status-tag status-rejected">Contaminated</span>
-                                @else
-                                    <span class="status-tag status-pending">Pending QC</span>
-                                @endif
-                            </div>
-
-                            <div class="actions">
-                                @if($bottle->post_micro_status == 'CONTAMINATED')
-                                    @if($bottle->is_disposed)
-                                        <span class="status-disposed">Disposed</span>
+                                <div class="clinical-status">
+                                    @if($bottle->post_micro_status == 'NOT CONTAMINATED')
+                                        <span class="status-tag status-approved">Not Contaminated</span>
+                                    @elseif($bottle->post_micro_status == 'CONTAMINATED')
+                                        <span class="status-tag status-rejected">Contaminated</span>
                                     @else
+                                        <span class="status-tag status-pending">Pending QC</span>
+                                    @endif
+                                </div>
+
+                                <div class="actions">
+                                    @if($bottle->post_micro_status == 'CONTAMINATED')
                                         <button class="btn-view btn-dispose-red" onclick='markAsDisposed("{{ $bottle->post_bottle_code }}")' title="Dispose Bottle">
                                             <i class="fas fa-trash-alt" style="color: #dc2626;"></i> Dispose
                                         </button>
+                                    @else
+                                        <button class="btn-view" onclick='openQCModal(@json($bottle))' title="Perform QC Test">
+                                            <i class="fas fa-microscope"></i> Test
+                                        </button>
                                     @endif
-                                @else
-                                    <button class="btn-view" onclick='openQCModal(@json($bottle))' title="Perform QC Test">
-                                        <i class="fas fa-microscope"></i> Test
-                                    </button>
-                                @endif
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
+                        @empty
+                            <div style="padding: 40px; text-align: center; color: #6b7280;">
+                                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No active bottles</p>
+                                <p style="font-size: 14px;">All bottles have been tested or disposed</p>
+                            </div>
+                        @endforelse
+                    </div>
 
-                <!-- No Results Message -->
-                <div id="noResultsMessage" style="display:none; padding: 40px; text-align: center; color: #6b7280;">
-                    <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
-                    <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No bottles found</p>
-                    <p style="font-size: 14px;">Try adjusting your search terms</p>
+                    <!-- No Results Message (for search) -->
+                    <div id="noResultsMessage" style="display:none; padding: 40px; text-align: center; color: #6b7280;">
+                        <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No bottles found</p>
+                        <p style="font-size: 14px;">Try adjusting your search terms</p>
+                    </div>
+
+                    <!-- Pagination for Active Bottles -->
+                    <div id="activePaginationControls" class="pagination-controls"></div>
+                </div>
+            </div>
+
+            <!-- Disposed Bottles Tab -->
+            <div id="disposedTab" class="tab-content">
+                <div class="records-list">
+                    <div class="record-header">
+                        <button class="sortable-header">POST BOTTLE CODE</button>
+                        <button class="sortable-header">LOCATION</button>
+                        <button class="sortable-header">EXPIRY DATE</button>
+                        <button class="sortable-header">DISPOSED DATE</button>
+                        <button class="sortable-header">QC STATUS</button>
+                        <span>DETAILS</span>
+                    </div>
+
+                    <div id="disposedBottlesList">
+                        @forelse($disposedBottles as $bottle)
+                            <div class="record-item disposed-item" data-bottle-code="{{ $bottle->post_bottle_code }}" 
+                                 data-donor-name="{{ $bottle->milk->donor->dn_FullName ?? 'Unknown' }}" 
+                                 data-location="{{ $bottle->post_storage_location ?? 'N/A' }}"
+                                 data-status="{{ $bottle->post_micro_status ?? 'Pending' }}">
+                                <div class="milk-donor-info">
+                                    <div class="milk-icon-wrapper" style="background:#fee2e2; color:#991b1b;">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </div>
+                                    <div>
+                                        <span class="milk-id">{{ $bottle->post_bottle_code }}</span>
+                                        <span class="donor-name">{{ $bottle->milk->donor->dn_FullName ?? 'Unknown' }}</span>
+                                    </div>
+                                </div>
+
+                                <div>{{ $bottle->post_storage_location ?? 'N/A' }}</div>
+                                <div class="expiry-date">{{ $bottle->post_expiry_date }}</div>
+                                <div>{{ $bottle->updated_at ? $bottle->updated_at->format('Y-m-d') : '-' }}</div>
+
+                                <div class="clinical-status">
+                                    @if($bottle->post_micro_status == 'NOT CONTAMINATED')
+                                        <span class="status-tag status-approved">Not Contaminated</span>
+                                    @elseif($bottle->post_micro_status == 'CONTAMINATED')
+                                        <span class="status-tag status-rejected">Contaminated</span>
+                                    @else
+                                        <span class="status-tag status-pending">Pending QC</span>
+                                    @endif
+                                </div>
+
+                                <div class="actions">
+                                    <button class="btn-view" onclick='viewDisposedDetails(@json($bottle))' title="View Details">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        @empty
+                            <div style="padding: 40px; text-align: center; color: #6b7280;">
+                                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No disposed bottles</p>
+                                <p style="font-size: 14px;">No bottles have been disposed yet</p>
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <!-- Pagination for Disposed Bottles -->
+                    <div id="disposedPaginationControls" class="pagination-controls"></div>
                 </div>
             </div>
         </div>
@@ -168,6 +250,81 @@
     </div>
 </div>
 
+{{-- ========================================================= --}}
+{{-- DISPOSED BOTTLE DETAILS MODAL --}}
+{{-- ========================================================= --}}
+<div id="disposedModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2><i class="fas fa-info-circle"></i> Disposed Bottle Details</h2>
+            <button class="modal-close-btn" onclick="closeDisposedModal()">Close</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Bottle Code</label>
+                    <p id="disposed-bottle-code">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Donor Name</label>
+                    <p id="disposed-donor-name">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Storage Location</label>
+                    <p id="disposed-location">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Expiry Date</label>
+                    <p id="disposed-expiry">-</p>
+                </div>
+                <div class="info-item">
+                    <label>Disposed Date</label>
+                    <p id="disposed-date">-</p>
+                </div>
+                <div class="info-item">
+                    <label>QC Status</label>
+                    <p id="disposed-status">-</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;" id="qc-results-section">
+                <h3 style="margin-bottom: 15px; color: #334155;">Microbiology Results</h3>
+                <table class="table-qc">
+                    <thead>
+                        <tr>
+                            <th>Test Type</th>
+                            <th>Count (CFU/ml)</th>
+                            <th>Limit</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:600; color:#334155;">Total Viable Count</td>
+                            <td id="disposed-tvc" style="text-align: center; font-weight: 600;">-</td>
+                            <td>< 100,000</td>
+                            <td id="disposed-tvc-result">-</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600; color:#334155;">Enterobacteriaceae</td>
+                            <td id="disposed-entero" style="text-align: center; font-weight: 600;">-</td>
+                            <td>< 10,000</td>
+                            <td id="disposed-entero-result">-</td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600; color:#334155;">Staphylococcus</td>
+                            <td id="disposed-staph" style="text-align: center; font-weight: 600;">-</td>
+                            <td>< 10,000</td>
+                            <td id="disposed-staph-result">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
@@ -188,7 +345,7 @@
     .badge-safe { background: #dcfce7; color: #166534; }
     .badge-contaminated { background: #fee2e2; color: #991b1b; }
     
-    /* Red Dispose Button - styled like Test button but red */
+    /* Red Dispose Button */
     .btn-dispose-red {
         color: #dc2626 !important;
     }
@@ -197,7 +354,7 @@
         color: #b91c1c !important;
     }
     
-    /* Disposed Status - styled like Contaminated status */
+    /* Disposed Status */
     .status-disposed {
         background: #d1d5db;
         color: #4b5563;
@@ -245,9 +402,150 @@
         background: #4b5563;
     }
     
-    /* Make modal overlay higher z-index to ensure it's on top */
+    /* Modal overlay */
     .modal-overlay {
         z-index: 9999;
+    }
+
+    /* Tab Navigation */
+    .tab-navigation {
+        display: flex;
+        gap: 0;
+        border-bottom: 2px solid #e5e7eb;
+        padding: 0 20px;
+        background: #f9fafb;
+    }
+
+    .tab-btn {
+        padding: 14px 24px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        top: 2px;
+    }
+
+    .tab-btn:hover {
+        color: #1A5F7A;
+        background: #f3f4f6;
+    }
+
+    .tab-btn.active {
+        color: #1A5F7A;
+        border-bottom-color: #1A5F7A;
+        background: white;
+    }
+
+    .tab-count {
+        background: #e5e7eb;
+        color: #4b5563;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .tab-btn.active .tab-count {
+        background: #1A5F7A;
+        color: white;
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Disposed Item Styling */
+    .disposed-item {
+        opacity: 0.8;
+        background: #fafafa;
+    }
+
+    .disposed-item:hover {
+        opacity: 1;
+    }
+
+    /* Pagination Controls Styling - Matching Milk Records */
+    .pagination-controls {
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        border-top: 1px solid #e5e7eb;
+        background: #f9fafb;
+    }
+
+    .pagination-controls .page-btn {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        min-width: 38px;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .pagination-controls .page-btn:hover:not(:disabled):not(.active) {
+        background: #f3f4f6;
+        border-color: #9ca3af;
+        color: #374151;
+    }
+
+    .pagination-controls .page-btn.active {
+        background: #1A5F7A;
+        border-color: #1A5F7A;
+        color: white;
+        font-weight: 600;
+        cursor: default;
+    }
+
+    .pagination-controls .page-btn:disabled {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+        color: #d1d5db;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    /* Info Grid for Disposed Details Modal */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+    }
+
+    .info-item p {
+        font-size: 16px;
+        color: #1f2937;
+        font-weight: 600;
+        margin: 0;
     }
 </style>
 
@@ -258,13 +556,50 @@
     const LIMIT_STAPH = 10000;
 
     let currentBottle = null;
+    let currentTab = '{{ request()->get("tab", "active") }}';
+
+    // ==========================================
+    // TAB SWITCHING
+    // ==========================================
+    function switchTab(tab) {
+        currentTab = tab;
+        
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.closest('.tab-btn').classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        if (tab === 'active') {
+            document.getElementById('activeTab').classList.add('active');
+        } else {
+            document.getElementById('disposedTab').classList.add('active');
+        }
+
+        // Clear search when switching tabs
+        clearSearch();
+
+        // Update URL without reload
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        window.history.pushState({}, '', url);
+    }
+
+    // Initialize correct tab on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (currentTab === 'disposed') {
+            document.querySelectorAll('.tab-btn')[1].click();
+        }
+    });
 
     // ==========================================
     // SEARCH FUNCTIONALITY
     // ==========================================
     function performSearch() {
         const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-        const bottles = document.querySelectorAll('.record-item');
+        const bottlesList = currentTab === 'active' ? 'bottlesList' : 'disposedBottlesList';
+        const bottles = document.querySelectorAll(`#${bottlesList} .record-item`);
         const noResultsMessage = document.getElementById('noResultsMessage');
         const clearButton = document.querySelector('.btn-clear');
         
@@ -276,7 +611,6 @@
             const location = bottle.getAttribute('data-location').toLowerCase();
             const status = bottle.getAttribute('data-status').toLowerCase();
             
-            // Search across all fields
             const matches = bottleCode.includes(searchTerm) || 
                           donorName.includes(searchTerm) || 
                           location.includes(searchTerm) ||
@@ -290,11 +624,13 @@
             }
         });
 
-        // Show/hide no results message
-        if (visibleCount === 0) {
-            noResultsMessage.style.display = 'block';
-        } else {
-            noResultsMessage.style.display = 'none';
+        // Show/hide no results message (only for active tab)
+        if (currentTab === 'active') {
+            if (visibleCount === 0 && searchTerm !== '') {
+                noResultsMessage.style.display = 'block';
+            } else {
+                noResultsMessage.style.display = 'none';
+            }
         }
 
         // Show/hide clear button
@@ -421,7 +757,6 @@
             return;
         }
 
-        // CLOSE THE QC MODAL IMMEDIATELY BEFORE SHOWING CONFIRMATION
         closeQCModal();
 
         Swal.fire({
@@ -455,7 +790,6 @@
                 .then(data => {
                     if(data.success) {
                         if(isContaminated) {
-                            // Prompt to dispose contaminated bottle
                             Swal.fire({
                                 title: '⚠️ Bottle Marked as Contaminated',
                                 html: '<div style="font-size: 16px; color: #374151; margin-top: 10px;">Please dispose of this contaminated bottle immediately for safety.</div>',
@@ -484,25 +818,21 @@
                         }
                     } else {
                         Swal.fire('Error', data.message || 'Failed to save results.', 'error');
-                        // Reopen modal if save failed
                         openQCModal(currentBottle);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     Swal.fire('Error', 'An error occurred while saving.', 'error');
-                    // Reopen modal if request failed
                     openQCModal(currentBottle);
                 });
             } else {
-                // If user cancels, reopen the QC modal
                 openQCModal(currentBottle);
             }
         });
     }
 
     function markAsDisposed(bottleCode) {
-        // Show loading state
         Swal.fire({
             title: 'Marking as Disposed...',
             allowOutsideClick: false,
@@ -539,6 +869,246 @@
             Swal.fire('Error', 'An error occurred.', 'error');
         });
     }
+
+    // ==========================================
+    // DISPOSED BOTTLE DETAILS MODAL
+    // ==========================================
+    function viewDisposedDetails(bottle) {
+        document.getElementById('disposed-bottle-code').textContent = bottle.post_bottle_code;
+        document.getElementById('disposed-donor-name').textContent = bottle.milk?.donor?.dn_FullName || 'Unknown';
+        document.getElementById('disposed-location').textContent = bottle.post_storage_location || 'N/A';
+        document.getElementById('disposed-expiry').textContent = bottle.post_expiry_date || 'N/A';
+        document.getElementById('disposed-date').textContent = bottle.updated_at ? new Date(bottle.updated_at).toLocaleDateString() : 'N/A';
+        
+        // Status
+        const statusEl = document.getElementById('disposed-status');
+        if (bottle.post_micro_status === 'NOT CONTAMINATED') {
+            statusEl.innerHTML = '<span class="status-tag status-approved">Not Contaminated</span>';
+        } else if (bottle.post_micro_status === 'CONTAMINATED') {
+            statusEl.innerHTML = '<span class="status-tag status-rejected">Contaminated</span>';
+        } else {
+            statusEl.innerHTML = '<span class="status-tag status-pending">Pending QC</span>';
+        }
+
+        // QC Results
+        if (bottle.post_micro_total_viable || bottle.post_micro_entero || bottle.post_micro_staph) {
+            document.getElementById('disposed-tvc').textContent = bottle.post_micro_total_viable || 'N/A';
+            document.getElementById('disposed-entero').textContent = bottle.post_micro_entero || 'N/A';
+            document.getElementById('disposed-staph').textContent = bottle.post_micro_staph || 'N/A';
+
+            // Results
+            const tvcResult = (bottle.post_micro_total_viable || 0) >= LIMIT_TVC;
+            const enteroResult = (bottle.post_micro_entero || 0) >= LIMIT_ENTERO;
+            const staphResult = (bottle.post_micro_staph || 0) >= LIMIT_STAPH;
+
+            document.getElementById('disposed-tvc-result').innerHTML = tvcResult 
+                ? '<span class="badge-result badge-contaminated"><i class="fas fa-times-circle"></i> Fail</span>'
+                : '<span class="badge-result badge-safe"><i class="fas fa-check-circle"></i> Pass</span>';
+            
+            document.getElementById('disposed-entero-result').innerHTML = enteroResult 
+                ? '<span class="badge-result badge-contaminated"><i class="fas fa-times-circle"></i> Fail</span>'
+                : '<span class="badge-result badge-safe"><i class="fas fa-check-circle"></i> Pass</span>';
+            
+            document.getElementById('disposed-staph-result').innerHTML = staphResult 
+                ? '<span class="badge-result badge-contaminated"><i class="fas fa-times-circle"></i> Fail</span>'
+                : '<span class="badge-result badge-safe"><i class="fas fa-check-circle"></i> Pass</span>';
+            
+            document.getElementById('qc-results-section').style.display = 'block';
+        } else {
+            document.getElementById('qc-results-section').style.display = 'none';
+        }
+
+        document.getElementById('disposedModal').style.display = 'flex';
+    }
+
+    function closeDisposedModal() {
+        document.getElementById('disposedModal').style.display = 'none';
+    }
+    // ==========================================
+    // CLIENT-SIDE PAGINATION (matching milk records)
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Setup pagination for Active Bottles
+        setupPagination('activeTab', 'bottlesList', 'activePaginationControls');
+        
+        // Setup pagination for Disposed Bottles
+        setupPagination('disposedTab', 'disposedBottlesList', 'disposedPaginationControls');
+    });
+
+    function setupPagination(tabId, listId, controlsId) {
+        const tab = document.getElementById(tabId);
+        const listContainer = document.getElementById(listId);
+        const controls = document.getElementById(controlsId);
+        
+        if (!tab || !listContainer || !controls) return;
+
+        const rowsSelector = '.record-item';
+        const perPage = 10;
+        let currentPage = 1;
+
+        function getRows() {
+            // Only get visible rows (not hidden by search)
+            return Array.from(listContainer.querySelectorAll(rowsSelector))
+                .filter(r => r.style.display !== 'none');
+        }
+
+        function renderControls(rows) {
+            const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+            controls.innerHTML = '';
+
+            const prev = document.createElement('button');
+            prev.className = 'page-btn';
+            prev.textContent = '‹ Prev';
+            prev.disabled = currentPage <= 1;
+            prev.addEventListener('click', () => renderPage(currentPage - 1));
+            controls.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn';
+                btn.textContent = String(i);
+                if (i === currentPage) btn.classList.add('active');
+                btn.addEventListener('click', () => renderPage(i));
+                controls.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.className = 'page-btn';
+            next.textContent = 'Next ›';
+            next.disabled = currentPage >= totalPages;
+            next.addEventListener('click', () => renderPage(currentPage + 1));
+            controls.appendChild(next);
+        }
+
+        function renderPage(page) {
+            const rows = getRows();
+            const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page;
+
+            // Hide all rows first
+            Array.from(listContainer.querySelectorAll(rowsSelector)).forEach(r => {
+                // Only hide if not already hidden by search
+                if (r.style.display !== 'none') {
+                    r.classList.add('pagination-hidden');
+                }
+            });
+
+            const start = (currentPage - 1) * perPage;
+            const pageRows = rows.slice(start, start + perPage);
+            pageRows.forEach(r => r.classList.remove('pagination-hidden'));
+
+            renderControls(rows);
+        }
+
+        // Expose rebuild function for search functionality
+        window[`__rebuild${tabId}Pagination`] = function(page) {
+            const rows = getRows();
+            const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+            if (typeof page === 'number' && page >= 1) {
+                currentPage = page > totalPages ? totalPages : page;
+            } else if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+            renderPage(currentPage);
+        };
+
+        // Initial render
+        renderPage(1);
+    }
+
+    // Update performSearch to work with pagination
+    const originalPerformSearch = performSearch;
+    performSearch = function() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const bottlesList = currentTab === 'active' ? 'bottlesList' : 'disposedBottlesList';
+        const bottles = document.querySelectorAll(`#${bottlesList} .record-item`);
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        const clearButton = document.querySelector('.btn-clear');
+        
+        let visibleCount = 0;
+
+        bottles.forEach(bottle => {
+            const bottleCode = bottle.getAttribute('data-bottle-code').toLowerCase();
+            const donorName = bottle.getAttribute('data-donor-name').toLowerCase();
+            const location = bottle.getAttribute('data-location').toLowerCase();
+            const status = bottle.getAttribute('data-status').toLowerCase();
+            
+            const matches = bottleCode.includes(searchTerm) || 
+                          donorName.includes(searchTerm) || 
+                          location.includes(searchTerm) ||
+                          status.includes(searchTerm);
+            
+            if (matches || searchTerm === '') {
+                bottle.style.display = '';
+                bottle.classList.remove('pagination-hidden');
+                visibleCount++;
+            } else {
+                bottle.style.display = 'none';
+                bottle.classList.add('pagination-hidden');
+            }
+        });
+
+        // Show/hide no results message (only for active tab)
+        if (currentTab === 'active') {
+            if (visibleCount === 0 && searchTerm !== '') {
+                noResultsMessage.style.display = 'block';
+            } else {
+                noResultsMessage.style.display = 'none';
+            }
+        }
+
+        // Show/hide clear button
+        if (searchTerm !== '') {
+            clearButton.style.display = 'inline-block';
+        } else {
+            clearButton.style.display = 'none';
+        }
+
+        // Rebuild pagination for current tab
+        if (currentTab === 'active') {
+            if (window.__rebuildactiveTabPagination) window.__rebuildactiveTabPagination(1);
+        } else {
+            if (window.__rebuilddisposedTabPagination) window.__rebuilddisposedTabPagination(1);
+        }
+    };
+
+    // Update switchTab to rebuild pagination
+    const originalSwitchTab = switchTab;
+    switchTab = function(tab) {
+        currentTab = tab;
+        
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.closest('.tab-btn').classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        if (tab === 'active') {
+            document.getElementById('activeTab').classList.add('active');
+            if (window.__rebuildactiveTabPagination) window.__rebuildactiveTabPagination();
+        } else {
+            document.getElementById('disposedTab').classList.add('active');
+            if (window.__rebuilddisposedTabPagination) window.__rebuilddisposedTabPagination();
+        }
+
+        // Clear search when switching tabs
+        clearSearch();
+
+        // Update URL without reload
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        window.history.pushState({}, '', url);
+    };
 </script>
+
+<style>
+    /* Hide items that are hidden by pagination */
+    .record-item.pagination-hidden {
+        display: none !important;
+    }
+</style>
 
 @endsection

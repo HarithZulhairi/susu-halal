@@ -809,21 +809,23 @@ class MilkController extends Controller
         return response()->json(['success' => true]);
     }
 
-  public function viewQualityControlInventory()
+    public function viewQualityControlInventory()
     {
-        $postBottles = PostBottle::with(['milk.donor'])
+        // Active Bottles (Not Disposed) - Get all records for client-side pagination
+        $activeBottles = PostBottle::with(['milk.donor'])
             ->whereDoesntHave('allocations') // Not allocated
             ->whereNotNull('created_at') // Already stored
             ->where('is_disposed', 0)  
-            // Comment out this line temporarily to see ALL bottles including contaminated ones for debugging
-            // ->where('post_micro_status', '!=', 'Contaminated')
             ->orderBy('post_expiry_date')
-            ->get();
+            ->get(); // ← Changed from paginate(10) to get()
 
-        // Don't transform - just pass the collection directly
-        // The blade template can access Eloquent properties directly
+        // Disposed Bottles - Get all records for client-side pagination
+        $disposedBottles = PostBottle::with(['milk.donor'])
+            ->where('is_disposed', 1)
+            ->orderByDesc('updated_at') // Most recently disposed first
+            ->get(); // ← Changed from paginate(10) to get()
         
-        return view('labtech.labtech_quality-control', compact('postBottles'));
+        return view('labtech.labtech_quality-control', compact('activeBottles', 'disposedBottles'));
     }
     
     public function updateMicrobiologyResults(Request $request)
