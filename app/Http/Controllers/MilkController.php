@@ -870,23 +870,6 @@ class MilkController extends Controller
                     ->where('post_micro_status', 'Contaminated')
                     ->exists();
 
-                if ($hasContamination) {
-                    Milk::where('milk_ID', $milkId)
-                        ->update(['milk_Status' => 'Contaminated']);
-                } else {
-                    // Check if all bottles for this milk have been tested
-                    $allTested = PostBottle::where('milk_ID', $milkId)
-                        ->whereNotNull('post_micro_status')
-                        ->where('post_micro_status', '!=', 'Pending')
-                        ->count();
-                    
-                    $totalBottles = PostBottle::where('milk_ID', $milkId)->count();
-                    
-                    if ($allTested === $totalBottles) {
-                        Milk::where('milk_ID', $milkId)
-                            ->update(['milk_Status' => 'Safe']);
-                    }
-                }
             }
 
             return response()->json([
