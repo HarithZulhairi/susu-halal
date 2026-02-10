@@ -130,6 +130,36 @@
   color: #6b7280;
 }
 
+/* Pagination controls */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 0 18px 0;
+}
+.pagination-controls .page-btn {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #374151;
+    font-weight: 600;
+}
+.pagination-controls .page-btn:hover {
+    background: #f3f4f6;
+}
+.pagination-controls .page-btn.active {
+    background: #1A5F7A;
+    color: white;
+    border-color: #14646d;
+}
+.pagination-controls .page-btn[disabled] {
+    opacity: 0.5;
+    cursor: default;
+}
+
+
 /* ========== NICU Cubicle ========== */
 .infants-table td:nth-child(2) {
   color: #374151;

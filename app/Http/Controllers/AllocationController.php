@@ -14,6 +14,122 @@ use Carbon\Carbon;
 
 class AllocationController extends Controller
 {
+    public function viewTraceabilityNurse(Request $request)
+    {
+        // 1. Build the base query for MilkRequest to apply filters
+        // We will use this to find WHICH parents to show
+        $requestQuery = MilkRequest::whereIn('status', ['Allocated', 'Fully Dispensed']);
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->get('search');
+            $requestQuery->whereHas('parent', function($q) use ($searchTerm) {
+                $q->where('pr_BabyName', 'like', "%{$searchTerm}%")
+                ->orWhere('pr_ID', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // 2. Get unique Parent IDs that match our criteria (Paginated)
+        // We paginate the PARENTS so we display X infants per page
+        $parentIDs = $requestQuery->pluck('pr_ID')->unique();
+        
+        // Manual Pagination for the array of IDs
+        $page = $request->input('page', 1);
+        $perPage = 10;
+        $paginatedParentIDs = new \Illuminate\Pagination\LengthAwarePaginator(
+            $parentIDs->forPage($page, $perPage),
+            $parentIDs->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        // 3. Fetch the actual requests ONLY for these paginated parents
+        // This effectively "Groups" them because we iterate by the parent IDs we found
+        $infants = [];
+        
+        // We need to re-fetch the requests for these specific parents to get the details
+        // We assume we want ALL 'Allocated/Fully Dispensed' requests for these visible parents
+        $visibleRequests = MilkRequest::whereIn('status', ['Allocated', 'Fully Dispensed'])
+            ->whereIn('pr_ID', $paginatedParentIDs->items()) // Filter by the paginated IDs
+            ->with([
+                'parent', 
+                'doctor',
+                'allocations.postBottles.milk.donor', 
+                'allocations.nurse'
+            ])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('parent.pr_ID');
+
+        foreach ($visibleRequests as $patientID => $patientRequests) {
+            $firstReq = $patientRequests->first(); 
+            $parent = $firstReq->parent;
+
+            // Build the infant object structure
+            $infantObj = (object)[
+                'id' => $parent->formattedID ?? 'ID-'.$parent->pr_ID,
+                'name' => $parent->pr_BabyName,
+                'nicu' => $parent->pr_NICU,
+                'last_updated' => $patientRequests->max('updated_at')->format('Y-m-d h:i A'),
+                'current_weight' => $firstReq->current_weight,
+                'baby_gender' => $parent->pr_BabyGender,
+                'status' => $firstReq->status,
+                'requests' => []
+            ];
+
+            // Process each request for this infant
+            foreach ($patientRequests as $req) {
+                
+                // Map Allocations
+                $allocationList = $req->allocations->map(function($alloc) {
+                    return (object)[
+                        'milk_id'    => $alloc->postBottles ? $alloc->postBottles->post_bottle_code : 'N/A',
+                        'volume'     => $alloc->total_selected_milk,
+                        'time'       => $alloc->created_at->format('Y-m-d h:i A'),
+                        'nurse_id'   => $alloc->nurse ? '#N'.$alloc->nurse->ns_ID : '-',
+                        'nurse_name' => $alloc->nurse ? $alloc->nurse->ns_Name : 'Unknown'
+                    ];
+                });
+
+                // Get Donor Info
+                $firstAlloc = $req->allocations->first();
+                $donor = $firstAlloc && $firstAlloc->postBottles && $firstAlloc->postBottles->milk && $firstAlloc->postBottles->milk->donor 
+                    ? $firstAlloc->postBottles->milk->donor 
+                    : null;
+
+                // Build the Request Detail Object
+                $infantObj->requests[] = (object)[
+                    'req_id' => $req->request_ID,
+                    'total_allocated_vol' => $req->allocations->sum('total_selected_milk'),
+                    'details' => (object)[
+                        'patient_name' => $parent->pr_BabyName,
+                        'patient_id'   => $parent->formattedID ?? '#P'.$parent->pr_ID,
+                        'patient_nicu' => $parent->pr_NICU,
+                        'parent_consent' => $parent->pr_ConsentStatus ?? 'N/A',
+                        'donor_id'     => $donor ? '#D'.$donor->dn_ID : 'Mixed/Unknown',
+                        'donor_name'   => $donor ? $donor->dn_FullName : 'Multiple/Unknown',
+                        'consent'      => 'Consent Granted',
+                        'method'       => $req->kinship_method === 'yes' ? 'Milk Kinship' : 'No Milk Kinship',
+                        'schedule'     => $req->feeding_perday . ' feeds/day (' . $req->feeding_interval . 'h interval)',
+                        'start_time'   => $req->feeding_start_time,
+                        'doctor_id'    => $req->doctor ? '#Dr'.$req->doctor->dr_ID : '-',
+                        'doctor_name'  => $req->doctor ? $req->doctor->dr_Name : 'Unknown',
+                        'status'       => $req->status,
+                        'direct_oral'  => $req->oral_feeding,
+                        'feeding_tube' => $req->feeding_tube,
+                        'oral_volume'  => $req->oral_total . ' ml',
+                        'tube_volume'  => $req->drip_total . ' ml',
+                        'allocations'  => $allocationList
+                    ]
+                ];
+            }
+            $infants[] = $infantObj;
+        }
+
+        // Pass the structured data AND the paginator to the view
+        // Note: 'requests' variable in view should refer to the paginator for the links() method
+        return view('nurse.nurse_infants-request', ['infants' => $infants, 'requests' => $paginatedParentIDs]);
+    }
     /**
      * Store the allocation of milk bottles to a request.
      * Captures Nurse ID (ns_ID) here.
