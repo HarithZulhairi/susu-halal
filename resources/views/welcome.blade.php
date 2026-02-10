@@ -357,6 +357,7 @@
     </section>
 
     <!-- FAQ Section -->
+    <!-- FAQ Section -->
     <section class="section" style="background: var(--light);">
         <div class="container">
             <div class="section-title">
