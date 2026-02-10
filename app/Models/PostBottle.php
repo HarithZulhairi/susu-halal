@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class PostBottle extends Model
 {
     use HasFactory;
-
+    
     protected $table = 'post_bottles';
+    protected $primaryKey = 'post_ID';
+
     protected $primaryKey = 'post_ID';
 
     protected $fillable = [
@@ -22,7 +24,8 @@ class PostBottle extends Model
         'post_micro_entero', 
         'post_micro_staph', 
         'post_micro_status',
-        'post_storage_location'
+        'post_storage_location',
+        'is_disposed'
     ];
 
     public function milk()

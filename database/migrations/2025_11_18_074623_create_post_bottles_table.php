@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('post_bottles', function (Blueprint $table) {
-            $table->id(); 
+            $table->id('post_ID'); 
             
             // Foreign Keys
             $table->unsignedBigInteger('milk_ID'); 

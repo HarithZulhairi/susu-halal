@@ -809,4 +809,137 @@ class MilkController extends Controller
         return response()->json(['success' => true]);
     }
 
+  public function viewQualityControlInventory()
+    {
+        $postBottles = PostBottle::with(['milk.donor'])
+            ->whereDoesntHave('allocations') // Not allocated
+            ->whereNotNull('created_at') // Already stored
+            ->where('is_disposed', 0)  
+            // Comment out this line temporarily to see ALL bottles including contaminated ones for debugging
+            // ->where('post_micro_status', '!=', 'Contaminated')
+            ->orderBy('post_expiry_date')
+            ->get();
+
+        // Don't transform - just pass the collection directly
+        // The blade template can access Eloquent properties directly
+        
+        return view('labtech.labtech_quality-control', compact('postBottles'));
+    }
+    
+    public function updateMicrobiologyResults(Request $request)
+    {
+        try {
+            $request->validate([
+                'bottles' => 'required|array|min:1',
+                'bottles.*.bottle_id' => 'required|string|exists:post_bottles,post_bottle_code',
+                'bottles.*.total_viable' => 'required|numeric|min:0',
+                'bottles.*.entero' => 'required|numeric|min:0',
+                'bottles.*.staph' => 'required|numeric|min:0',
+                'bottles.*.result' => 'required|string|in:NOT CONTAMINATED,CONTAMINATED'
+            ]);
+
+            $affectedMilkIds = [];
+
+            foreach ($request->bottles as $bottle) {
+
+                $postBottle = PostBottle::where('post_bottle_code', $bottle['bottle_id'])->first();
+
+                if ($postBottle) {
+
+                    $postBottle->update([
+                        'post_micro_total_viable' => $bottle['total_viable'],
+                        'post_micro_entero'       => $bottle['entero'],
+                        'post_micro_staph'        => $bottle['staph'],
+                        'post_micro_status'       => $bottle['result']
+                    ]);
+
+                    // Collect affected milk IDs
+                    $affectedMilkIds[] = $postBottle->milk_ID;
+                }
+            }
+
+            // Remove duplicates
+            $affectedMilkIds = array_unique($affectedMilkIds);
+
+            // ============================================
+            // 🔥 AUTO UPDATE BATCH STATUS HERE
+            // ============================================
+            foreach ($affectedMilkIds as $milkId) {
+
+                $hasContamination = PostBottle::where('milk_ID', $milkId)
+                    ->where('post_micro_status', 'Contaminated')
+                    ->exists();
+
+                if ($hasContamination) {
+                    Milk::where('milk_ID', $milkId)
+                        ->update(['milk_Status' => 'Contaminated']);
+                } else {
+                    // Check if all bottles for this milk have been tested
+                    $allTested = PostBottle::where('milk_ID', $milkId)
+                        ->whereNotNull('post_micro_status')
+                        ->where('post_micro_status', '!=', 'Pending')
+                        ->count();
+                    
+                    $totalBottles = PostBottle::where('milk_ID', $milkId)->count();
+                    
+                    if ($allTested === $totalBottles) {
+                        Milk::where('milk_ID', $milkId)
+                            ->update(['milk_Status' => 'Safe']);
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Microbiology results updated successfully.'
+            ]);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function markBottleDisposed(Request $request)
+    {
+        try {
+            $request->validate([
+                'bottle_code' => 'required|string|exists:post_bottles,post_bottle_code'
+            ]);
+
+            $bottle = PostBottle::where('post_bottle_code', $request->bottle_code)->first();
+            
+            if ($bottle) {
+                $bottle->update(['is_disposed' => true]);
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Bottle marked as disposed successfully.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Bottle not found.'
+            ], 404);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 }

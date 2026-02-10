@@ -18,7 +18,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 
 //new routes
-Route::view('/labtech/inventory-quality-control', 'labtech.labtech_quality-control')->name('labtech.quality-control');
+Route::get('/labtech/inventory-quality-control', [MilkController::class, 'viewQualityControlInventory'])
+    ->name('labtech.quality-control');
+Route::post('/labtech/mark-bottle-disposed', [MilkController::class, 'markBottleDisposed'])
+    ->name('labtech.markBottleDisposed');
 Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
 Route::view('/hmmc/infants-request', 'hmmc.hmmc_infants-request')->name('hmmc.infants-request');
 Route::view('/doctor/infants-request', 'doctor.doctor_infants-request')->name('doctor.infants-request');
@@ -366,6 +369,10 @@ Route::get('/doctor/donor-candidate-list', [DonorAppointmentController::class, '
 
 Route::put('/doctor/candidates/approve/{id}', [DonorAppointmentController::class, 'approveDonorToBeDr']);
 Route::put('/doctor/candidates/reject/{id}', [DonorAppointmentController::class, 'rejectDonorToBeDr']);
+
+
+Route::post('/labtech/update-microbiology-results', [MilkController::class, 'updateMicrobiologyResults'])
+    ->name('labtech.updateMicrobiologyResults');
 
 
 

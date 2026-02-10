@@ -5,8 +5,7 @@
 @section('content')
   <link rel="stylesheet" href="{{ asset('css/nurse_milk-request-list.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-
+  
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   {{-- Flash Messages --}}
@@ -308,70 +307,9 @@
             </table>
         </div>
 
-        <table class="records-table" id="requestTable">
-          <thead>
-            <tr>
-              <th onclick="sortTable(0)">Patient Name <i class="fas fa-sort sort-icon"></i></th>
-              <th onclick="sortTable(1)">NICU Cubicle <i class="fas fa-sort sort-icon"></i></th>
-              <th onclick="sortTable(2)">Date Requested <i class="fas fa-sort sort-icon"></i></th>
-              <th onclick="sortTable(3)">Feeding Time <i class="fas fa-sort sort-icon"></i></th>
-              <th onclick="sortTable(4)">Status <i class="fas fa-sort sort-icon"></i></th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($requests as $req)
-              <tr>
-                <td>
-                  <div class="patient-info">
-                    <i class="fas fa-baby milk-icon"></i>
-                    <div>
-                      <strong>{{ $req->formatted_id }}</strong><br>
-                      <span>{{ $req->patient_name }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>{{ $req->cubicle }}</td>
-                <td>{{ $req->date_requested }}</td>
-                <td>{{ $req->feed_time }}</td>
-                <td>
-                  @if($req->is_fully_dispensed)
-                    <span class="status success">Fully Dispensed</span>
-
-                @elseif(count($req->allocated_items) > 0)
-                    <span class="status approved">Partially Dispensed</span>
-
-                @else
-                    <span class="status {{ strtolower($req->status) }}">
-                        {{ $req->status }}
-                    </span>
-                @endif
-                </td>
-                <td>
-                   {{-- 1. View Details Icon --}}
-                  <button type="button" class="btn-view" 
-                        onclick='openViewModal(@json($req))' 
-                        title="View Details">
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  
-                  {{-- 2. Allocate/Edit Icon --}}
-                  @if($req->can_allocate)
-                    <button type="button" class="btn-view"
-                        style="color: #f59e0b;" 
-                        onclick='openMilkModal(this)'
-                        data-id="{{ $req->request_ID }}"
-                        data-status="{{ $req->status }}"
-                        data-formatted-id="{{ $req->formatted_id }}"
-                        data-patient-name="{{ $req->patient_name }}"
-                        data-weight="{{ $req->weight }}"
-                        data-dob="{{ $req->parent->pr_BabyDOB }}"
-                        data-ward="{{ $req->cubicle }}"
-                        data-volume="{{ $req->total_daily_volume }}"
-                        title="Allocate Milk">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                  @endif
+        <div class="pagination-wrapper">
+            {{ $requests->links() }}
+        </div>
 
       </div>
     </div>
@@ -466,7 +404,6 @@
             </div>
 
         </div>
-      </div>
     </div>
 </div>
 
@@ -697,7 +634,6 @@
         document.getElementById('viewRequestModal').style.display = 'flex';
     }
 
-
     function closeViewModal() {
         document.getElementById('viewRequestModal').style.display = 'none';
     }
@@ -738,11 +674,10 @@
             }
             itemDiv.classList.add("selected");
         } else {
-            selectedMilkUnits = selectedMilkUnits.filter(m => m.id !== id);
-            milkItemDiv.classList.remove("selected");
+            // Remove
+            selectedMilkUnits = selectedMilkUnits.filter(m => m.id != id);
+            itemDiv.classList.remove("selected");
         }
-
-        updateTotalVolume();
     }
 
     // Individual Checkbox Event

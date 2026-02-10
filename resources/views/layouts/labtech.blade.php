@@ -15,6 +15,7 @@
   crossorigin="anonymous"
   referrerpolicy="no-referrer"
 />
+<meta name="csrf-token" content="{{ csrf_token() }}"> 
 
 </head>
 <body>
