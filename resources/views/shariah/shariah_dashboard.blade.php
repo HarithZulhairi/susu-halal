@@ -34,20 +34,6 @@
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Milk Kinship Cases</span>
-                <div class="stat-icon green">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-            </div>
-            <div class="stat-value">{{ $kinshipCases ?? 42 }}</div>
-            <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                {{ $kinshipChange ?? '8%' }} from last month
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
                 <span class="stat-label">Compliance Reviews</span>
                 <div class="stat-icon orange">
                     <i class="fas fa-scale-balanced"></i>
@@ -113,111 +99,6 @@
         </div>
     </div>
 
-    <!-- Bottom Grid -->
-    <div class="quick-stats-card">
-        <!-- Pending Approvals -->
-        <div class="card users-card">
-            <div class="card-header">
-                <h2>Pending Shariah Approvals</h2>
-                <a href="{{ route('shariah.infant-request') }}" class="view-all">
-                    View All Cases
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-            <div class="table-container">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th>CASE ID</th>
-                            <th>REQUEST TYPE</th>
-                            <th>APPLICANT</th>
-                            <th>STATUS</th>
-                            <th>PRIORITY</th>
-                            <th>ACTIONS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar teal">MK</div>
-                                    <div>
-                                        <div class="user-name">#MK-2024-015</div>
-                                        <div class="user-email">Milk Kinship Review</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-donor">Kinship</span></td>
-                            <td>Fatima Al-Mansoor</td>
-                            <td><span class="badge badge-pending">Under Review</span></td>
-                            <td><span class="badge badge-high">High</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-gavel"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar blue">DR</div>
-                                    <div>
-                                        <div class="user-name">#DR-2024-042</div>
-                                        <div class="user-email">Donor Registration</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-nurse">Screening</span></td>
-                            <td>Aisha Rahman</td>
-                            <td><span class="badge badge-pending">Awaiting Fatwa</span></td>
-                            <td><span class="badge badge-medium">Medium</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-gavel"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal">MR</div>
-                                    <div>
-                                        <div class="user-name">#MR-2024-128</div>
-                                        <div class="user-email">Milk Request</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-advisor">Compliance</span></td>
-                            <td>Mohammed Hassan</td>
-                            <td><span class="badge badge-active">Approved</span></td>
-                            <td><span class="badge badge-low">Low</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-file-download"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar pink">MP</div>
-                                    <div>
-                                        <div class="user-name">#MP-2024-056</div>
-                                        <div class="user-email">Processing Audit</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-donor">Audit</span></td>
-                            <td>North Branch Facility</td>
-                            <td><span class="badge badge-pending">In Progress</span></td>
-                            <td><span class="badge badge-high">High</span></td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-clipboard-check"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
 </div>
 

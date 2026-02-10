@@ -129,32 +129,6 @@
             </a>
 
             <ul style="display: flex; list-style: none; gap: 25px; margin: 0;">
-                <li>
-                    <a href="{{ url('/') }}" 
-                    style="text-decoration: none; color: var(--dark); font-weight: 500; padding: 8px 12px; border-radius: 4px; transition: var(--transition);">
-                    Home
-                    </a>
-                </li>
-                <li>
-                    <a href="#services" 
-                    style="text-decoration: none; color: var(--dark); font-weight: 500; padding: 8px 12px; border-radius: 4px; transition: var(--transition);">
-                    Services
-                    </a>
-                </li>
-                <li>
-                    <a href="#about" 
-                    style="text-decoration: none; color: var(--dark); font-weight: 500; padding: 8px 12px; border-radius: 4px; transition: var(--transition);">
-                    About
-                    </a>
-                </li>
-                <li>
-                    <a href="#contact" 
-                    style="text-decoration: none; color: var(--dark); font-weight: 500; padding: 8px 12px; border-radius: 4px; transition: var(--transition);">
-                    Contact
-                    </a>
-                </li>
-
-                
                     <li>
                         <a href="/register" 
                         style="text-decoration: none; color: var(--secondary); font-weight: 600; padding: 8px 16px; border-radius: 4px; transition: var(--transition);">
@@ -180,7 +154,6 @@
             </p>
             <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
                 <a href="{{ route('register') }}" class="btn btn-primary">Become a Donor</a>
-                <a href="#" class="btn btn-secondary">Request Milk</a>
             </div>
         </div>
     </header>
@@ -309,7 +282,7 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
+    <!-- Testimonials Section 
     <section class="section">
         <div class="container">
             <div class="section-title">
@@ -354,9 +327,8 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
-    <!-- FAQ Section -->
     <!-- FAQ Section -->
     <section class="section" style="background: var(--light);">
         <div class="container">
@@ -407,7 +379,6 @@
             </p>
             <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
                 <a href="#" class="btn" style="background: var(--white); color: var(--primary);">Become a Donor</a>
-                <a href="#" class="btn" style="background: transparent; color: var(--white); border: 2px solid var(--white);">Request Milk</a>
             </div>
         </div>
     </section>
@@ -436,7 +407,7 @@
          style="width: 270px; height: auto; margin-bottom: 15px;">
     <p>Providing Shariah-compliant human milk sharing services to support mothers and infants in need.</p>
 </div>
-
+                <!-- 
                 <div>
                     <h4 style="color: var(--secondary); margin-bottom: 15px;">Quick Links</h4>
                     <ul style="list-style: none;">
@@ -447,6 +418,7 @@
                         <li style="margin-bottom: 8px;"><a href="#" style="color: var(--white); text-decoration: none;">Contact</a></li>
                     </ul>
                 </div>
+                
                 <div>
                     <h4 style="color: var(--secondary); margin-bottom: 15px;">Services</h4>
                     <ul style="list-style: none;">
@@ -456,6 +428,7 @@
                         <li style="margin-bottom: 8px;"><a href="#" style="color: var(--white); text-decoration: none;">Islamic Compliance</a></li>
                     </ul>
                 </div>
+                -->
                 <div>
                     <h4 style="color: var(--secondary); margin-bottom: 15px;">Contact Us</h4>
                     <ul style="list-style: none;">
