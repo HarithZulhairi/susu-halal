@@ -263,8 +263,24 @@
 <script>
 
     function downloadReport(parentId) {
-        window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
+        window.open("{{ url('/layouts/milk_report_pdf') }}/" + parentId, "_blank");
     }
+
+    // Search Functionality
+    document.getElementById('searchBox').addEventListener('keyup', function() {
+        let searchText = this.value.toLowerCase();
+        let requests = document.querySelectorAll('.milk-badge'); // Target the request badges
+
+        requests.forEach(badge => {
+            let badgeText = badge.innerText.toLowerCase();
+            if (badgeText.includes(searchText)) {
+                badge.style.display = 'inline-block'; // Show matching request
+            } else {
+                badge.style.display = 'none'; // Hide non-matching request
+            }
+        });
+    });
+
 
     function openAllocationModal(details, volumePerFeed) {
         // 1. Populate Basic Info

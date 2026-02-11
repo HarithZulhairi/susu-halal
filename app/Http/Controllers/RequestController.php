@@ -491,4 +491,55 @@ public function dispenseMilk(Request $request)
         return view('parent.parent_my-infant-request', compact('parent'));
     }
 
+    public function generateMilkReport($pr_ID)
+    {
+        $patient = ParentModel::findOrFail($pr_ID);
+        
+        // Calculate gestational age or use stored value
+        $gestationalAge = $patient->pr_BabyGestationalAge ?? 'N/A';
+        // If not stored, calculate from DOB if available (simplified logic)
+        if ($gestationalAge === 'N/A' && $patient->pr_BabyDOB) {
+            $dob = Carbon::parse($patient->pr_BabyDOB);
+            $now = Carbon::now();
+            $ageInWeeks = $dob->diffInWeeks($now);
+            // Assuming 40 weeks is full term, this is just postnatal age in weeks
+             $gestationalAge = $ageInWeeks . " (Postnatal)"; 
+        }
+
+        $reportData = [];
+        $totalVolume = 0;
+
+        // Fetch all allocations for this parent's requests
+        $requests = MilkRequest::where('pr_ID', $pr_ID)
+            ->with(['allocations.postBottles.milk', 'allocations.nurse', 'doctor'])
+            ->get();
+
+        foreach ($requests as $req) {
+            foreach ($req->allocations as $alloc) {
+                // Formatting data for the report view
+                $milk = $alloc->postBottles->milk ?? null;
+                $donorId = $milk ? '#D' . $milk->dn_ID : '-';
+                
+                $reportData[] = (object)[
+                    'date' => $alloc->created_at->format('d/m/Y'),
+                    'time' => $alloc->created_at->format('H:i'),
+                    'batch_no' => $alloc->post_ID ? 'B' . $alloc->post_ID : '-',
+                    'donor_id' => $donorId,
+                    'consent_kinship' => $req->kinship_method,
+                    'freq' => $req->feeding_interval ? 'Every ' . $req->feeding_interval . 'h' : '-',
+                    'amount' => $alloc->total_selected_milk,
+                    'incharge' => optional($alloc->nurse)->ns_Name ?? '-',
+                    'witness' => '-', // Witness logic not in DB yet
+                    'remark' => $req->kinship_method
+                ];
+
+                $totalVolume += $alloc->total_selected_milk;
+            }
+        }
+
+        $generatedDate = now()->format('d M Y');
+
+        return view('layouts.milk_report_pdf', compact('patient', 'reportData', 'totalVolume', 'generatedDate', 'gestationalAge'));
+    }
+
 }

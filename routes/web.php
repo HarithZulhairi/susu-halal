@@ -22,7 +22,7 @@ Route::get('/labtech/inventory-quality-control', [MilkController::class, 'viewQu
     ->name('labtech.quality-control');
 Route::post('/labtech/mark-bottle-disposed', [MilkController::class, 'markBottleDisposed'])
     ->name('labtech.markBottleDisposed');
-Route::view('/layouts/milk_report_pdf', 'layouts.milk_report_pdf')->name('layouts.milk_report_pdf');
+Route::get('/layouts/milk_report_pdf/{pr_ID}', [RequestController::class, 'generateMilkReport'])->name('layouts.milk_report_pdf');
 Route::view('/hmmc/infants-request', 'hmmc.hmmc_infants-request')->name('hmmc.infants-request');
 Route::view('/doctor/infants-request', 'doctor.doctor_infants-request')->name('doctor.infants-request');
 Route::view('/shariah/infants-request', 'shariah.shariah_infants-request')->name('shariah.infants-request');

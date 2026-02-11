@@ -41,7 +41,7 @@
             <td class="label">NAME</td>
             <td style="width: 30%; font-weight: bold;">{{ strtoupper($patient->pr_BabyName) }}</td>
             <td class="label">PATIENT ID (MRN)</td>
-            <td style="font-weight: bold;">{{ $patient->formattedID ?? $patient->pr_ID }}</td>
+            <td style="font-weight: bold;">{{ $patient->formatted_id ?? $patient->pr_ID }}</td>
         </tr>
         <tr>
             <td class="label">DOB / TOB</td>
