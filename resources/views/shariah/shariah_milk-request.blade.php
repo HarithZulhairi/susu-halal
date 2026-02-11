@@ -1,4 +1,4 @@
-@extends('layouts.hmmc')
+@extends('layouts.shariah')
 
 @section('title', 'Milk Distribution')
 

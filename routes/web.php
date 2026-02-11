@@ -240,7 +240,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
     Route::post('/nurse/set-infant-weight/update', [RequestController::class, 'updateInfantWeightNurse'])->name('nurse.nurse_infant-weight.update');
 
-    Route::get('/nurse/set-infant-weight', [RequestController::class, 'setInfantWeightNurse'])->name('nurse.nurse_set-infant-weight');
+    Route::get('/hmmc/infant-list', [RequestController::class, 'viewInfantHMMC'])->name('hmmc.hmmc_infant-list');
 
     Route::get('/parent/my-infant-request',
     [RequestController::class, 'viewMyInfantMilkRequests'])
@@ -258,6 +258,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/shariah/view-milk-processing/{milk}', [MilkController::class, 'viewMilkProcessingShariah'])->name('shariah.shariah_view-milk-processing');
     Route::post('/shariah/update-decision/{milk}', [MilkController::class, 'updateDecision'])->name('shariah.update-decision');
     Route::get('/shariah/manage-milk-records', [MilkController::class, 'viewMilkShariah'])->name('shariah.shariah_manage-milk-records');
+    Route::get('/shariah/milk-request', [RequestController::class, 'viewRequestShariah'])->name('shariah.milk-request');
     
 
     // Milk Records Views

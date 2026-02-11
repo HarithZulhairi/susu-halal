@@ -139,41 +139,138 @@ class RequestController extends Controller
         return view('nurse.nurse_milk-request-list', compact('requests', 'milks', 'postbottles', 'allocations'));
     }
 
-
     public function viewRequestHMMC(Request $request)
     {
-        $search = $request->input('search');
-        $status = $request->input('status'); // Get status from tabs
+        // 1. Base Query with Eager Loading
+        $query = MilkRequest::with([
+            'parent', 
+            'doctor', 
+            'allocations.postBottles',
+            'allocations.feedRecords.nurse' 
+        ]);
 
-        // 1. Start the query
-        $query = MilkRequest::with(['parent', 'doctor', 'allocation.milk']);
-
-        // 2. Apply Search Filter
-        if ($search) {
-            $query->whereHas('parent', function ($q) use ($search) {
-                $q->where('pr_BabyName', 'LIKE', "%{$search}%")
-                ->orWhere('pr_ID', 'LIKE', "%{$search}%");
+        // 2. Apply Filters (Keep your existing filter logic)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('parent', function($q) use ($search) {
+                $q->where('pr_BabyName', 'like', "%{$search}%")
+                ->orWhere('formattedID', 'like', "%{$search}%");
             });
         }
 
-        // 3. Apply Status Filter (Tabs)
-        if ($status && $status !== 'All') {
-            $query->where('status', $status);
+        if ($request->filled('status') && $request->status !== 'All') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('vol_min')) {
+            $query->where('total_daily_volume', '>=', $request->vol_min);
+        }
+        if ($request->filled('vol_max')) {
+            $query->where('total_daily_volume', '<=', $request->vol_max);
+        }
+        if ($request->filled('req_date_from')) {
+            $query->whereDate('created_at', '>=', $request->req_date_from);
+        }
+        if ($request->filled('req_date_to')) {
+            $query->whereDate('created_at', '<=', $request->req_date_to);
+        }
+        if ($request->filled('feed_date_from')) {
+            $query->whereDate('feeding_start_date', '>=', $request->feed_date_from);
+        }
+        if ($request->filled('feed_date_to')) {
+            $query->whereDate('feeding_start_date', '<=', $request->feed_date_to);
         }
 
-        // 4. Order and Paginate
-        $requests = $query->latest()->paginate(10);
+        // 3. Paginate & Persist Query Strings
+        $requests = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString(); 
 
-        // 5. Append query parameters so tabs + search + pagination work together
-        $requests->appends(['search' => $search, 'status' => $status]);
+        // 5. Get Available Milk
+        $milks = Milk::where('milk_Status', 'Storage Completed')
+            ->where('milk_shariahApproval', 1)
+            ->whereHas('postBottles', function ($q) {
+                $q->whereDate('post_expiry_date', '>=', \Carbon\Carbon::today());
+            })
+            ->get();
 
-        // Only NON-EXPIRED milk
-        $milks = Milk::whereDate('milk_expiryDate', '>=', Carbon::today())
-                    ->where('milk_Status', 'Distributing Completed')
-                    ->where('milk_shariahApproval', '1')
-                    ->get();
+        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', \Carbon\Carbon::today())
+            ->where('post_micro_status', 'NOT CONTAMINATED')
+            ->whereDoesntHave('allocations')
+            ->whereHas('milk', function ($q) {
+                $q->where('milk_Status', 'Storage Completed')
+                ->where('milk_shariahApproval', 1);
+            })
+            ->get();
+        
+        // Pass allocations variable explicitly if needed by other views, though JS uses json_data
+        $allocations = Allocation::all(); 
 
-        return view('hmmc.hmmc_milk-request', compact('requests', 'milks'));
+        return view('hmmc.hmmc_milk-request', compact('requests', 'milks', 'postbottles', 'allocations'));
+    }
+
+    public function viewRequestShariah(Request $request)
+    {
+        // 1. Base Query with Eager Loading
+        $query = MilkRequest::with([
+            'parent', 
+            'doctor', 
+            'allocations.postBottles',
+            'allocations.feedRecords.nurse' 
+        ]);
+
+        // 2. Apply Filters (Keep your existing filter logic)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('parent', function($q) use ($search) {
+                $q->where('pr_BabyName', 'like', "%{$search}%")
+                ->orWhere('formattedID', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status') && $request->status !== 'All') {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('vol_min')) {
+            $query->where('total_daily_volume', '>=', $request->vol_min);
+        }
+        if ($request->filled('vol_max')) {
+            $query->where('total_daily_volume', '<=', $request->vol_max);
+        }
+        if ($request->filled('req_date_from')) {
+            $query->whereDate('created_at', '>=', $request->req_date_from);
+        }
+        if ($request->filled('req_date_to')) {
+            $query->whereDate('created_at', '<=', $request->req_date_to);
+        }
+        if ($request->filled('feed_date_from')) {
+            $query->whereDate('feeding_start_date', '>=', $request->feed_date_from);
+        }
+        if ($request->filled('feed_date_to')) {
+            $query->whereDate('feeding_start_date', '<=', $request->feed_date_to);
+        }
+
+        // 3. Paginate & Persist Query Strings
+        $requests = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString(); 
+
+        // 5. Get Available Milk
+        $milks = Milk::where('milk_Status', 'Storage Completed')
+            ->where('milk_shariahApproval', 1)
+            ->whereHas('postBottles', function ($q) {
+                $q->whereDate('post_expiry_date', '>=', \Carbon\Carbon::today());
+            })
+            ->get();
+
+        $postbottles = PostBottle::whereDate('post_expiry_date', '>=', \Carbon\Carbon::today())
+            ->where('post_micro_status', 'NOT CONTAMINATED')
+            ->whereDoesntHave('allocations')
+            ->whereHas('milk', function ($q) {
+                $q->where('milk_Status', 'Storage Completed')
+                ->where('milk_shariahApproval', 1);
+            })
+            ->get();
+        
+        // Pass allocations variable explicitly if needed by other views, though JS uses json_data
+        $allocations = Allocation::all(); 
+
+        return view('shariah.shariah_milk-request', compact('requests', 'milks', 'postbottles', 'allocations'));
     }
 
     //CRUD other than viewing//
@@ -340,34 +437,15 @@ public function dispenseMilk(Request $request)
 
     //Infant Weight Record//
 
-    public function viewInfantWeightHMMC(Request $request)
+    public function viewInfantHMMC(Request $request)
     {
-        // Start Query with Relationships
-        $query = ParentModel::with(['requests.allocation.milk']);
-
-        // --- SEARCH LOGIC ---
-        if ($request->has('search') && $request->search != '') {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('pr_ID', 'like', "%{$searchTerm}%")
-                ->orWhere('pr_BabyName', 'like', "%{$searchTerm}%");
-            });
-        }
-
-        // --- PAGINATION CHANGE ---
-        // Change ->get() to ->paginate(10)
-        $parents = $query->latest()->paginate(10);
-
-        // Ensure search term persists when clicking "Next Page"
-        $parents->appends(['search' => $request->search]);
-
-        return view('hmmc.hmmc_list-of-infants', compact('parents'));
+        $parents = ParentModel::all();
+        return view('hmmc.hmmc_infant-list', compact('parents'));
     }
 
     public function setInfantWeightNurse()
     {
         $parents = ParentModel::all();
-
         return view('nurse.nurse_set-infant-weight', compact('parents'));
     }
     
@@ -411,28 +489,5 @@ public function dispenseMilk(Request $request)
 
         return view('parent.parent_my-infant-request', compact('parent'));
     }
-
-    public function viewInfantMilkShariah(Request $request)
-    {
-        // Same as HMMC
-        $query = ParentModel::with(['requests.allocation.milk']);
-
-        // Search logic
-        if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('pr_ID', 'like', "%{$request->search}%")
-                ->orWhere('pr_BabyName', 'like', "%{$request->search}%");
-            });
-        }
-
-        // Pagination
-        $parents = $query->latest()->paginate(10);
-        $parents->appends(['search' => $request->search]);
-
-        return view('shariah.shariah_infant-request', compact('parents'));
-    }
-
-
-
 
 }
