@@ -25,47 +25,52 @@ class DashboardController extends Controller
     // ============================
     public function donor()
     {
-           $dn_id = auth()->user()->role_id; // Donor's ID
+        $dn_id = auth()->user()->role_id; // Donor's ID
 
-    // Upcoming appointments (Milk + Pumping Kit)
-    $milkAppointments = MilkAppointment::where('dn_ID', $dn_id)
-        ->where('appointment_datetime', '>=', now())
-        ->get();
+        // Upcoming appointments (Milk + Pumping Kit) - still from appointment tables
+        $milkAppointments = MilkAppointment::where('dn_ID', $dn_id)
+            ->where('appointment_datetime', '>=', now())
+            ->get();
 
-    $pumpingAppointments = PumpingKitAppointment::where('dn_ID', $dn_id)
-        ->where('appointment_datetime', '>=', now())
-        ->get();
+        $pumpingAppointments = PumpingKitAppointment::where('dn_ID', $dn_id)
+            ->where('appointment_datetime', '>=', now())
+            ->get();
 
-    $upcomingAppointments = $milkAppointments->concat($pumpingAppointments)
-        ->sortBy('appointment_datetime')
-        ->values();
+        $upcomingAppointments = $milkAppointments->concat($pumpingAppointments)
+            ->sortBy('appointment_datetime')
+            ->values();
 
-    // Last 6 months stats
-    $monthLabels = [];
-    $monthlyDonations = [];
-    $monthlyFrequency = [];
+        // Last 6 months chart data (from Milk table - actual donation records)
+        $monthLabels = [];
+        $monthlyDonations = [];
+        $monthlyFrequency = [];
 
-    for ($i = 5; $i >= 0; $i--) {
-        $month = Carbon::now()->subMonths($i);
-        $monthLabels[] = $month->format('F'); // Full month names
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $monthLabels[] = $month->format('F');
 
-        $monthlyDonations[] = MilkAppointment::where('dn_ID', $dn_id)
-            ->whereYear('appointment_datetime', $month->year)
-            ->whereMonth('appointment_datetime', $month->month)
-            ->sum('milk_amount');
+            $monthlyDonations[] = Milk::where('dn_ID', $dn_id)
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->sum('milk_volume');
 
-        $monthlyFrequency[] = MilkAppointment::where('dn_ID', $dn_id)
-            ->whereYear('appointment_datetime', $month->year)
-            ->whereMonth('appointment_datetime', $month->month)
+            $monthlyFrequency[] = Milk::where('dn_ID', $dn_id)
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->count();
+        }
+
+        // Total Donations (number of milk records for this donor)
+        $totalDonations = Milk::where('dn_ID', $dn_id)->count();
+
+        // Total Milk donated (sum of milk_volume)
+        $totalMilk = Milk::where('dn_ID', $dn_id)->sum('milk_volume');
+
+        // Total Bottles (post-pasteurization bottles from this donor's milk)
+        $donorMilkIds = Milk::where('dn_ID', $dn_id)->pluck('milk_ID');
+        $totalBottles = PostBottle::whereIn('milk_ID', $donorMilkIds)
+            ->where('is_disposed', 0)
             ->count();
-    }
-
-    // Total counts for cards
-    $totalDonations = $milkAppointments->count();
-    $totalMilk = $milkAppointments->sum('milk_amount');
-    $totalRecipients = MilkAppointment::where('dn_ID', $dn_id)
-        ->whereNotNull('milk_amount')
-        ->count();
 
     return view('donor.donor_dashboard', compact(
         'upcomingAppointments',
@@ -74,7 +79,7 @@ class DashboardController extends Controller
         'monthlyFrequency',
         'totalDonations',
         'totalMilk',
-        'totalRecipients'
+        'totalBottles'
     ));
     }
 
@@ -87,26 +92,17 @@ class DashboardController extends Controller
         // 1. STATS CARDS
         // ============================
 
-        // Active Donors (Passed Screening)
-        $activeDonors = Donor::whereHas('screening', function($query) {
-            $query->where('dtb_ScreeningStatus', 'passed');
-        })->count();
+        // Active Donors (all approved donors in Donor table)
+        $activeDonors = Donor::count();
 
-        // Pending Appointments (Milk + Kit)
-        $pendingAppointments = MilkAppointment::where('status', 'Pending')->count() 
-                            + PumpingKitAppointment::where('status', 'Pending')->count();
+        // Pending Milk Requests (requests waiting for nurse to process/allocate)
+        $pendingMilkRequests = MilkRequest::where('status', 'Waiting')->count();
 
-        // Milk Requests 
-        // (If you have a MilkRequest model, use that. Otherwise, defaults to 0)
-        $milkRequests = class_exists('App\Models\MilkRequest') 
-            ? \App\Models\MilkRequest::where('status', 'Pending')->count() 
-            : 0;
+        // Total Milk Batches (all milk records the nurse oversees)
+        $totalMilkBatches = Milk::count();
 
-        // Processing Queue (Real Data)
-        // Counts milk that has started processing but is not yet in final storage
-        $processingQueue = Milk::whereNotIn('milk_Status', ['Not Yet Started', 'Storage Completed'])
-                            ->whereNotNull('milk_Status')
-                            ->count();
+        // Available Bottles (post-pasteurization bottles ready for allocation, not disposed)
+        $availableBottles = PostBottle::where('is_disposed', 0)->count();
 
         // ============================
         // 2. CHART DATA (Total Volume per Month)
@@ -151,9 +147,9 @@ class DashboardController extends Controller
         // ============================
         return view('nurse.nurse_dashboard', compact(
             'activeDonors',
-            'pendingAppointments',
-            'milkRequests',
-            'processingQueue',
+            'pendingMilkRequests',
+            'totalMilkBatches',
+            'availableBottles',
             'months',
             'volumeData',
             'todayAppointments'
@@ -177,10 +173,8 @@ class DashboardController extends Controller
                                     ->whereNull('milk_stage3StartDate')
                                     ->count();
 
-        // 4. Storage Used (Count of finalized Post-Pasteurization Bottles)
-        // We count individual bottles in storage, not just batches
-        $bottlesInStorage = PostBottle::whereNotNull('post_storage_location')->count();
-        $storageUsed = $bottlesInStorage . ' Bottles';
+        // 4. Active Bottles (not disposed)
+        $activeBottles = PostBottle::where('is_disposed', 0)->count();
 
         // 5. Chart Data (Last 12 Months)
         $months = [];
@@ -214,7 +208,7 @@ class DashboardController extends Controller
             'totalSamples',
             'processedSamples',
             'pendingPasteurization',
-            'storageUsed',
+            'activeBottles',
             'months',
             'processedMonthly',
             'dispatchedMonthly',
@@ -231,13 +225,14 @@ class DashboardController extends Controller
         // Total Patients (parents with babies)
         $totalPatients = ParentModel::count(); // Adjust based on your actual model
 
-        // Active Donors (donors who passed screening)
-        $activeDonors = Donor::whereHas('screening', function($query) {
-            $query->where('dtb_ScreeningStatus', 'passed');
-        })->count();
+        // Active Donors (all approved donors in the Donor table)
+        $activeDonors = Donor::count();
 
-        // Pending Milk Requests
-        $pendingRequests = MilkRequest::where('status', 'Pending')->count();
+        // Pending Milk Requests (status is 'Waiting' in the database)
+        $pendingRequests = MilkRequest::where('status', 'Waiting')->count();
+
+        // Approved Requests (requests approved by doctors)
+        $approvedRequests = MilkRequest::where('status', 'Approved')->count();
 
         // ====== RECENT MILK REQUESTS FOR TABLE ======
         $recentRequests = MilkRequest::with(['parent', 'doctor'])
@@ -255,6 +250,7 @@ class DashboardController extends Controller
             'totalPatients' => $totalPatients,
             'activeDonors' => $activeDonors,
             'pendingRequests' => $pendingRequests,
+            'approvedRequests' => $approvedRequests,
             
             // Recent requests for table
             'recentRequests' => $recentRequests,
@@ -276,7 +272,67 @@ class DashboardController extends Controller
     // ============================
     public function shariah()
     {
-        return view('shariah.shariah_dashboard');
+        // 1. Pending Approvals (milk not yet reviewed by Shariah)
+        $pendingApprovals = Milk::whereNull('milk_shariahApproval')->count();
+
+        // 2. Compliance Reviews (total milk that has been reviewed - approved or rejected)
+        $complianceReviews = Milk::whereNotNull('milk_shariahApproval')->count();
+
+        // 3. Fatwa Issued (milk approved by Shariah, value = 1)
+        $fatwaIssued = Milk::where('milk_shariahApproval', 1)->count();
+
+        // Compliance rate
+        $complianceRate = $complianceReviews > 0 ? round(($fatwaIssued / $complianceReviews) * 100) : 0;
+        $complianceChange = $complianceRate . '% compliant';
+
+        // New pending today
+        $newPendingToday = Milk::whereNull('milk_shariahApproval')
+                              ->whereDate('created_at', Carbon::today())
+                              ->count();
+        $approvalsChange = $newPendingToday . ' new today';
+
+        // Fatwa this month
+        $fatwaThisMonth = Milk::where('milk_shariahApproval', 1)
+                              ->whereYear('updated_at', Carbon::now()->year)
+                              ->whereMonth('updated_at', Carbon::now()->month)
+                              ->count();
+        $fatwaChange = $fatwaThisMonth . ' this month';
+
+        // 4. Chart Data (Last 7 Months)
+        $months = [];
+        $reviewedData = [];
+        $fatwaData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $months[] = $date->format('M');
+            $year = $date->year;
+            $month = $date->month;
+
+            // Reviewed: has shariah approval in this month (based on updated_at)
+            $reviewedData[] = Milk::whereNotNull('milk_shariahApproval')
+                                  ->whereYear('updated_at', $year)
+                                  ->whereMonth('updated_at', $month)
+                                  ->count();
+
+            // Fatwa Issued: Approved in this month
+            $fatwaData[] = Milk::where('milk_shariahApproval', 1)
+                               ->whereYear('updated_at', $year)
+                               ->whereMonth('updated_at', $month)
+                               ->count();
+        }
+
+        return view('shariah.shariah_dashboard', compact(
+            'pendingApprovals', 
+            'complianceReviews', 
+            'fatwaIssued',
+            'approvalsChange', 
+            'complianceChange', 
+            'fatwaChange',
+            'months', 
+            'reviewedData', 
+            'fatwaData'
+        ));
     }
 
     // ============================
@@ -295,10 +351,23 @@ class DashboardController extends Controller
         // -----------------------
         // Stats Cards
         // -----------------------
-        $totalUsers = User::count(); // Total registered users
-        $activeDonors = DonorToBe::where('dtb_ScreeningStatus', 'passed')->count(); // Active donors
-        $totalDonations = MilkAppointment::sum('milk_amount'); // Total donations
-        $systemAlerts = DonorToBe::where('dtb_ScreeningStatus', 'pending')->count();
+        // Total Users: Sum all role-specific tables (User table only has 4, but actual users = 9)
+        $totalUsers = \App\Models\HmmcAdmin::count() + 
+                      \App\Models\Nurse::count() + 
+                      \App\Models\Doctor::count() + 
+                      \App\Models\LabTech::count() + 
+                      \App\Models\ShariahCommittee::count() + 
+                      \App\Models\ParentModel::count() + 
+                      \App\Models\Donor::count();
+
+        // Active Donors: Count from Donor table (DonorToBe table is empty)
+        $activeDonors = Donor::count();
+
+        // Pending Send Credential: Donors who haven't been sent credentials yet
+        $pendingCredentials = Donor::whereNull('dn_CredentialsSentAt')->count();
+
+        // Pending Screening: Donors who haven't been sent credentials yet
+        $systemAlerts = Donor::whereNull('dn_CredentialsSentAt')->count();
 
         // -----------------------
         // Chart Data: Donor Registrations & Active Donors
@@ -311,37 +380,43 @@ class DashboardController extends Controller
             $month = Carbon::now()->subMonths($i);
             $months[] = $month->format('M');
 
-            $registeredDonors[] = DonorToBe::whereYear('created_at', $month->year)
-                                        ->whereMonth('created_at', $month->month)
-                                        ->count();
+            // Donors registered in this month
+            $registeredDonors[] = Donor::whereYear('created_at', $month->year)
+                                      ->whereMonth('created_at', $month->month)
+                                      ->count();
 
-            $activeDonorsMonthly[] = DonorToBe::where('dtb_ScreeningStatus', 'passed')
-                                            ->whereDate('created_at', '<=', $month->endOfMonth())
-                                            ->count();
+            // Cumulative active donors up to end of this month
+            $activeDonorsMonthly[] = Donor::whereDate('created_at', '<=', $month->endOfMonth())
+                                         ->count();
         }
 
         // -----------------------
         // Recent Donors Table
         // -----------------------
-        $recentDonors = DonorToBe::with('donor')
-            ->latest()
+        $recentDonors = Donor::latest()
             ->take(10)
             ->get()
-            ->map(function ($donorToBe) {
+            ->map(function ($donor) {
+                // Determine screening status
+                $status = 'active';
+                if (is_null($donor->dn_CredentialsSentAt)) {
+                    $status = 'pending';
+                }
+
                 return (object)[
-                    'id' => $donorToBe->dn_ID,
-                    'name' => $donorToBe->donor?->dn_FullName ?? 'Unknown', // get full name from Donor
-                    'email' => $donorToBe->donor?->dn_Email ?? null,
+                    'id' => $donor->dn_ID,
+                    'name' => $donor->dn_FullName ?? 'Unknown',
+                    'email' => $donor->dn_Email ?? null,
                     'role' => 'donor',
-                    'screeningStatus' => $donorToBe->dtb_ScreeningStatus ?? 'passed',
-                    'created_at' => $donorToBe->created_at,
+                    'screeningStatus' => $status,
+                    'created_at' => $donor->created_at,
                 ];
             });
 
         return view('hmmc.hmmc_dashboard', compact(
             'totalUsers',
             'activeDonors',
-            'totalDonations',
+            'pendingCredentials',
             'systemAlerts',
             'months',
             'registeredDonors',

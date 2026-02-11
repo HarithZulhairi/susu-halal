@@ -69,15 +69,15 @@
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Milk Recipients</span>
+                <span class="stat-label">My Bottles</span>
                 <div class="stat-icon red">
-                    <i class="fas fa-baby"></i>
+                    <i class="fas fa-flask-vial"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $totalRecipients }}</div>
+            <div class="stat-value">{{ $totalBottles }}</div>
             <div class="stat-change positive">
                 <i class="fas fa-heart"></i>
-                Making a difference
+                Post-pasteurization
             </div>
         </div>
     </div>

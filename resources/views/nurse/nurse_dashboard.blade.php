@@ -29,33 +29,32 @@
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="stat-label">Pending Appointments</span>
-                    <div class="stat-icon green">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                </div>
-                <div class="stat-value">{{ $pendingAppointments ?? 0 }}</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <span class="stat-label">Milk Requests</span>
+                    <span class="stat-label">Pending Milk Requests</span>
                     <div class="stat-icon orange">
                         <i class="fas fa-hand-holding-medical"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ $milkRequests ?? 0 }}</div>
+                <div class="stat-value">{{ $pendingMilkRequests ?? 0 }}</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="stat-label">Processing Queue</span>
-                    <div class="stat-icon red">
-                        <i class="fas fa-industry"></i>
+                    <span class="stat-label">Total Milk Batches</span>
+                    <div class="stat-icon green">
+                        <i class="fas fa-bottle-droplet"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ $processingQueue ?? 0 }}</div>
-                <small style="color: #888; font-size: 11px;">Active Batches</small>
+                <div class="stat-value">{{ $totalMilkBatches ?? 0 }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Available Bottles</span>
+                    <div class="stat-icon purple">
+                        <i class="fas fa-flask-vial"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ $availableBottles ?? 0 }}</div>
             </div>
         </div>
 

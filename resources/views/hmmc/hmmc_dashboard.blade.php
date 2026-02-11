@@ -44,12 +44,12 @@
 
     <div class="stat-card">
         <div class="stat-header">
-            <span class="stat-label">Total Donations (ml)</span>
+            <span class="stat-label">Pending Send Credential</span>
             <div class="stat-icon orange">
-                <i class="fas fa-hand-holding-heart"></i>
+                <i class="fas fa-envelope"></i>
             </div>
         </div>
-        <div class="stat-value">{{ $totalDonations }}</div>
+        <div class="stat-value">{{ $pendingCredentials }}</div>
         <div class="stat-change negative">
         </div>
     </div>
