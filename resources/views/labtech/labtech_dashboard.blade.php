@@ -63,12 +63,12 @@
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="stat-label">Bottles in Storage</span>
+                    <span class="stat-label">Active Bottles</span>
                     <div class="stat-icon purple">
                         <i class="fas fa-snowflake"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ $storageUsed ?? '0 Bottles' }}</div>
+                <div class="stat-value">{{ $activeBottles ?? 0 }}</div>
                 <div class="stat-change positive">
                     <i class="fas fa-warehouse"></i>
                     Stage 5 Completed

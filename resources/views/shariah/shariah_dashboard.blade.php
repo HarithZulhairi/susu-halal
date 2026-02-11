@@ -120,11 +120,11 @@ gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: @json($months),
         datasets: [
             {
                 label: 'Reviewed Milk',
-                data: [30, 40, 35, 56, 78, 67, 34],
+                data: @json($reviewedData),
                 borderColor: '#4B9CD3',
                 backgroundColor: gradientBlue,
                 fill: true,
@@ -135,7 +135,7 @@ new Chart(ctx, {
             },
             {
                 label: 'Fatwa Issued',
-                data: [8, 12, 13, 14, 16, 18, 20],
+                data: @json($fatwaData),
                 borderColor: '#48BB78',
                 backgroundColor: gradientGreen,
                 fill: true,

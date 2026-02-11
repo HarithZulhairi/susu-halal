@@ -53,12 +53,12 @@
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Appointments Today</span>
+                <span class="stat-label">Approved Requests</span>
                 <div class="stat-icon red">
-                    <i class="fas fa-calendar-check"></i>
+                    <i class="fas fa-check-circle"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $appointmentsToday ?? 5 }}</div>
+            <div class="stat-value">{{ $approvedRequests ?? 0 }}</div>
         </div>
     </div>
 
