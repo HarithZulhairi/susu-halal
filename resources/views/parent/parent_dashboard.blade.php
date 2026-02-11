@@ -20,15 +20,15 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Milk Requests</span>
+                <span class="stat-label">Total Milk Requests</span>
                 <div class="stat-icon blue">
                     <i class="fas fa-hand-holding-medical"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $totalRequests ?? 8 }}</div>
+            <div class="stat-value">{{ $totalRequests }}</div>
             <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                {{ $requestsChange ?? '15%' }} from last month
+                <i class="fas fa-check-circle"></i>
+                {{ $approvedRequests }} approved
             </div>
         </div>
 
@@ -39,10 +39,10 @@
                     <i class="fas fa-bottle-droplet"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ number_format($milkReceived ?? 3250) }}ml</div>
+            <div class="stat-value">{{ number_format($milkReceived) }}ml</div>
             <div class="stat-change positive">
-                <i class="fas fa-arrow-up"></i>
-                {{ $receivedChange ?? '22%' }} from last month
+                <i class="fas fa-flask-vial"></i>
+                From allocations
             </div>
         </div>
 
@@ -53,24 +53,24 @@
                     <i class="fas fa-clock"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $pendingRequests ?? 2 }}</div>
+            <div class="stat-value">{{ $pendingRequests }}</div>
             <div class="stat-change warning">
                 <i class="fas fa-exclamation-circle"></i>
-                {{ $pendingChange ?? 'Awaiting approval' }}
+                Awaiting approval
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
-                <span class="stat-label">Infants Registered</span>
+                <span class="stat-label">Infant Registered</span>
                 <div class="stat-icon red">
                     <i class="fas fa-baby-carriage"></i>
                 </div>
             </div>
-            <div class="stat-value">{{ $infantsRegistered ?? 1 }}</div>
+            <div class="stat-value">{{ $infantsRegistered }}</div>
             <div class="stat-change positive">
-                <i class="fas fa-heart"></i>
-                Your little one
+                <i class="fas fa-baby"></i>
+                {{ $parent->pr_BabyName }} @if($babyAge) ({{ $babyAge }}) @endif
             </div>
         </div>
     </div>
@@ -95,12 +95,12 @@
         <div class="card quick-stats-card">
             <h2>Quick Actions</h2>
             <div class="quick-stats-list">
-                <a href="{{ route('parent.my-infant-request') }}" class="quick-stat-item" style="text-decoration: none;"">
+                <a href="{{ route('parent.my-infant-request') }}" class="quick-stat-item" style="text-decoration: none;">
                     <div class="quick-stat-info">
                         <div class="quick-stat-value"><i class="fas fa-baby"></i></div>
-                        <div class="quick-stat-label">Request Milk</div>
+                        <div class="quick-stat-label">View Milk Requests</div>
                     </div>
-                    <span class="quick-stat-badge primary">New Request</span>
+                    <span class="quick-stat-badge primary">View</span>
                 </a>
                 <a href="{{ route('profile.show') }}" class="quick-stat-item" style="text-decoration: none;">
                     <div class="quick-stat-info">
@@ -124,6 +124,21 @@
                     <span class="quick-stat-badge primary">View All</span>
                 </a>
             </div>
+
+            <!-- Infant Info Card -->
+            <div style="margin-top: 20px; padding: 15px; background: #f0fdf4; border-radius: 10px; border: 1px solid #bbf7d0;">
+                <h3 style="margin: 0 0 10px 0; font-size: 14px; color: #166534;">
+                    <i class="fas fa-baby"></i> My Infant
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                    <div><strong>Name:</strong> {{ $parent->pr_BabyName }}</div>
+                    <div><strong>Gender:</strong> {{ $parent->pr_BabyGender ?? 'N/A' }}</div>
+                    <div><strong>NICU:</strong> {{ $parent->pr_NICU ?? 'N/A' }}</div>
+                    <div><strong>Weight:</strong> {{ $parent->pr_BabyCurrentWeight ?? 'N/A' }} kg</div>
+                    <div><strong>DOB:</strong> {{ $parent->pr_BabyDOB ? \Carbon\Carbon::parse($parent->pr_BabyDOB)->format('d M Y') : 'N/A' }}</div>
+                    <div><strong>Consent:</strong> {{ $parent->pr_ConsentStatus ?? 'N/A' }}</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -142,93 +157,52 @@
                 <table class="users-table">
                     <thead>
                         <tr>
-                            <th>REQUEST DATE</th>
-                            <th>QUANTITY</th>
+                            <th>REQUEST ID</th>
+                            <th>DATE</th>
+                            <th>DAILY VOLUME</th>
                             <th>STATUS</th>
-                            <th>INFANT DETAILS</th>
-                            <th>ACTIONS</th>
+                            <th>DOCTOR</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @forelse($recentRequests as $req)
                         <tr>
                             <td>
                                 <div class="user-info">
-                                    <div class="user-avatar teal"><i class="fas fa-calendar"></i></div>
+                                    <div class="user-avatar teal"><i class="fas fa-file-medical"></i></div>
                                     <div>
-                                        <div class="user-name">May 18, 2024</div>
-                                        <div class="user-email">Urgent Request</div>
+                                        <div class="user-name">{{ $req->formatted_id }}</div>
+                                        <div class="user-email">{{ $req->kinship_method ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span class="badge badge-donor">500ml</span></td>
-                            <td><span class="badge badge-active">Approved</span></td>
-                            <td>Baby Girl (3 months)</td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
+                            <td>{{ $req->created_at ? $req->created_at->format('d M Y') : 'N/A' }}</td>
+                            <td><span class="badge badge-donor">{{ $req->total_daily_volume ?? 0 }}ml</span></td>
                             <td>
-                                <div class="user-info">
-                                    <div class="user-avatar blue"><i class="fas fa-calendar"></i></div>
-                                    <div>
-                                        <div class="user-name">May 15, 2024</div>
-                                        <div class="user-email">Regular Request</div>
-                                    </div>
-                                </div>
+                                @if($req->status == 'Approved')
+                                    <span class="badge badge-active">Approved</span>
+                                @elseif($req->status == 'Waiting')
+                                    <span class="badge badge-pending">Waiting</span>
+                                @else
+                                    <span class="badge badge-inactive">{{ ucfirst($req->status) }}</span>
+                                @endif
                             </td>
-                            <td><span class="badge badge-nurse">750ml</span></td>
-                            <td><span class="badge badge-pending">Processing</span></td>
-                            <td>Baby Boy (2 months)</td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-edit"></i></button>
-                            </td>
+                            <td>{{ optional($req->doctor)->dr_Name ?? 'N/A' }}</td>
                         </tr>
+                        @empty
                         <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar dark-teal"><i class="fas fa-calendar"></i></div>
-                                    <div>
-                                        <div class="user-name">May 10, 2024</div>
-                                        <div class="user-email">Monthly Supply</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-advisor">1000ml</span></td>
-                            <td><span class="badge badge-active">Completed</span></td>
-                            <td>Baby Girl (4 months)</td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-file-download"></i></button>
+                            <td colspan="5" style="text-align:center; padding:20px; color:#999;">
+                                No milk requests yet.
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar pink"><i class="fas fa-calendar"></i></div>
-                                    <div>
-                                        <div class="user-name">May 5, 2024</div>
-                                        <div class="user-email">Initial Request</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge badge-donor">300ml</span></td>
-                            <td><span class="badge badge-inactive">Archived</span></td>
-                            <td>Baby Boy (1 month)</td>
-                            <td class="actions">
-                                <button class="action-btn"><i class="fas fa-eye"></i></button>
-                                <button class="action-btn"><i class="fas fa-file-download"></i></button>
-                            </td>
-                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-</script>
+
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -239,19 +213,14 @@ const gradientBlue = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
 gradientBlue.addColorStop(0, 'rgba(75, 156, 211, 0.5)');
 gradientBlue.addColorStop(1, 'rgba(75, 156, 211, 0.05)');
 
-// gradient fill for green line
-const gradientGreen = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
-gradientGreen.addColorStop(0, 'rgba(72, 187, 120, 0.4)');
-gradientGreen.addColorStop(1, 'rgba(72, 187, 120, 0.05)');
-
 new Chart(ctx, {
     type: 'line',
     data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        labels: @json($monthLabels),
         datasets: [
             {
-                label: 'Infant Milk Request Volume (ml)',
-                data: [900, 800, 500, 500, 300, 200, 300],
+                label: 'Milk Request Volume (ml)',
+                data: @json($monthlyVolumes),
                 borderColor: '#4B9CD3',
                 backgroundColor: gradientBlue,
                 fill: true,
@@ -301,7 +270,7 @@ new Chart(ctx, {
             y: {
                 beginAtZero: true,
                 grid: { color: '#f1f5f9' },
-                ticks: { color: '#555', stepSize: 500 }
+                ticks: { color: '#555' }
             },
             x: {
                 grid: { display: false },

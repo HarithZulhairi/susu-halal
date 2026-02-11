@@ -10,7 +10,6 @@
     .swal2-container { z-index: 9999 !important; }
     .modal-overlay { z-index: 2000; }
     
-    /* Custom styles for new detailed modal */
     .detail-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -76,7 +75,6 @@
         border-bottom: 2px solid #f1f5f9;
         padding-bottom: 5px;
     }
-    /* PDF Icon Style */
     .btn-pdf {
         background: none;
         border: none;
@@ -90,79 +88,10 @@
         transform: scale(1.1);
     }
     .btn-pdf i {
-        color: #dc2626; /* Red for PDF */
+        color: #dc2626;
         font-size: 18px;
+    }
 </style>
-
-{{-- DUMMY DATA SETUP --}}
-@php
-    // Simulate a parent/infant record
-    $infant = (object)[
-        'id' => 'P-2024-001',
-        'name' => 'Baby Adam',
-        'nicu' => 'NICU-A1',
-        'last_updated' => '2026-01-22 09:30 AM',
-        'current_weight' => 2.5,
-        'requests' => [
-            (object)[
-                'req_id' => 101,
-                'total_allocated_vol' => 60, // 30ml + 30ml
-                // Detailed data for modal
-                'details' => (object)[
-                    'donor_id' => 'D-2024-055',
-                    'donor_name' => 'Sarah Connor',
-                    'consent' => 'Consent Granted (Full)',
-                    'method' => 'Milk Kinship', // or 'No Milk Kinship'
-                    'schedule' => 'Every 3 Hours',
-                    'start_time' => '2026-01-22 08:00 AM',
-                    'doctor_id' => 'DR-007',
-                    'doctor_name' => 'Dr. Strange',
-                    // List of actual milk packs given
-                    'allocations' => [
-                        (object)[
-                            'milk_id' => 'M26-001',
-                            'volume' => 30,
-                            'time' => '2026-01-22 08:15 AM',
-                            'nurse_id' => 'N-101',
-                            'nurse_name' => 'Nurse Joy'
-                        ],
-                        (object)[
-                            'milk_id' => 'M26-002',
-                            'volume' => 30,
-                            'time' => '2026-01-22 11:15 AM',
-                            'nurse_id' => 'N-102',
-                            'nurse_name' => 'Nurse Carla'
-                        ]
-                    ]
-                ]
-            ],
-            // Another request example
-            (object)[
-                'req_id' => 102,
-                'total_allocated_vol' => 30,
-                'details' => (object)[
-                    'donor_id' => 'D-2024-088',
-                    'donor_name' => 'Jane Doe',
-                    'consent' => 'Consent Granted (Restricted)',
-                    'method' => 'No Milk Kinship',
-                    'schedule' => 'Every 4 Hours',
-                    'start_time' => '2026-01-23 10:00 AM',
-                    'doctor_id' => 'DR-009',
-                    'doctor_name' => 'Dr. House',
-                    'allocations' => [
-                        (object)[
-                            'milk_id' => 'M26-005',
-                            'volume' => 30,
-                            'time' => '2026-01-23 10:05 AM',
-                            'nurse_id' => 'N-101',
-                            'nurse_name' => 'Nurse Joy'
-                        ]
-                    ]
-                ]
-            ]
-        ]
-    ];
-@endphp
 
 <div>
     <div>
@@ -182,11 +111,11 @@
             <table class="infants-table" id="infantsTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">Patient Name <i class="fas fa-sort-down sort-icon sort-active"></i></th>
-                        <th onclick="sortTable(1)">NICU Cubicle No. <i class="fas fa-sort sort-icon"></i></th>
-                        <th onclick="sortTable(2)">Total Milk Allocation <i class="fas fa-sort sort-icon"></i></th>
-                        <th onclick="sortTable(3)">Last Updated Weight <i class="fas fa-sort sort-icon"></i></th>
-                        <th onclick="sortTable(4)">Current Weight <i class="fas fa-sort sort-icon"></i></th>
+                        <th>Patient Name</th>
+                        <th>NICU Cubicle No.</th>
+                        <th>Milk Requests</th>
+                        <th>Last Updated</th>
+                        <th>Current Weight</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -197,37 +126,61 @@
                             <div class="patient-info">
                                 <div class="patient-avatar"><i class="fa-solid fa-baby"></i></div>
                                 <div class="patient-details">
-                                    <strong>#{{ $infant->id }}</strong>
-                                    <span>{{ $infant->name }}</span>
+                                    <strong>{{ $parent->formatted_id }}</strong>
+                                    <span>{{ $parent->pr_BabyName }}</span>
                                 </div>
                             </div>
                         </td>
 
-                        <td>{{ $infant->nicu }}</td>
+                        <td>{{ $parent->pr_NICU ?? 'N/A' }}</td>
 
                         <td>
                             <div class="milk-badge-container">
-                                @foreach($infant->requests as $req)
+                                @forelse($parent->requests as $req)
+                                    @php
+                                        $modalData = [
+                                            'request_id' => $req->formatted_id,
+                                            'doctor_name' => optional($req->doctor)->dr_Name ?? 'N/A',
+                                            'doctor_id' => $req->doctor ? '#DR' . $req->doctor->dr_ID : 'N/A',
+                                            'kinship_method' => $req->kinship_method ?? 'N/A',
+                                            'feeding_interval' => $req->feeding_interval ?? 'N/A',
+                                            'volume_per_feed' => $req->volume_per_feed ?? 'N/A',
+                                            'status' => $req->status,
+                                            'feeding_start_date' => $req->feeding_start_date,
+                                            'feeding_start_time' => $req->feeding_start_time,
+                                            'allocations' => $req->allocations->map(function($alloc) {
+                                                return [
+                                                    'allocation_id' => $alloc->allocation_ID,
+                                                    'post_id' => $alloc->post_ID,
+                                                    'volume' => $alloc->total_selected_milk ?? 'N/A',
+                                                    'time' => $alloc->created_at ? $alloc->created_at->format('d-m-Y h:i A') : 'N/A',
+                                                    'nurse_name' => optional($alloc->nurse)->ns_Name ?? 'N/A',
+                                                    'nurse_id' => $alloc->nurse ? '#NS' . $alloc->nurse->ns_ID : 'N/A',
+                                                ];
+                                            })->toArray()
+                                        ];
+                                    @endphp
                                     <span class="milk-badge" style="cursor: pointer;"
-                                          onclick='openAllocationModal(@json($req->details), {{ $req->total_allocated_vol }})'>
-                                        <i class="fas fa-flask"></i> {{ $req->total_allocated_vol }} ml
+                                          onclick='openAllocationModal(@json($modalData), "{{ $req->volume_per_feed ?? 0 }}")'>
+                                        <i class="fas fa-flask"></i> {{ $req->formatted_id }} - {{ ucfirst($req->status) }}
                                     </span>
-                                @endforeach
+                                @empty
+                                    <span style="color:#999;">No requests</span>
+                                @endforelse
                             </div>
                         </td>
 
-                        <td>{{ $infant->last_updated }}</td>
+                        <td>{{ $parent->updated_at?->format('d-m-Y h:i A') ?? 'N/A' }}</td>
 
                         <td>
                             <div class="weight-display">
                                 <i class="fa-solid fa-weight-scale"></i>
-                                <span>{{ $infant->current_weight }} kg</span>
+                                <span>{{ $parent->pr_BabyCurrentWeight ?? 'N/A' }} kg</span>
                             </div>
                         </td>
 
                        <td class="actions">
-                            {{-- UPDATED: Replaced Eye Icon with Download PDF Icon --}}
-                            <button class="btn-pdf" title="Download Report" onclick="downloadReport('{{ $infant->id }}')">
+                            <button class="btn-pdf" title="Download Report" onclick="downloadReport('{{ $parent->pr_ID }}')">
                                 <i class="fa-solid fa-file-pdf"></i>
                             </button>
                         </td>
@@ -241,52 +194,48 @@
 
 {{-- ======================= MODALS ======================= --}}
 
-{{-- Milk Allocation Detail Modal --}}
+{{-- Milk Request Detail Modal --}}
 <div id="allocationDetailModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:700px;">
         <div class="modal-header">
-            <h2><i class="fas fa-file-medical-alt"></i> Milk Allocation Details</h2>
+            <h2><i class="fas fa-file-medical-alt"></i> Milk Request Details</h2>
             <button class="modal-close-btn" onclick="closeAllocationModal()">Close</button>
         </div>
         <div class="modal-body">
             
-            {{-- 1. Donor & Milk Info --}}
-            <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
+            {{-- 1. Request & Doctor Info --}}
+            <div class="section-title"><i class="fas fa-user-circle"></i> Request & Doctor Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <label>Donor Name</label>
-                    <p id="modalDonorName">-</p>
+                    <label>Request ID</label>
+                    <p id="modalRequestId">-</p>
                 </div>
                 <div class="detail-item">
-                    <label>Donor ID</label>
-                    <p id="modalDonorId">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Donor Consent Status</label>
-                    <p id="modalConsent" style="color:#166534; font-weight:700;">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Total Allocated Volume</label>
-                    <p id="modalTotalVol" style="color:#0369a1; font-weight:800; font-size:16px;">-</p>
-                </div>
-            </div>
-
-            {{-- 2. Dispensing Method & Doctor --}}
-            <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Dispensing & Assignment</div>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Dispensing Method</label>
-                    <div id="modalMethodBadge"></div>
-                </div>
-                <div class="detail-item">
-                    <label>Feeding Schedule</label>
-                    <p id="modalSchedule">-</p>
-                    <small id="modalStartTime" style="color:#64748b;">-</small>
+                    <label>Status</label>
+                    <p id="modalStatus" style="font-weight:700;">-</p>
                 </div>
                 <div class="detail-item">
                     <label>Assigned By (Doctor)</label>
                     <p id="modalDoctorName">-</p>
                     <small id="modalDoctorId" style="color:#64748b;">-</small>
+                </div>
+                <div class="detail-item">
+                    <label>Volume Per Feed</label>
+                    <p id="modalTotalVol" style="color:#0369a1; font-weight:800; font-size:16px;">-</p>
+                </div>
+            </div>
+
+            {{-- 2. Feeding Details --}}
+            <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Feeding & Assignment</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Kinship Method</label>
+                    <div id="modalMethodBadge"></div>
+                </div>
+                <div class="detail-item">
+                    <label>Feeding Interval</label>
+                    <p id="modalSchedule">-</p>
+                    <small id="modalStartTime" style="color:#64748b;">-</small>
                 </div>
             </div>
 
@@ -295,9 +244,10 @@
             <table class="allocation-list">
                 <thead>
                     <tr>
-                        <th>Milk Unit ID</th>
+                        <th>Allocation ID</th>
+                        <th>Bottle ID</th>
                         <th>Volume</th>
-                        <th>Allocation Time</th>
+                        <th>Time</th>
                         <th>Allocated By (Nurse)</th>
                     </tr>
                 </thead>
@@ -312,53 +262,55 @@
 
 <script>
 
-    function downloadReport(patientId) {
-            // In a real app, you would pass the ID to the route: 
-            // window.open(`/parent/report-pdf/${patientId}`, '_blank');
-            
-            // For this demo, we assume a static route or view
-            // Ensure you create the route in web.php pointing to the new file below
-            window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
-        }
+    function downloadReport(parentId) {
+        window.open("{{ url('/layouts/milk_report_pdf') }}", "_blank");
+    }
 
-    function openAllocationModal(details, totalVol) {
+    function openAllocationModal(details, volumePerFeed) {
         // 1. Populate Basic Info
-        document.getElementById('modalDonorName').textContent = details.donor_name;
-        document.getElementById('modalDonorId').textContent = details.donor_id;
-        document.getElementById('modalConsent').textContent = details.consent;
-        document.getElementById('modalTotalVol').textContent = totalVol + " ml";
+        document.getElementById('modalRequestId').textContent = details.request_id;
+        document.getElementById('modalStatus').textContent = details.status;
+        document.getElementById('modalDoctorName').textContent = details.doctor_name;
+        document.getElementById('modalDoctorId').textContent = details.doctor_id;
+        document.getElementById('modalTotalVol').textContent = volumePerFeed + " ml/feed";
         
         // 2. Method Badge
         const badgeDiv = document.getElementById('modalMethodBadge');
-        if(details.method === 'Milk Kinship') {
-            badgeDiv.innerHTML = `<span class="badge-method badge-kinship"><i class="fas fa-check"></i> Milk Kinship</span>`;
+        if(details.kinship_method && details.kinship_method.toLowerCase().includes('kinship')) {
+            badgeDiv.innerHTML = `<span class="badge-method badge-kinship"><i class="fas fa-check"></i> ${details.kinship_method}</span>`;
         } else {
-            badgeDiv.innerHTML = `<span class="badge-method badge-no-kinship"><i class="fas fa-ban"></i> No Milk Kinship</span>`;
+            badgeDiv.innerHTML = `<span class="badge-method badge-no-kinship"><i class="fas fa-info-circle"></i> ${details.kinship_method || 'N/A'}</span>`;
         }
 
-        // 3. Schedule & Doctor
-        document.getElementById('modalSchedule').textContent = details.schedule;
-        document.getElementById('modalStartTime').textContent = "Start: " + details.start_time;
-        document.getElementById('modalDoctorName').textContent = details.doctor_name;
-        document.getElementById('modalDoctorId').textContent = details.doctor_id;
+        // 3. Schedule
+        document.getElementById('modalSchedule').textContent = "Every " + (details.feeding_interval || 'N/A') + " hours";
+        const startStr = (details.feeding_start_date || '') + ' ' + (details.feeding_start_time || '');
+        document.getElementById('modalStartTime').textContent = startStr.trim() ? "Start: " + startStr.trim() : '';
 
-        // 4. Populate Table
+        // 4. Populate Allocation Table
         const tbody = document.getElementById('allocationTableBody');
         tbody.innerHTML = '';
         
-        details.allocations.forEach(alloc => {
+        if (details.allocations && details.allocations.length > 0) {
+            details.allocations.forEach(alloc => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:600; color:#0f172a;">${alloc.allocation_id}</td>
+                    <td>${alloc.post_id || 'N/A'}</td>
+                    <td>${alloc.volume} ml</td>
+                    <td>${alloc.time}</td>
+                    <td>
+                        <strong>${alloc.nurse_name}</strong><br>
+                        <span style="color:#64748b; font-size:11px;">${alloc.nurse_id}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-weight:600; color:#0f172a;">${alloc.milk_id}</td>
-                <td>${alloc.volume} ml</td>
-                <td>${alloc.time}</td>
-                <td>
-                    <strong>${alloc.nurse_name}</strong><br>
-                    <span style="color:#64748b; font-size:11px;">${alloc.nurse_id}</span>
-                </td>
-            `;
+            tr.innerHTML = `<td colspan="5" style="text-align:center; padding:15px; color:#999;">No allocations yet for this request.</td>`;
             tbody.appendChild(tr);
-        });
+        }
 
         document.getElementById('allocationDetailModal').style.display = 'flex';
     }
@@ -366,12 +318,15 @@
     function closeAllocationModal() {
         document.getElementById('allocationDetailModal').style.display = 'none';
     }
-
-    function openInfantProfile() {
-        Swal.fire('Info', 'This would open the full infant profile view.', 'info');
-    }
     
-    // Sort logic (Simple placeholder)
+    // Close modal on outside click
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-overlay')) {
+            e.target.style.display = 'none';
+        }
+    });
+    
+    // Sort logic
     function sortTable(n) { console.log("Sorting column " + n); }
 </script>
 

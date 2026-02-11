@@ -483,7 +483,8 @@ public function dispenseMilk(Request $request)
         // Logged-in parent (user_id foreign key)
         $parent = ParentModel::where('user_id', auth()->id())
             ->with([
-                'requests.allocation.milk'
+                'requests.doctor',
+                'requests.allocations'
             ])
             ->firstOrFail();
 

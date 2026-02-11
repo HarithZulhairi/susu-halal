@@ -340,7 +340,63 @@ class DashboardController extends Controller
     // ============================
     public function parent()
     {
-        return view('parent.parent_dashboard');
+        // Get the logged-in parent's record
+        $parent = ParentModel::where('user_id', auth()->id())
+            ->with(['requests.doctor', 'requests.allocations'])
+            ->firstOrFail();
+
+        $prId = $parent->pr_ID;
+
+        // Stats Cards
+        $totalRequests = $parent->requests->count();
+        $pendingRequests = $parent->requests->where('status', 'Waiting')->count();
+        $approvedRequests = $parent->requests->where('status', 'Approved')->count();
+
+        // Milk received = sum of allocated milk volumes
+        $milkReceived = 0;
+        foreach ($parent->requests as $req) {
+            foreach ($req->allocations as $alloc) {
+                $milkReceived += $alloc->total_selected_milk ?? 0;
+            }
+        }
+
+        // Infant info (always 1 per parent in this system)
+        $infantsRegistered = 1;
+
+        // Baby age calculation
+        $babyAge = null;
+        if ($parent->pr_BabyDOB) {
+            $babyAge = Carbon::parse($parent->pr_BabyDOB)->diffForHumans(null, true);
+        }
+
+        // Chart: last 6 months milk request volumes
+        $monthLabels = [];
+        $monthlyVolumes = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $monthLabels[] = $month->format('F');
+
+            $monthlyVolumes[] = \App\Models\Request::where('pr_ID', $prId)
+                ->whereYear('created_at', $month->year)
+                ->whereMonth('created_at', $month->month)
+                ->sum('total_daily_volume');
+        }
+
+        // Recent requests for table
+        $recentRequests = $parent->requests->sortByDesc('created_at')->take(5);
+
+        return view('parent.parent_dashboard', compact(
+            'parent',
+            'totalRequests',
+            'pendingRequests',
+            'approvedRequests',
+            'milkReceived',
+            'infantsRegistered',
+            'babyAge',
+            'monthLabels',
+            'monthlyVolumes',
+            'recentRequests'
+        ));
     }
 
     // ============================
