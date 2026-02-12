@@ -227,27 +227,6 @@
                 </div>
             </div>
 
-            {{-- 2. Donor & Consent Info --}}
-            <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Donor Name</label>
-                    <p id="modalDonorName">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Donor ID</label>
-                    <p id="modalDonorId">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Donor Consent Status</label>
-                    <p id="modalConsent" style="color:#166534; font-weight:700;">-</p>
-                </div>
-                <div class="detail-item">
-                    <label>Total Allocated Volume</label>
-                    <p id="modalTotalVol" style="color:#0369a1; font-weight:800; font-size:16px;">-</p>
-                </div>
-            </div>
-
             {{-- 3. Dispensing Method & Doctor --}}
             <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Dispensing & Assignment</div>
             <div class="detail-grid">
