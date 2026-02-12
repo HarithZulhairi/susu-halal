@@ -109,7 +109,7 @@ class RegisteredUserController extends Controller
                 'dn_Address' => $request->address,
                 'dn_Parity' => $request->parity,
                 'dn_MaritalStatus' => $request->marital_status,
-                'dn_HusbandConsent' => $request->husband_consent,
+                'dn_HusbandConsent' => $request->husband_consent ?? 'No',
                 'dn_DonationType' => $request->donation_type,
                 'dn_Religion' => $request->religion,
                 'dn_ExcessBreastMilk' => $request->has_excess_milk === 'yes',

@@ -644,7 +644,7 @@ class UserController extends Controller
                         'dn_Contact'            => $request->contact ?? null,
                         'dn_Address'            => $request->address ?? null,
                         'dn_MaritalStatus'      => $request->marital_status ?? null,
-                        'dn_HusbandConsent'     => $request->husband_consent ?? null,
+                        'dn_HusbandConsent'     => $request->husband_consent ?? 'No',
                         'dn_DonationType'       => $request->donation_type ?? null,
                         'dn_Religion'           => $request->religion ?? null,
                         'dn_ExcessBreastMilk'   => $request->excess_breast_milk ?? null,

@@ -79,6 +79,7 @@ class RequestController extends Controller
             'parent', 
             'doctor', 
             'allocations.postBottles',
+            'allocations.postBottles.milk.donor',
             'allocations.feedRecords.nurse' 
         ]);
 
@@ -146,6 +147,7 @@ class RequestController extends Controller
             'parent', 
             'doctor', 
             'allocations.postBottles',
+            'allocations.postBottles.milk.donor',
             'allocations.feedRecords.nurse' 
         ]);
 
@@ -213,6 +215,7 @@ class RequestController extends Controller
             'parent', 
             'doctor', 
             'allocations.postBottles',
+            'allocations.postBottles.milk.donor',
             'allocations.feedRecords.nurse' 
         ]);
 
