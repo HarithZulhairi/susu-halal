@@ -58,11 +58,12 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        // 3️⃣ First-time donor
-        if ($role === 'donor' && $roleUser['first_login'] == 1) {
+        // 3️⃣ First-time login check for all roles
+        if ($roleUser['first_login'] == 1) {
             session([
-                'first_time_donor' => true,
-                'donor_nric'       => $roleUser['nric'],
+                'first_time_login' => true,
+                'user_nric'        => $roleUser['nric'],
+                'auth_role'        => $role,
             ]);
         }
 
@@ -109,13 +110,13 @@ class LoginRequest extends FormRequest
     private function getRoleUser($role, $username)
     {
         $modelMap = [
-            'hmmc_admin'     => ['model' => HmmcAdmin::class, 'field' => 'ad_Username', 'pass' => 'ad_Password', 'name' => 'ad_Name', 'email' => 'ad_Email', 'id' => 'ad_Admin'],
-            'nurse'          => ['model' => Nurse::class, 'field' => 'ns_Username', 'pass' => 'ns_Password', 'name' => 'ns_Name', 'email' => 'ns_Email', 'id' => 'ns_ID'],
-            'doctor'         => ['model' => Doctor::class, 'field' => 'dr_Username', 'pass' => 'dr_Password', 'name' => 'dr_Name', 'email' => 'dr_Email', 'id' => 'dr_ID'],
-            'lab_technician' => ['model' => LabTech::class, 'field' => 'lt_Username', 'pass' => 'lt_Password', 'name' => 'lt_Name', 'email' => 'lt_Email', 'id' => 'lt_ID'],
-            'shariah_advisor'=> ['model' => ShariahCommittee::class, 'field' => 'sc_Username', 'pass' => 'sc_Password', 'name' => 'sc_Name', 'email' => 'sc_Email', 'id' => 'sc_ID'],
-            'parent'         => ['model' => ParentModel::class, 'field' => 'pr_NRIC', 'pass' => 'pr_Password', 'name' => 'pr_Name', 'email' => 'pr_Email', 'id' => 'pr_ID'],
-            'donor'          => ['model' => Donor::class, 'field' => 'dn_NRIC', 'pass' => 'dn_Password', 'name' => 'dn_FullName', 'email' => 'dn_Email', 'id' => 'dn_ID'],
+            'hmmc_admin'     => ['model' => HmmcAdmin::class, 'field' => 'ad_Username', 'nric_field' => 'ad_NRIC', 'pass' => 'ad_Password', 'name' => 'ad_Name', 'email' => 'ad_Email', 'id' => 'ad_Admin'],
+            'nurse'          => ['model' => Nurse::class, 'field' => 'ns_Username', 'nric_field' => 'ns_NRIC', 'pass' => 'ns_Password', 'name' => 'ns_Name', 'email' => 'ns_Email', 'id' => 'ns_ID'],
+            'doctor'         => ['model' => Doctor::class, 'field' => 'dr_Username', 'nric_field' => 'dr_NRIC', 'pass' => 'dr_Password', 'name' => 'dr_Name', 'email' => 'dr_Email', 'id' => 'dr_ID'],
+            'lab_technician' => ['model' => LabTech::class, 'field' => 'lt_Username', 'nric_field' => 'lt_NRIC', 'pass' => 'lt_Password', 'name' => 'lt_Name', 'email' => 'lt_Email', 'id' => 'lt_ID'],
+            'shariah_advisor'=> ['model' => ShariahCommittee::class, 'field' => 'sc_Username', 'nric_field' => 'sc_NRIC', 'pass' => 'sc_Password', 'name' => 'sc_Name', 'email' => 'sc_Email', 'id' => 'sc_ID'],
+            'parent'         => ['model' => ParentModel::class, 'field' => 'pr_NRIC', 'nric_field' => 'pr_NRIC', 'pass' => 'pr_Password', 'name' => 'pr_Name', 'email' => 'pr_Email', 'id' => 'pr_ID'],
+            'donor'          => ['model' => Donor::class, 'field' => 'dn_NRIC', 'nric_field' => 'dn_NRIC', 'pass' => 'dn_Password', 'name' => 'dn_FullName', 'email' => 'dn_Email', 'id' => 'dn_ID'],
         ];
 
         if (!isset($modelMap[$role])) {
@@ -134,8 +135,8 @@ class LoginRequest extends FormRequest
             'name'     => $record->{$map['name']},
             'email'    => $record->{$map['email']},
             'password' => $record->{$map['pass']},
-            'first_login' => $role === 'donor' ? $record->first_login : 0,
-            'nric'        => $role === 'donor' ? $record->{$map['field']} : null,
+            'first_login' => $record->first_login,
+            'nric'        => $record->{$map['nric_field']},
         ];
     }
 

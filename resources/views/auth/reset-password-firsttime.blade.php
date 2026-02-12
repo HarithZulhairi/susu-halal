@@ -115,8 +115,9 @@
           class="space-y-6"
         >
           @csrf
+          <input type="hidden" name="role" value="{{ $role ?? session('auth_role') }}">
           
-          {{-- NRIC (only for first-time donor) --}}
+          {{-- NRIC --}}
           @if(!isset($user_table))
             <div class="space-y-2">
               <label for="nric" class="flex items-center space-x-2 text-sm font-medium text-gray-700">
@@ -128,7 +129,7 @@
                   id="nric"
                   type="text"
                   name="nric"
-                  value="{{ old('nric', session('donor_nric')) }}"
+                  value="{{ old('nric', $nric) }}"
                   required
                   readonly
                   class="w-full px-4 py-3 pl-11 border border-gray-300 rounded-2xl bg-gray-100 cursor-not-allowed"

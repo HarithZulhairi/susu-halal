@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             'ad_Contact' => '0123456789',
             'ad_Email' => 'admin@hmmc.org',
             'ad_Gender' => 'Male',
+            'first_login' => false,
         ]);
 
         $doctor = Doctor::create([
@@ -51,6 +52,7 @@ class DatabaseSeeder extends Seeder
             'dr_Institution' => 'UM Medical Center',
             'dr_Specialization' => 'Pediatrics',
             'dr_YearsOfExperience' => 8,
+            'first_login' => false,
         ]);
 
         $donor = Donor::create([
@@ -77,6 +79,7 @@ class DatabaseSeeder extends Seeder
             'dn_TobaccoAlcohol' => 0,
             'dn_DietaryAlerts' => 'None',
             'dn_ConsentStatus' => 'Approved',
+            'first_login' => false,
         ]);
 
         $donor1 = Donor::create([
@@ -103,6 +106,7 @@ class DatabaseSeeder extends Seeder
             'dn_TobaccoAlcohol' => 0,
             'dn_DietaryAlerts' => 'None',
             'dn_ConsentStatus' => 'Approved',
+            'first_login' => false,
         ]);
 
         $labtech = LabTech::create([
@@ -118,6 +122,7 @@ class DatabaseSeeder extends Seeder
             'lt_Certification' => 'MLT Certified',
             'lt_Specialization' => 'Blood Testing',
             'lt_YearsOfExperience' => 5,
+            'first_login' => false,
         ]);
 
         $nurse = Nurse::create([
@@ -133,6 +138,7 @@ class DatabaseSeeder extends Seeder
             'ns_Institution' => 'UM Nursing College',
             'ns_Specialization' => 'Neonatal Care',
             'ns_YearsOfExperience' => 6,
+            'first_login' => false,
         ]);
 
         $parent = ParentModel::create([
@@ -148,6 +154,7 @@ class DatabaseSeeder extends Seeder
             'pr_NICU' => 'No',
             'pr_BabyBirthWeight' => '3.2',
             'pr_BabyCurrentWeight' => '5.1',
+            'first_login' => false,
         ]);
 
         $parent2 = ParentModel::create([
@@ -163,6 +170,7 @@ class DatabaseSeeder extends Seeder
             'pr_NICU' => 'No',
             'pr_BabyBirthWeight' => '3.5',
             'pr_BabyCurrentWeight' => '5.3',
+            'first_login' => false,
         ]);
 
 
@@ -179,6 +187,7 @@ class DatabaseSeeder extends Seeder
             'sc_Institution' => 'UIA',
             'sc_Specialization' => 'Islamic Finance',
             'sc_YearsOfExperience' => 7,
+            'first_login' => false,
         ]);
 
         // --- 2. SEED MILK DATA ---

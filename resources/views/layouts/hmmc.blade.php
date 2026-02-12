@@ -12,6 +12,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" 
       integrity="sha512-...CORRECT_HASH..." 
       crossorigin="anonymous">
+    
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 <body>
@@ -60,5 +63,26 @@
       @yield('content')
     </main>
   </div>
+
+  <script>
+    // Common Success/Error Popup
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Success!',
+            text: "{{ session('success') }}",
+            timer: 3000,
+            showConfirmButton: false
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: "{{ session('error') }}",
+        });
+    @endif
+  </script>
 </body>
 </html>

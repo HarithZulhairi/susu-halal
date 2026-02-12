@@ -25,9 +25,9 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate(); // LoginRequest handles role logic
 
-        if (session('first_time_donor')) {
+        if (session('first_time_login')) {
             return redirect()->route('password.first-time')
-                ->with('nric', session('donor_nric'));
+                ->with('nric', session('user_nric'));
         }
 
         $request->session()->regenerate();

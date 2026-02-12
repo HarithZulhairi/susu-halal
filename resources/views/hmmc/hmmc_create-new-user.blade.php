@@ -138,6 +138,17 @@
                         @enderror
                     </div>
                     <div class="form-group">
+                        <label for="nicu">NICU Admission <span class="required">*</span></label>
+                        <select name="nicu" id="nicu" class="form-control" required>
+                            <option value="">Select Status</option>
+                            <option value="Yes" {{ old('nicu') == 'Yes' ? 'selected' : '' }}>Yes</option>
+                            <option value="No" {{ old('nicu') == 'No' ? 'selected' : '' }}>No</option>
+                        </select>
+                        @error('nicu')
+                            <span class="input-error">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="form-group">
                         <label for="baby_gender">Baby Gender <span class="required">*</span></label>
                         <select name="baby_gender" id="baby_gender" class="form-control" required>
                             <option value="">Select Gender</option>
@@ -269,15 +280,21 @@
             <div class="form-section">
                 <h3 class="section-title"><i class="fas fa-key"></i> Account Settings</h3>
                 <div class="form-grid">
+                    {{-- Username Field: Hidden for Parents (uses NRIC) --}}
+                    @if($role !== 'parent')
                     <div class="form-group">
                         <label for="username">Username <span class="required">*</span></label>
-                        <input type="text" name="username" id="username" class="form-control" placeholder="Enter username" required value="{{ old('username') }}">
+                        <input type="text" name="username" id="username" class="form-control" placeholder="Enter username" 
+                            @if($role !== 'parent') required @endif value="{{ old('username') }}">
                         <div class="validation-feedback" id="username-feedback"></div>
                         @error('username')
                             <span class="input-error">{{ $message }}</span>
                         @enderror
                     </div>
+                    @endif
 
+                    {{-- Password Field: Only for Donor (others use NRIC) --}}
+                    @if($role === 'donor')
                     <div class="form-group">
                         <label for="password">Temporary Password <span class="required">*</span></label>
                         <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
@@ -286,6 +303,12 @@
                             <span class="input-error">{{ $message }}</span>
                         @enderror
                     </div>
+                    @else
+                    <div class="form-group">
+                        <label>Temporary Password</label>
+                        <input type="text" class="form-control" value="Password will be set to NRIC" disabled style="background-color: #e9ecef;">
+                    </div>
+                    @endif
 
                     {{-- Account Status for administrative control --}}
                     <div class="form-group full-width">

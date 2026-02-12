@@ -510,17 +510,33 @@ class UserController extends Controller
         }
 
         try {
-            $request->validate([
+            $rules = [
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|email',
-                'username' => 'required|string',
-                'password' => 'required|string|min:6',
                 'nric'     => 'required_if:role,admin,doctor,labtech,shariah,nurse,parent,donor|string|max:20',
-            ]);
+                'nicu'     => 'required_if:role,parent|string',
+            ];
+
+            // Username is required for all roles EXCEPT parent (who uses NRIC)
+            if ($role !== 'parent') {
+                $rules['username'] = 'required|string';
+            }
+
+            // Password is only required for Donor (others use NRIC as default)
+            if ($role === 'donor') {
+                $rules['password'] = 'required|string|min:6';
+            }
+
+            $request->validate($rules);
 
             \Log::info('Validation passed');
 
-            $password = Hash::make($request->input('password'));
+            // Set password: Use input for Donor, otherwise use NRIC
+            if ($role === 'donor') {
+                $password = Hash::make($request->input('password'));
+            } else {
+                $password = Hash::make($request->input('nric'));
+            }
 
             switch ($role) {
                 case 'admin':
@@ -618,13 +634,13 @@ class UserController extends Controller
                     DB::table('parent')->insert([
                         'pr_Name'              => $request->name,
                         'pr_NRIC'              => $request->nric,
-                        'pr_Username'          => $request->username,
                         'pr_Password'          => $password,
                         'pr_Email'             => $request->email,
                         'pr_Address'           => $request->address ?? null,
                         'pr_Contact'           => $request->contact ?? null,
                         'pr_BabyName'          => $request->baby_name ?? null,
                         'pr_BabyDOB'           => $request->baby_dob ?? null,
+                        'pr_NICU'              => $request->nicu,
                         'pr_BabyGender'        => $request->baby_gender ?? null,
                         'pr_BabyBirthWeight'   => $request->baby_birth_weight ?? null,
                         'pr_BabyCurrentWeight' => $request->baby_current_weight ?? null,
@@ -1097,7 +1113,7 @@ class UserController extends Controller
                 'parent' => [
                     'email' => 'pr_Email',
                     'nric' => 'pr_NRIC',
-                    'username' => 'pr_Username',
+                    // 'username' => 'pr_Username',
                     'contact' => 'pr_Contact'
                 ],
                 'donor' => [

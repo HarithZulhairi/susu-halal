@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\HmmcAdmin;
+use App\Models\Nurse;
+use App\Models\Doctor;
+use App\Models\LabTech;
+use App\Models\ShariahCommittee;
+use App\Models\ParentModel;
 
 class NewPasswordController extends Controller
 {
@@ -120,17 +126,19 @@ class NewPasswordController extends Controller
         }
     }
 
-        /**
+
+    /**
      * Display the first-time password reset view for donors.
      */
     public function createFirstTime(Request $request): View
     {
         return view('auth.reset-password-firsttime', [
-            'nric' => session('donor_nric') ?? $request->old('nric')
+            'nric' => session('user_nric') ?? $request->old('nric'),
+            'role' => session('auth_role')
         ]);
     }
 
-        /**
+    /**
      * Handle first-time password reset for donors.
      */
     public function storeFirstTime(Request $request): RedirectResponse
@@ -138,42 +146,97 @@ class NewPasswordController extends Controller
         $request->validate([
             'nric' => ['required', 'string'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['required', 'string'],
         ]);
 
-        // Find the donor by NRIC
-        $donor = Donor::where('dn_NRIC', $request->nric)->first();
+        $role = $request->role;
+        $nric = $request->nric;
 
-        if (!$donor) {
+        // Model Map
+        $modelMap = [
+            'hmmc_admin'     => ['model' => HmmcAdmin::class, 'field' => 'ad_NRIC', 'pass' => 'ad_Password', 'id' => 'ad_Admin'],
+            'nurse'          => ['model' => Nurse::class, 'field' => 'ns_NRIC', 'pass' => 'ns_Password', 'id' => 'ns_ID'],
+            'doctor'         => ['model' => Doctor::class, 'field' => 'dr_NRIC', 'pass' => 'dr_Password', 'id' => 'dr_ID'],
+            'lab_technician' => ['model' => LabTech::class, 'field' => 'lt_NRIC', 'pass' => 'lt_Password', 'id' => 'lt_ID'],
+            'shariah_advisor'=> ['model' => ShariahCommittee::class, 'field' => 'sc_NRIC', 'pass' => 'sc_Password', 'id' => 'sc_ID'],
+            'parent'         => ['model' => ParentModel::class, 'field' => 'pr_NRIC', 'pass' => 'pr_Password', 'id' => 'pr_ID'],
+            'donor'          => ['model' => Donor::class, 'field' => 'dn_NRIC', 'pass' => 'dn_Password', 'id' => 'dn_ID'],
+        ];
+
+        if (!isset($modelMap[$role])) {
+            return back()->withErrors(['role' => 'Invalid role.']);
+        }
+
+        $map = $modelMap[$role];
+        $userModel = $map['model']::where($map['field'], $nric)->first();
+
+        if (!$userModel) {
             return back()->withInput($request->only('nric'))
-                        ->withErrors(['nric' => 'Donor not found with this NRIC.']);
+                        ->withErrors(['nric' => 'User not found with this NRIC.']);
         }
 
         // ✅ CRITICAL: Update password AND set first_login to false
-        $donor->update([
-            'dn_Password' => Hash::make($request->password),
+        $userModel->update([
+            $map['pass'] => Hash::make($request->password),
             'first_login' => 0 // This prevents future first-time login prompts
         ]);
 
-        // Update or create user record using donor's email
-        $user = User::updateOrCreate(
-            ['email' => $donor->dn_Email],
-            [
-                'name' => $donor->dn_FullName,
-                'password' => Hash::make($request->password),
-                'role' => 'donor',
-                'role_id' => $donor->dn_ID
-            ]
-        );
+        // Update or create user record using user's email (if applicable)
+        // Some users might not have email depending on implementation, but likely yes
+        $emailField = match($role) {
+            'hmmc_admin' => 'ad_Email',
+            'nurse' => 'ns_Email',
+            'doctor' => 'dr_Email',
+            'lab_technician' => 'lt_Email',
+            'shariah_advisor' => 'sc_Email',
+            'parent' => 'pr_Email',
+            'donor' => 'dn_Email',
+            default => 'email'
+        };
+        
+        $nameField = match($role) {
+            'hmmc_admin' => 'ad_Name',
+            'nurse' => 'ns_Name',
+            'doctor' => 'dr_Name',
+            'lab_technician' => 'lt_Name',
+            'shariah_advisor' => 'sc_Name',
+            'parent' => 'pr_Name',
+            'donor' => 'dn_FullName',
+            default => 'name'
+        };
 
-        // Log in the user
-        auth()->login($user);
-        // Set session role
-        session(['auth_role' => $user->role]);
+        if ($userModel->$emailField) {
+            $user = User::updateOrCreate(
+                ['email' => $userModel->$emailField],
+                [
+                    'name' => $userModel->$nameField,
+                    'password' => Hash::make($request->password),
+                    'role' => $role,
+                    'role_id' => $userModel->{$map['id']}
+                ]
+            );
+
+            // Log in the user
+            auth()->login($user);
+            // Set session role
+            session(['auth_role' => $user->role]);
+        }
 
         // Clear first-time session data
-        session()->forget(['first_time_donor', 'donor_nric', 'donor_email', 'donor_id', 'donor_name']);
+        session()->forget(['first_time_login', 'user_nric', 'auth_role']);
 
-        return redirect()->route('donor.dashboard')
+        $dashboardRoute = match($role) {
+            'hmmc_admin' => 'hmmc.dashboard',
+            'nurse' => 'nurse.dashboard',
+            'doctor' => 'doctor.dashboard',
+            'lab_technician' => 'labtech.dashboard',
+            'shariah_advisor' => 'shariah.dashboard',
+            'parent' => 'parent.dashboard',
+            'donor' => 'donor.dashboard',
+            default => 'dashboard',
+        };
+
+        return redirect()->route($dashboardRoute)
                     ->with('success', 'Password set successfully! Welcome to your dashboard.');
     }
 }

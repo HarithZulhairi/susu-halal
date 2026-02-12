@@ -25,7 +25,6 @@ class ParentModel extends Model
         'pr_BabyBirthWeight',
         'pr_BabyCurrentWeight',
         'pr_Password',
-        'pr_Username',
         'pr_ConsentStatus',
         'user_id',
     ];
