@@ -577,15 +577,20 @@
         const status = parent.pr_ConsentStatus;
         let badgeHtml = '';
 
-        if (status === 'Approved') {
-            badgeHtml = `<div class="consent-badge approved"><i class="fas fa-check-circle"></i> Parent Consent Approved</div>`;
+        // 1. Parent Consent Badge
+        if (status === 'Approved' || status === 'Accepted') {
+            badgeHtml += `<div class="consent-badge approved" style="margin-bottom: 5px;"><i class="fas fa-check-circle"></i> Parent: Approved</div>`;
         } else if (status === 'Pending') {
-            badgeHtml = `<div class="consent-badge pending"><i class="fas fa-clock"></i> Consent Pending</div>`;
-        } else if (status === 'Rejected') {
-            badgeHtml = `<div class="consent-badge rejected"><i class="fas fa-times-circle"></i> Consent Rejected</div>`;
+            badgeHtml += `<div class="consent-badge pending" style="margin-bottom: 5px;"><i class="fas fa-clock"></i> Parent: Pending</div>`;
+        } else if (status === 'Rejected' || status === 'Declined') {
+            badgeHtml += `<div class="consent-badge rejected" style="margin-bottom: 5px;"><i class="fas fa-times-circle"></i> Parent: Rejected</div>`;
         } else {
-            badgeHtml = `<div class="consent-badge unknown"><i class="fas fa-question-circle"></i> Status Unknown</div>`;
+            badgeHtml += `<div class="consent-badge unknown" style="margin-bottom: 5px;"><i class="fas fa-question-circle"></i> Parent: ${status || 'Unknown'}</div>`;
         }
+
+        // 2. Donor Consent Badges (Removed as per request)
+        // Only showing Parent Consent now.
+
         consentContainer.innerHTML = badgeHtml;
 
         // --- Dispensing Logic ---
