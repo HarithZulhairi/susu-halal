@@ -589,44 +589,8 @@
             badgesHtml += `<div class="consent-badge unknown" style="margin-bottom: 5px;"><i class="fas fa-question-circle"></i> Parent: ${parentStatus || 'Unknown'}</div>`;
         }
 
-        // 2. Donor Consent Badges (from allocations)
-        const uniqueDonors = new Map();
-        
-        if (data.allocations && data.allocations.length > 0) {
-            data.allocations.forEach(alloc => {
-                // Handle potential key casing differences (postBottles vs post_bottles)
-                const postBottle = alloc.postBottles || alloc.post_bottles;
-                
-                if (postBottle && postBottle.milk && postBottle.milk.donor) {
-                    const donor = postBottle.milk.donor;
-                    if (!uniqueDonors.has(donor.dn_ID)) {
-                        uniqueDonors.set(donor.dn_ID, donor);
-                    }
-                }
-            });
-        }
-
-        if (uniqueDonors.size > 0) {
-            uniqueDonors.forEach(donor => {
-                const donorName = donor.dn_FullName || 'Unknown Donor';
-                const donorStatus = donor.dn_ConsentStatus; 
-                
-                if (donorStatus === 'Approved' || donorStatus === 'Accepted') {
-                    badgesHtml += `<div class="consent-badge approved" style="margin-bottom: 5px;"><i class="fas fa-check-circle"></i> Donor (${donorName}): Approved</div>`;
-                } else if (donorStatus === 'Pending') {
-                    badgesHtml += `<div class="consent-badge pending" style="margin-bottom: 5px;"><i class="fas fa-clock"></i> Donor (${donorName}): Pending</div>`;
-                } else if (donorStatus === 'Rejected' || donorStatus === 'Declined') {
-                    badgesHtml += `<div class="consent-badge rejected" style="margin-bottom: 5px;"><i class="fas fa-times-circle"></i> Donor (${donorName}): Rejected</div>`;
-                } else {
-                    badgesHtml += `<div class="consent-badge unknown" style="margin-bottom: 5px;"><i class="fas fa-question-circle"></i> Donor (${donorName}): ${donorStatus || 'Unknown'}</div>`;
-                }
-            });
-        } else {
-             // If no allocations yet, maybe show a placeholder or nothing for donor
-             if(data.status !== 'Waiting') {
-                badgesHtml += `<div class="consent-badge unknown" style="margin-bottom: 5px;"><i class="fas fa-exclamation-circle"></i> No Donor Info Available</div>`;
-             }
-        }
+        // 2. Donor Consent Badges (Removed as per request)
+        // Only showing Parent Consent now.
 
         consentContainer.innerHTML = badgesHtml;
 
