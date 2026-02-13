@@ -85,7 +85,7 @@
                         <option value="admin">Admin</option>
                         <option value="doctor">Doctor</option>
                         <option value="nurse">Nurse</option>
-                        <option value="labtech">Lab Tech</option>
+                        <option value="labtech">Microbiologist</option>
                         <option value="shariah">Shariah</option>
                         <option value="parent">Parent</option>
                         <option value="donor">Donor</option>
@@ -320,7 +320,7 @@
                         <div class="role-icon purple">
                             <i class="fas fa-flask"></i>
                         </div>
-                        <h3>Lab Technician</h3>
+                        <h3>Microbiologist</h3>
                         <p>Laboratory specialist</p>
                     </div>
                 </a>

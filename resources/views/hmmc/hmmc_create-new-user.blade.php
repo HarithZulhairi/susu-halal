@@ -30,7 +30,7 @@
 
 <div class="main-content">
     <div class="page-header">
-        <h1>Create New {{ ucfirst($role) }} User</h1>
+        <h1>Create New {{ $role === 'labtech' ? 'Microbiologist' : ucfirst($role) }} User</h1>
     </div>
 
     <div class="create-user-container">
@@ -42,7 +42,7 @@
             <div class="role-badge-section">
                 <div class="selected-role-badge {{ $role }}">
                     <i class="fas fa-{{ getRoleIcon($role) }}"></i>
-                    <span>{{ ucfirst($role) }}</span>
+                    <span>{{ $role === 'labtech' ? 'Microbiologist' : ucfirst($role) }}</span>
                 </div>
                 <button class="btn-change-role" onclick="openRoleModal()" title="Change Role">
                     <i class="fas fa-exchange-alt"></i>
@@ -400,7 +400,7 @@
                     <div class="role-icon">
                         <i class="fas fa-flask"></i>
                     </div>
-                    <h3>Lab Technician</h3>
+                    <h3>Microbiologist</h3>
                     <p>Laboratory specialist</p>
                 </div>
             </a>
