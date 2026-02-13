@@ -68,7 +68,7 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
-        $role = session('auth_role');
+        $role = $user->role;
         
         if (!$role || !isset($this->roleConfig[$role])) {
             abort(403, 'Invalid user role');
@@ -95,7 +95,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        $role = session('auth_role');
+        $role = $user->role;
         
         if (!$role || !isset($this->roleConfig[$role])) {
             abort(403, 'Invalid user role');
@@ -122,7 +122,7 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
-        $role = session('auth_role');
+        $role = $user->role;
         
         if (!$role || !isset($this->roleConfig[$role])) {
             abort(403, 'Invalid user role');
@@ -383,7 +383,7 @@ class ProfileController extends Controller
         ]);
 
         $user = Auth::user();
-        $role = session('auth_role');
+        $role = $user->role;
         
         if (!$role || !isset($this->roleConfig[$role])) {
             abort(403, 'Invalid user role');
