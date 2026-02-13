@@ -49,7 +49,7 @@
               <td>{{ $app['reference'] }}</td>
               <td>#{{ $app['donor_id'] }}</td>
 
-              <td>{{ \Carbon\Carbon::parse($app['date'])->format('d.m.Y') }}</td>
+              <td>{{ \Carbon\Carbon::parse($app['date'])->format('d/m/Y') }}</td>
 
               <td>{{ $app['amount'] ? $app['amount'].' ml' : '-' }}</td>
 
@@ -130,7 +130,7 @@
             >
               <td>{{ $app['reference'] }}</td>
               <td>#{{ $app['donor_id'] }}</td>
-              <td>{{ \Carbon\Carbon::parse($app['date'])->format('d.m.Y') }}</td>
+              <td>{{ \Carbon\Carbon::parse($app['date'])->format('d/m/Y') }}</td>
               
               <td>
                 <span class="status-tag {{ strtolower($app['status']) }}">

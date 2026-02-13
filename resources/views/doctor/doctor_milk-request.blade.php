@@ -157,10 +157,10 @@
 
                     <td>{{ $req->parent->pr_NICU ?? '-' }}</td>
 
-                    <td>{{ $req->created_at->format('M d, Y') }}</td>
+                    <td>{{ $req->created_at->format('d/m/Y') }}</td>
 
                     <td>
-                        {{ \Carbon\Carbon::parse($req->feeding_start_date)->format('M d, Y') }}
+                        {{ \Carbon\Carbon::parse($req->feeding_start_date)->format('d/m/Y') }}
                         •
                         {{ \Carbon\Carbon::parse($req->feeding_start_time)->format('h:i A') }}
                     </td>

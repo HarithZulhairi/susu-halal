@@ -146,7 +146,7 @@
                         </div>
                         <div class="info-item">
                             <label>DATE OF BIRTH</label>
-                            <p>{{ $profile->dob ? \Carbon\Carbon::parse($profile->dob)->format('F d, Y') : 'Not provided' }}</p>
+                            <p>{{ $profile->dob ? \Carbon\Carbon::parse($profile->dob)->format('d/m/Y')  : 'Not provided' }}</p>
                         </div>
                         <div class="info-item">
                             <label>MARITAL STATUS</label>
@@ -166,7 +166,7 @@
                         </div>
                         <div class="info-item">
                             <label>MEMBER SINCE</label>
-                            <p>{{ $profile->created_at ? \Carbon\Carbon::parse($profile->created_at)->format('F d, Y') : 'N/A' }}</p>
+                            <p>{{ $profile->created_at ? \Carbon\Carbon::parse($profile->created_at)->format('d/m/Y')  : 'N/A' }}</p>
                         </div>
                         <div class="info-item">
                             <label>ACCOUNT STATUS</label>

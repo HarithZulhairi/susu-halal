@@ -163,7 +163,7 @@
                                 <div class="user-info">
                                     <div class="user-avatar teal"><i class="fas fa-calendar"></i></div>
                                     <div>
-                                        <div class="user-name">{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('M d, Y') }}</div>
+                                        <div class="user-name">{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('d/m/Y') }}</div>
                                         <div class="user-email">{{ \Carbon\Carbon::parse($app->appointment_datetime)->format('h:i A') }}</div>
                                     </div>
                                 </div>

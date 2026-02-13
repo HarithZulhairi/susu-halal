@@ -14,7 +14,7 @@
     <div class="main-content">
 
         <div class="page-header">
-            <h1>My Milk Records</h1>
+            <h1>My Milk Processing Records</h1>
             <p>Track the processing status of your donations</p>
         </div>
 

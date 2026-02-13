@@ -176,7 +176,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $req->created_at ? $req->created_at->format('d M Y') : 'N/A' }}</td>
+                            <td>{{ $req->created_at ? $req->created_at->format('d/m/Y')  : 'N/A' }}</td>
                             <td><span class="badge badge-donor">{{ $req->total_daily_volume ?? 0 }}ml</span></td>
                             <td>
                                 @if($req->status == 'Approved')

@@ -228,7 +228,7 @@
                             <tr data-status="{{ strtolower($appointment->status) }}">
                                 <td><span class="ref-id">{{ $appointment->reference_num }}</span></td>
 
-                                <td>{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('d.m.Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($appointment->appointment_datetime)->format('d/m/Y') }}</td>
 
                                 <td>
                                     {{ $appointment->milk_amount ? $appointment->milk_amount . ' ml' : '-' }}

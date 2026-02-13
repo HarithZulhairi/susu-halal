@@ -261,7 +261,7 @@
                         </div>
                     </td>
                     <td>{{ $req->parent->pr_NICU ?? '-' }}</td>
-                    <td>{{ $req->created_at->format('d-m-Y') }}</td>
+                    <td>{{ $req->created_at->format('d/m/Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($req->feeding_start_time)->format('H:i') }}</td>
                     <td>{{ $req->total_daily_volume }} ml</td>
                     <td>

@@ -111,12 +111,12 @@
             <table class="infants-table" id="infantsTable">
                 <thead>
                     <tr>
-                        <th>Patient Name</th>
+                        <th>Patient ID</th>
                         <th>NICU Cubicle No.</th>
                         <th>Milk Requests</th>
                         <th>Last Updated</th>
                         <th>Current Weight</th>
-                        <th>Actions</th>
+                        <!-- <th>Document</th> -->
                     </tr>
                 </thead>
 
@@ -127,7 +127,7 @@
                                 <div class="patient-avatar"><i class="fa-solid fa-baby"></i></div>
                                 <div class="patient-details">
                                     <strong>{{ $parent->formatted_id }}</strong>
-                                    <span>{{ $parent->pr_BabyName }}</span>
+                                    <!-- <span>{{ $parent->pr_BabyName }}</span> -->
                                 </div>
                             </div>
                         </td>
@@ -153,7 +153,7 @@
                                                     'allocation_id' => $alloc->allocation_ID,
                                                     'post_id' => $alloc->post_ID,
                                                     'volume' => $alloc->total_selected_milk ?? 'N/A',
-                                                    'time' => $alloc->created_at ? $alloc->created_at->format('d-m-Y h:i A') : 'N/A',
+                                                    'time' => $alloc->created_at ? $alloc->created_at->format('d/m/Y • h:i A') : 'N/A',
                                                     'nurse_name' => optional($alloc->nurse)->ns_Name ?? 'N/A',
                                                     'nurse_id' => $alloc->nurse ? '#NS' . $alloc->nurse->ns_ID : 'N/A',
                                                 ];
@@ -170,7 +170,7 @@
                             </div>
                         </td>
 
-                        <td>{{ $parent->updated_at?->format('d-m-Y h:i A') ?? 'N/A' }}</td>
+                        <td>{{ $parent->updated_at?->format('d/m/Y • h:i A') ?? 'N/A' }}</td>
 
                         <td>
                             <div class="weight-display">
@@ -179,11 +179,11 @@
                             </div>
                         </td>
 
-                       <td class="actions">
+                       <!-- <td class="actions">
                             <button class="btn-pdf" title="Download Report" onclick="downloadReport('{{ $parent->pr_ID }}')">
                                 <i class="fa-solid fa-file-pdf"></i>
                             </button>
-                        </td>
+                        </td> -->
                     </tr>
                 </tbody>
             </table>

@@ -82,7 +82,7 @@
                     <input type="radio" name="kinship_method" value="no" onchange="calculateDispensing()" checked>
                     <div class="radio-content">
                         <strong><i class="fas fa-ban"></i> No Milk Kinship</strong>
-                        <span>Restricted Feed / Drip Method</span>
+                        <span>Restricted Drip / Direct Method</span>
                     </div>
                 </label>
             </div>
@@ -90,9 +90,9 @@
 
         <div class="grid-2">
             <div class="form-group">
-                <label for="feeding_tube">Feeding Tube Method</label>
+                <label for="feeding_tube">Drip Feeding Method</label>
                 <select id="feeding_tube" name="feeding_tube" class="form-control">
-                    <option value="">-- Select Tube Method --</option>
+                    <option value="">-- Select Drip Method --</option>
                     <option value="Orogastric">Orogastric</option>
                     <option value="Nasogastric">Nasogastric</option>
                     <option value="Orojenhunal">Orojenhunal</option>
@@ -102,12 +102,14 @@
             </div>
 
             <div class="form-group">
-                <label for="oral_feeding">Oral Feeding Method</label>
+                <label for="oral_feeding">Direct Feeding Method</label>
                 <select id="oral_feeding" name="oral_feeding" class="form-control">
-                    <option value="">-- Select Oral Method --</option>
+                    <option value="">-- Select Direct Method --</option>
                     <option value="Cup">Cup</option>
                     <option value="Syringe">Syringe</option>
                     <option value="Bottle">Bottle</option>
+                    <option value="Breastfeeding">Breastfeeding</option>
+                    <option value="Tube">Tube</option>
                 </select>
             </div>
         </div>
@@ -126,15 +128,29 @@
 
             <div id="kinship-no-result" style="display:none;">
                 <p><strong>Method:</strong> Drip Method (Preventing Kinship)</p>
+                
+                <div class="mode-selector" style="margin-bottom: 15px; display: flex; gap: 10px;">
+                    <label>
+                        <input type="radio" name="calc_mode" value="auto" checked onchange="calculateDispensing()"> 
+                        Standard (80/20 Split)
+                    </label>
+                    <label>
+                        <input type="radio" name="calc_mode" value="manual" onchange="calculateDispensing()"> 
+                        Manual Adjustment
+                    </label>
+                </div>
+
                 <div class="result-grid">
                     <div class="result-item">
-                        <span>Drip / Tube Feeding:</span>
-                        <strong class="highlight-value" id="vol-drip">0 ml</strong>
+                        <span>Drip Feeding:</span>
+                        <strong class="highlight-value" id="vol-drip-display">0 ml</strong>
+                        <input type="number" id="manual_drip" class="manual-calc-input" style="display:none;" step="0.1">
                         <small>(Bulk Volume)</small>
                     </div>
                     <div class="result-item">
-                        <span>Direct Oral Feed (every 2h):</span>
-                        <strong class="highlight-value" id="vol-oral">0 ml</strong>
+                        <span>Direct Feeding (every 2h):</span>
+                        <strong class="highlight-value" id="vol-oral-display">0 ml</strong>
+                        <input type="number" id="manual_oral" class="manual-calc-input" style="display:none;" step="0.1">
                         <small>(Restricted Amount)</small>
                     </div>
                 </div>
@@ -210,89 +226,96 @@
     const radios = document.querySelectorAll('input[name="kinship_method"]');
     radios.forEach(radio => radio.addEventListener('change', calculateDispensing));
 
-    function calculateDispensing() {
-        const totalVolume = parseFloat(document.getElementById("entered_volume").value);
-        // Get the selected method value ('yes' or 'no')
-        const methodRadio = document.querySelector('input[name="kinship_method"]:checked');
-        const method = methodRadio ? methodRadio.value : null;
+    // Add event listeners for manual input typing
+        document.getElementById("manual_drip").addEventListener("input", function() { syncManual('drip'); });
+        document.getElementById("manual_oral").addEventListener("input", function() { syncManual('oral'); });
 
-        const resultBox = document.getElementById("calculation-result");
-        const resYes = document.getElementById("kinship-yes-result");
-        const resNo  = document.getElementById("kinship-no-result");
+        function calculateDispensing() {
+            const totalVolume = parseFloat(document.getElementById("entered_volume").value);
+            const kinship = document.querySelector('input[name="kinship_method"]:checked')?.value;
+            const mode = document.querySelector('input[name="calc_mode"]:checked')?.value;
+            
+            const resultBox = document.getElementById("calculation-result");
+            const resYes = document.getElementById("kinship-yes-result");
+            const resNo = document.getElementById("kinship-no-result");
 
-        // Hidden inputs
-        const volumePerFeedInput = document.getElementById("volume_per_feed");
-        const dripTotalInput     = document.getElementById("drip_total");
-        const oralTotalInput     = document.getElementById("oral_total");
-        const oralPerFeedInput   = document.getElementById("oral_per_feed");
+            if (isNaN(totalVolume) || totalVolume <= 0) {
+                resultBox.style.display = "none";
+                return;
+            }
 
-        // Input Elements to Toggle
-        const tubeSelect = document.getElementById("feeding_tube");
-        // const oralSelect = document.getElementById("oral_feeding"); // Always active per your request
+            resultBox.style.display = "block";
 
-        if (isNaN(totalVolume) || totalVolume <= 0) {
-            resultBox.style.display = "none";
-            return;
+            if (kinship === 'yes') {
+                resYes.style.display = "block";
+                resNo.style.display = "none";
+                const perFeed = (totalVolume / 12).toFixed(2);
+                document.getElementById("vol-per-feed-yes").textContent = `${perFeed} ml`;
+                updateHiddenInputs(0, 0, perFeed, perFeed);
+            } else {
+                resYes.style.display = "none";
+                resNo.style.display = "block";
+                
+                const dripDisplay = document.getElementById("vol-drip-display");
+                const oralDisplay = document.getElementById("vol-oral-display");
+                const dripInput = document.getElementById("manual_drip");
+                const oralInput = document.getElementById("manual_oral");
+
+                if (mode === 'auto') {
+                    // Standard 80/20 Logic
+                    dripDisplay.style.display = "block";
+                    oralDisplay.style.display = "block";
+                    dripInput.style.display = "none";
+                    oralInput.style.display = "none";
+
+                    const dripTotal = (totalVolume * 0.8).toFixed(2);
+                    const oralTotal = (totalVolume * 0.2).toFixed(2);
+                    const oralPerFeed = (oralTotal / 12).toFixed(2);
+
+                    dripDisplay.textContent = `${dripTotal} ml`;
+                    oralDisplay.textContent = `${oralPerFeed} ml`;
+                    
+                    document.getElementById("calc-explanation").innerHTML = `<strong>Auto Mode:</strong> 80% Drip (${dripTotal}ml) and 20% Direct split into 12 feeds.`;
+                    updateHiddenInputs(dripTotal, oralTotal, oralPerFeed, oralPerFeed);
+                } else {
+                    // Manual Mode Logic
+                    dripDisplay.style.display = "none";
+                    oralDisplay.style.display = "none";
+                    dripInput.style.display = "block";
+                    oralInput.style.display = "block";
+
+                    // Initialize manual inputs if empty
+                    if (!dripInput.value) {
+                        dripInput.value = (totalVolume * 0.8).toFixed(2);
+                        oralInput.value = (totalVolume * 0.2).toFixed(2);
+                    }
+                    syncManual('init'); 
+                }
+            }
         }
 
-        resultBox.style.display = "block";
+        function syncManual(source) {
+            const total = parseFloat(document.getElementById("entered_volume").value);
+            let d = document.getElementById("manual_drip");
+            let o = document.getElementById("manual_oral");
 
-        // === Common base calculations ===
-        const perFeedKinship = (totalVolume / 12).toFixed(2);
-        const dripTotal     = (totalVolume * 0.8).toFixed(2);
-        const oralTotal     = (totalVolume * 0.2).toFixed(2);
-        const oralPerFeed   = (oralTotal / 12).toFixed(2);
+            if (source === 'drip') {
+                o.value = (total - (parseFloat(d.value) || 0)).toFixed(2);
+            } else if (source === 'oral') {
+                d.value = (total - (parseFloat(o.value) || 0)).toFixed(2);
+            }
 
-        if (method === 'yes') {
-            /**
-             * ✅ KINSHIP INVOLVED (Full Nursing)
-             * - Disable Tube Feeding (not applicable for full nursing/mahram usually)
-             * - Only Oral Feeding active
-             */
-            resYes.style.display = "block";
-            resNo.style.display  = "none";
-
-            // UI Updates
-            document.getElementById("vol-per-feed-yes").textContent = `${perFeedKinship} ml`;
-            
-            // Disable Tube Select
-            tubeSelect.disabled = true;
-            tubeSelect.value = ""; // Reset value
-            tubeSelect.style.backgroundColor = "#e9ecef"; // Visual cue
-            tubeSelect.required = false; // Remove required attribute if it was set
-
-        } else {
-            /**
-             * ❌ NO KINSHIP (Restricted)
-             * - Enable BOTH Tube and Oral Feeding
-             */
-            resYes.style.display = "none";
-            resNo.style.display  = "block";
-
-            // UI Updates
-            document.getElementById("vol-drip").textContent = `${dripTotal} ml`;
-            document.getElementById("vol-oral").textContent = `${oralPerFeed} ml`;
-
-            document.getElementById("calc-explanation").innerHTML =
-                `<strong>Calculation:</strong>
-                Total ${totalVolume}ml → ${dripTotal}ml (Drip) + ${oralTotal}ml (Oral)<br>
-                Oral ${oralTotal}ml ÷ 12 feeds = <strong>${oralPerFeed} ml/feed</strong>`;
-            
-            // Enable Tube Select
-            tubeSelect.disabled = false;
-            tubeSelect.style.backgroundColor = ""; // Reset style
-            // tubeSelect.required = true; // Optional: Make it required if 'no kinship' is selected
+            const oralPerFeed = (parseFloat(o.value) / 12).toFixed(2);
+            document.getElementById("calc-explanation").innerHTML = `<strong>Manual Mode:</strong> Direct ${o.value}ml ÷ 12 feeds = <strong>${oralPerFeed} ml/feed</strong>`;
+            updateHiddenInputs(d.value, o.value, oralPerFeed, oralPerFeed);
         }
 
-        // 🔐 STORE EVERYTHING (ALWAYS)
-        volumePerFeedInput.value = perFeedKinship;
-        dripTotalInput.value     = dripTotal;
-        oralTotalInput.value     = oralTotal;
-        oralPerFeedInput.value   = oralPerFeed;
-    }
-
-
-
+        function updateHiddenInputs(drip, oral, oralFeed, volFeed) {
+            document.getElementById("drip_total").value = drip;
+            document.getElementById("oral_total").value = oral;
+            document.getElementById("oral_per_feed").value = oralFeed;
+            document.getElementById("volume_per_feed").value = volFeed;
+        }
 
     // --- Consent Simulation Logic ---
     document.getElementById('patient_id').addEventListener('change', function() {

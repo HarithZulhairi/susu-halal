@@ -290,3 +290,28 @@
     border-top: 1px solid #ffe0b2;
     padding-top: 8px;
 }
+
+.mode-selector label {
+    font-size: 13px;
+    background: #fff;
+    padding: 5px 10px;
+    border: 1px solid #ffccbc;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.mode-selector input[type="radio"] {
+    margin-right: 5px;
+}
+
+.manual-calc-input {
+    width: 90%;
+    margin-top: 5px;
+    padding: 5px;
+    border: 1px solid #f57c00;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: bold;
+    color: #d84315;
+}

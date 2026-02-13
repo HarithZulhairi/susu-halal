@@ -130,7 +130,7 @@
                     <div class="info-item"><label>USERNAME</label><p>{{ $profile->username }}</p></div>
                     <div class="info-item"><label>ADDRESS</label><p>{{ $profile->address ?? 'Not provided' }}</p></div>
                     <div class="info-item"><label>ACCOUNT CREATED</label>
-                        <p>{{ $profile->created_at ? \Carbon\Carbon::parse($profile->created_at)->format('F d, Y') : 'N/A' }}</p>
+                        <p>{{ $profile->created_at ? \Carbon\Carbon::parse($profile->created_at)->format('d/m/Y') : 'N/A' }}</p>
                     </div>
                     <div class="info-item"><label>STATUS</label>
                         <p><span class="status-badge completed">Active</span></p>

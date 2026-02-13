@@ -198,7 +198,7 @@
                                 <td>
                                     <span class="date-info">
                                         <i class="far fa-calendar-alt"></i>
-                                        {{ isset($user->created_at) ? \Carbon\Carbon::parse($user->created_at)->format('M d, Y') : 'N/A' }}
+                                        {{ isset($user->created_at) ? \Carbon\Carbon::parse($user->created_at)->format('d/m/Y') : 'N/A' }}
                                     </span>
                                 </td>
                                 <td class="actions">

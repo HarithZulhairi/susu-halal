@@ -37,7 +37,7 @@
   <div class="sidebar-section">
     <h4>Management</h4>
     <ul>
-      <li><a href="{{ route('parent.my-infant-request') }}"><i class="fa-solid fa-file-lines"></i> Infant Milk Records</a></li>
+      <li><a href="{{ route('parent.my-infant-request') }}"><i class="fa-solid fa-file-lines"></i> Milk Traceability</a></li>
     </ul>
   </div>
 

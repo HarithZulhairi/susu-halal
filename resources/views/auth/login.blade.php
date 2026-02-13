@@ -69,7 +69,7 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-800">Shariah Compliant</h3>
-                        <p class="text-sm text-gray-600">Following Islamic guidelines</p>
+                        <p class="text-sm text-gray-600">Following Islamic principles</p>
                     </div>
                 </div>
 
@@ -251,7 +251,7 @@
                     <a href="#" class="hover:text-gray-700 transition-colors">Terms of Service</a>
                     <a href="#" class="hover:text-gray-700 transition-colors">Support</a>
                 </div>
-                <p class="text-xs text-gray-400">&copy; 2024 Rahma Milk Bank. All rights reserved.</p>
+                <p class="text-xs text-gray-400">&copy; 2025 Halimatus Saadia Mother's Milk Centre. All rights reserved.</p>
             </div>
         </div>
     </div>

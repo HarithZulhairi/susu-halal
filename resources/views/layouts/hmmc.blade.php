@@ -37,7 +37,7 @@
   <div class="sidebar-section">
     <h4>Management</h4>
     <ul>
-      <li><a href="{{ route('hmmc.hmmc_manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records</a></li>
+      <li><a href="{{ route('hmmc.hmmc_manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Processing</a></li>
       <li><a href="{{ route('hmmc.hmmc_milk-request') }}"><i class="fa-solid fa-prescription-bottle"></i> Milk Requests</a></li>
       <li><a href="{{ route('hmmc.hmmc_infant-list') }}"><i class="fa-solid fa-baby"></i> Infants List</a></li>
       <li><a href="{{ route('hmmc.infants-request') }}"><i class="fa-solid fa-route"></i> Milk Traceability</a></li>

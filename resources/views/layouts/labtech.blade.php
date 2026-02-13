@@ -36,7 +36,7 @@
   <div class="sidebar-section">
     <h4>Management</h4>
     <ul>
-      <li><a href="{{ route('labtech.labtech_manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Records</a></li>
+      <li><a href="{{ route('labtech.labtech_manage-milk-records') }}"><i class="fa-solid fa-file-lines"></i> Milk Processing</a></li>
       <li><a href="{{ route('labtech.quality-control') }}"><i class="fa-solid fa-microscope"></i> Inventory Quality Control</a></li>
     </ul>
   </div>

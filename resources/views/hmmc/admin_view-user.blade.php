@@ -189,7 +189,7 @@
                     @if($user->baby_dob)
                     <div class="info-item">
                         <label>DATE OF BIRTH</label>
-                        <p>{{ \Carbon\Carbon::parse($user->baby_dob)->format('M d, Y') }}</p>
+                        <p>{{ \Carbon\Carbon::parse($user->baby_dob)->format('d/m/Y') }}</p>
                     </div>
                     @endif
                     @if($user->baby_gender)

@@ -74,7 +74,7 @@
                 <th class="col-consent">CONSENT<br>(KINSHIP)</th>
                 <th class="col-freq">FREQ</th>
                 <th class="col-amt">AMOUNT</th>
-                <th class="col-sig">INCHARGE</th>
+                <th class="col-sig">PERSON IN CHARGE</th>
                 <th class="col-sig">WITNESS</th>
                 <th class="col-remark">REMARK / <br>(TYPE OF FEEDING)</th>
             </tr>

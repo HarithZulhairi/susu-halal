@@ -53,7 +53,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $parent->pr_NICU }}</td>
-                                <td>{{ $parent->updated_at?->format('d-m-Y h:i A') }}</td>
+                                <td>{{ $parent->updated_at?->format('d/m/Y • h:i A') }}</td>
                                 <td>
                                     <div class="weight-display">
                                         <i class="fa-solid fa-weight-scale"></i>

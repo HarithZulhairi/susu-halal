@@ -121,7 +121,7 @@
                         <th onclick="sortTable(2)">Total Milk Allocation <i class="fas fa-sort sort-icon"></i></th>
                         <th onclick="sortTable(3)">Last Updated <i class="fas fa-sort sort-icon"></i></th>
                         <th onclick="sortTable(4)">Baby Gender <i class="fas fa-sort sort-icon"></i></th>
-                        <th>Actions</th>
+                        <th>Document</th>
                     </tr>
                 </thead>
 

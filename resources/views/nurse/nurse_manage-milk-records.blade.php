@@ -10,7 +10,7 @@
     <div class="main-content">
 
         <div class="page-header">
-            <h1>Milk Records Management</h1>
+            <h1>Milk Processing Records Management</h1>
             <p>Milk Processing and Records</p>
         </div>
 

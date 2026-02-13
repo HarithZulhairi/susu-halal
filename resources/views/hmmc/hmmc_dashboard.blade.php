@@ -155,7 +155,7 @@
                             <td><span class="badge badge-{{ strtolower($donor->screeningStatus) }}">{{ ucfirst($donor->screeningStatus) }}</span></td>
 
                             <!-- Registration Date Column -->
-                            <td>{{ $donor->created_at->format('M d, Y') }}</td>
+                            <td>{{ $donor->created_at->format('d/m/Y') }}</td>
                         </tr>
                         @endforeach
                         </tbody>
