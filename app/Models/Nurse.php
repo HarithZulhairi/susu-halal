@@ -24,6 +24,7 @@ class Nurse extends Model
         'ns_YearsOfExperience',
         'ns_Password',
         'ns_Username',
+        'first_login',
     ];
 
     public function user()

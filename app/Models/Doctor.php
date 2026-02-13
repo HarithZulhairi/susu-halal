@@ -25,6 +25,7 @@ class Doctor extends Model
         'dr_YearsOfExperience', 
         'dr_Password',
         'dr_Username',
+        'first_login',
         'user_id',
     ];
 

@@ -26,6 +26,7 @@ class LabTech extends Model
         'lt_Password',
         'lt_Username',
         'user_id',
+        'first_login',
     ];
 
     public function user()

@@ -27,6 +27,7 @@ class ParentModel extends Model
         'pr_Password',
         'pr_ConsentStatus',
         'user_id',
+        'first_login',
     ];
 
     /**

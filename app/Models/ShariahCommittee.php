@@ -25,6 +25,7 @@ class ShariahCommittee extends Model
         'sc_Password',
         'sc_Username',
         'user_id',
+        'first_login',
     ];
 
     public function user()

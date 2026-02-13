@@ -21,6 +21,7 @@ class HmmcAdmin extends Model
         'ad_Password',
         'ad_Username',
         'user_id',
+        'first_login',
     ];
 
     public function user()
