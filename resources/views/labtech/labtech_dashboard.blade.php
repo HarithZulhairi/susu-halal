@@ -12,7 +12,7 @@
             <div class="header-content">
                 <div>
                     <h1>Welcome, {{ auth()->user()->name }}<br>
-                    <p class="muted">Shariah-compliant Human Milk Bank • Lab Technician dashboard</p>
+                    <p class="muted">Shariah-compliant Human Milk Bank • Microbiologist dashboard</p>
                     </h1>
                 </div>
             </div>

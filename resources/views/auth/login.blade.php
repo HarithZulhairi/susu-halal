@@ -190,11 +190,11 @@
                                 <option value="hmmc_admin">HMMC Admin</option>
                                 <option value="nurse">Nurse</option>
                                 <option value="doctor">Doctor</option>
-                                <option value="lab_technician">Lab Technician</option>
+                                <option value="lab_technician">Microbiologist</option>
                                 <option value="shariah_advisor">Shariah Advisor</option>
                                 <option value="donor" {{ old('role') == 'donor' ? 'selected' : '' }}>Donor</option>
                                 <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>Parent</option>
-                            </select>
+                            </select> 
                             <i class="fas fa-user-tag absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             <i class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
