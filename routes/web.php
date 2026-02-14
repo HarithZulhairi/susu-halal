@@ -242,9 +242,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/hmmc/infant-list', [RequestController::class, 'viewInfantHMMC'])->name('hmmc.hmmc_infant-list');
 
-    Route::get('/parent/my-infant-request',
-    [RequestController::class, 'viewMyInfantMilkRequests'])
-    ->name('parent.my-infant-request');
+    Route::get('/parent/my-infant-request',[RequestController::class, 'viewMyInfantMilkRequests'])->name('parent.my-infant-request');
 
 
     // Route::view('/hmmc/list-of-infants', 'hmmc.hmmc_list-of-infants')->name('hmmc.list-of-infants');

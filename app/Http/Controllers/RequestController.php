@@ -487,7 +487,7 @@ public function dispenseMilk(Request $request)
         $parent = ParentModel::where('user_id', auth()->id())
             ->with([
                 'requests.doctor',
-                'requests.allocations'
+                'requests.allocations.postBottles.milk.donor'
             ])
             ->firstOrFail();
 

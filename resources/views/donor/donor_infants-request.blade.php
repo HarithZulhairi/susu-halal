@@ -210,12 +210,12 @@
             <div class="section-title"><i class="fas fa-baby"></i> Patient & Consent Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
-                    <label>Patient Name</label>
-                    <p id="modalPatientName">-</p>
-                </div>
-                <div class="detail-item">
                     <label>Patient ID</label>
                     <p id="modalPatientId">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Patient Weight</label>
+                    <p id="modalPatientWeight">-</p>
                 </div>
                 <div class="detail-item">
                     <label>NICU Location</label>
@@ -312,13 +312,13 @@
 <script>
 
     function downloadReport(patientId) {
-        const url = "{{ route('nurse.milk-report') }}?patient_id=" + patientId;
+        const url = "{{ route('donor.milk-report') }}?patient_id=" + patientId;
         window.open(url, "_blank");
     }
 
     function openAllocationModal(details, totalVol) {
         // 1. Populate Patient Info
-        document.getElementById('modalPatientName').textContent = details.patient_name;
+        document.getElementById('modalPatientWeight').textContent = details.patient_weight;
         document.getElementById('modalPatientId').textContent = details.patient_id;
         document.getElementById('modalNICU').textContent = details.patient_nicu;
         document.getElementById('modalParentConsent').textContent = details.parent_consent;

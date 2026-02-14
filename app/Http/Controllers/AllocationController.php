@@ -81,7 +81,7 @@ class AllocationController extends Controller
                     return (object)[
                         'milk_id'    => $alloc->postBottles ? $alloc->postBottles->post_bottle_code : 'N/A',
                         'volume'     => $alloc->total_selected_milk,
-                        'time'       => $alloc->created_at->format('Y-m-d h:i A'),
+                        'time'       => $alloc->created_at->format('d/m/Y h:i A'),
                         'nurse_id'   => $alloc->nurse ? '#N'.$alloc->nurse->ns_ID : '-',
                         'nurse_name' => $alloc->nurse ? $alloc->nurse->ns_Name : 'Unknown'
                     ];
@@ -190,7 +190,7 @@ class AllocationController extends Controller
                     return (object)[
                         'milk_id'    => $alloc->postBottles ? $alloc->postBottles->post_bottle_code : 'N/A',
                         'volume'     => $alloc->total_selected_milk,
-                        'time'       => $alloc->created_at->format('Y-m-d h:i A'),
+                        'time'       => $alloc->created_at->format('d/m/Yh:i A'),
                         'nurse_id'   => $alloc->nurse ? '#N'.$alloc->nurse->ns_ID : '-',
                         'nurse_name' => $alloc->nurse ? $alloc->nurse->ns_Name : 'Unknown'
                     ];
@@ -328,7 +328,7 @@ class AllocationController extends Controller
                     return (object)[
                         'milk_id'    => $alloc->postBottles ? $alloc->postBottles->post_bottle_code : 'N/A',
                         'volume'     => $alloc->total_selected_milk,
-                        'time'       => $alloc->created_at->format('Y-m-d h:i A'),
+                        'time'       => $alloc->created_at->format('d/m/Y h:i A'),
                         'nurse_id'   => $alloc->nurse ? '#N'.$alloc->nurse->ns_ID : '-',
                         'nurse_name' => $alloc->nurse ? $alloc->nurse->ns_Name : 'Unknown'
                     ];
@@ -346,6 +346,7 @@ class AllocationController extends Controller
                         'patient_id'   => $parent->formattedID ?? '#P'.$parent->pr_ID,
                         'patient_nicu' => $parent->pr_NICU,
                         'parent_consent' => $parent->pr_ConsentStatus ?? 'N/A',
+                        'patient_weight' => $req->current_weight . ' kg',
                         
                         'donor_id'     => $donorIDStr,
                         'donor_name'   => $donorName,
@@ -442,7 +443,7 @@ class AllocationController extends Controller
                     return (object)[
                         'milk_id'    => $alloc->postBottles ? $alloc->postBottles->post_bottle_code : 'N/A',
                         'volume'     => $alloc->total_selected_milk,
-                        'time'       => $alloc->created_at->format('Y-m-d h:i A'),
+                        'time'       => $alloc->created_at->format('d/m/Y h:i A'),
                         'nurse_id'   => $alloc->nurse ? '#N'.$alloc->nurse->ns_ID : '-',
                         'nurse_name' => $alloc->nurse ? $alloc->nurse->ns_Name : 'Unknown'
                     ];
@@ -551,7 +552,7 @@ class AllocationController extends Controller
                     return (object)[
                         'milk_id'    => $alloc->postBottles ? $alloc->postBottles->post_bottle_code : 'N/A',
                         'volume'     => $alloc->total_selected_milk,
-                        'time'       => $alloc->created_at->format('Y-m-d h:i A'),
+                        'time'       => $alloc->created_at->format('d/m/Y h:i A'),
                         'nurse_id'   => $alloc->nurse ? '#N'.$alloc->nurse->ns_ID : '-',
                         'nurse_name' => $alloc->nurse ? $alloc->nurse->ns_Name : 'Unknown'
                     ];
@@ -815,7 +816,7 @@ class AllocationController extends Controller
                 'success'    => true,
                 'nurse_name' => $nurse->ns_Name,
                 'time'       => $record->fed_at->format('h:i A'),
-                'date'       => $record->fed_at->format('d M Y')
+                'date'       => $record->fed_at->format('d/m/Y')
             ]);
 
         } catch (\Exception $e) {
@@ -910,6 +911,80 @@ class AllocationController extends Controller
 
         // 4. Pass data to the PDF View
         return view('layouts.milk_report_pdf', [
+            'patient' => $patient,
+            'gestationalAge' => $gestationalAge,
+            'reportData' => $reportData,
+            'totalVolume' => $totalVolume,
+            'generatedDate' => now()->format('Y-m-d')
+        ]);
+    }
+
+    public function generateMilkReportDonor(Request $request)
+    {
+        $request->validate([
+            'patient_id' => 'required|exists:parent,pr_ID' // Ensure patient exists
+        ]);
+
+        $patientId = $request->patient_id;
+
+        // 1. Fetch Patient Info
+        $patient = ParentModel::findOrFail($patientId); // Adjust Model name if it's 'Patient' or 'ParentModel'
+
+        // 2. Fetch All Allocated Milk Requests for this Patient
+        // We need to drill down: Request -> Allocations -> PostBottle -> Milk -> Donor
+        $requests = MilkRequest::where('pr_ID', $patientId)
+            ->whereIn('status', ['Allocated', 'Fully Dispensed'])
+            ->with([
+                'doctor',
+                'allocations.nurse',
+                'allocations.feedRecords.nurse', // To get witness/checker if available
+                'allocations.postBottles.milk.donor'
+            ])
+            ->orderBy('created_at', 'asc') // Chronological order
+            ->get();
+
+        // 3. Flatten allocations into a single list for the table
+        $reportData = [];
+        $totalVolume = 0;
+
+        foreach ($requests as $req) {
+            foreach ($req->allocations as $alloc) {
+                
+                // Get Donor Info safely
+                $bottle = $alloc->postBottles;
+                $donor = $bottle && $bottle->milk ? $bottle->milk->donor : null;
+
+                // Determine Signature Names
+                $inchargeName = $alloc->nurse ? $alloc->nurse->ns_Name : 'N/A';
+                
+                $witnessName = $req->doctor ? $req->doctor->dr_Name : '-';
+
+                // Format Date/Time
+                $dateTime = $alloc->created_at; // Or dispense_time if available
+
+                $reportData[] = (object)[
+                    'date' => $dateTime->format('d/m/y'),
+                    'time' => $dateTime->format('H:i') . ' H',
+                    'batch_no' => $bottle ? $bottle->post_bottle_code : 'N/A', // Milk ID
+                    'donor_id' => $donor ? '#D'.$donor->dn_ID : 'Unknown',
+                    'consent_kinship' => $req->kinship_method === 'yes' ? 'YES' : 'NO',
+                    'freq' => $req->feeding_interval . ' H',
+                    'amount' => $alloc->total_selected_milk,
+                    'incharge' => $inchargeName,
+                    'witness' => $witnessName,
+                    'remark' => $req->feeding_tube ? 'Feeding Tube' : 'Direct Oral',
+                    'gestational_age' => $req->gestational_age ?? 'N/A'
+                ];
+
+                $totalVolume += $alloc->total_selected_milk;
+            }
+        }
+
+        $latestRequest = $requests->last(); 
+        $gestationalAge = $latestRequest ? $latestRequest->gestational_age : '-';
+
+        // 4. Pass data to the PDF View
+        return view('layouts.donor_milk_report_pdf', [
             'patient' => $patient,
             'gestationalAge' => $gestationalAge,
             'reportData' => $reportData,

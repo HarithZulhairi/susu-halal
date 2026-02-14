@@ -750,7 +750,8 @@ class MilkController extends Controller
                 'post_bottle_code' => $b['bottle_id'],
                 'post_volume' => $b['volume'], 
                 'post_pasteurization_date' => $b['pasteurization_date'],
-                'post_expiry_date' => $b['expiry_date'],
+                'post_expiry_date' => $b['expiry_date'], // change this to format 'd/m/Y' in frontend before sending
+
                 'post_micro_status' => 'Pending'
             ]);
         }

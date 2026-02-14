@@ -71,7 +71,7 @@
                                 </div>
 
                                 <div>{{ $bottle->post_storage_location ?? 'N/A' }}</div>
-                                <div class="expiry-date">{{ $bottle->post_expiry_date }}</div>
+                                <div class="expiry-date">{{ \Carbon\Carbon::parse($bottle->post_expiry_date)->format('d/m/Y') }}</div>
                                 <div>{{ $bottle->updated_at ? $bottle->updated_at->format('d/m/Y') : '-' }}</div> 
 
                                 <div class="clinical-status">
@@ -147,7 +147,7 @@
 
                                 <div>{{ $bottle->post_storage_location ?? 'N/A' }}</div>
                                 <div class="expiry-date">{{ $bottle->post_expiry_date }}</div>
-                                <div>{{ $bottle->updated_at ? $bottle->updated_at->format('Y-m-d') : '-' }}</div>
+                                <div>{{ $bottle->updated_at ? $bottle->updated_at->format('d/m/Y') : '-' }}</div>
 
                                 <div class="clinical-status">
                                     @if($bottle->post_micro_status == 'NOT CONTAMINATED')

@@ -26,7 +26,7 @@
   </div>
 
   <div class="sidebar-section">
-    <h4>LAB TECHNICIAN</h4>
+    <h4>MICROBIOLOGIST</h4>
     <ul>
       <li><a href="{{ route('labtech.dashboard') }}"><i class="fa-solid fa-house"></i> Dashboard</a></li>
       <li><a href="{{ route('profile.show') }}"><i class="fa-solid fa-user"></i> Profile</a></li>

@@ -148,7 +148,9 @@
                                             'status' => $req->status,
                                             'feeding_start_date' => $req->feeding_start_date,
                                             'feeding_start_time' => $req->feeding_start_time,
+                                            
                                             'allocations' => $req->allocations->map(function($alloc) {
+                                                $donor = optional($alloc->postBottles?->milk?->donor);
                                                 return [
                                                     'allocation_id' => $alloc->allocation_ID,
                                                     'post_id' => $alloc->post_ID,
@@ -156,6 +158,9 @@
                                                     'time' => $alloc->created_at ? $alloc->created_at->format('d/m/Y • h:i A') : 'N/A',
                                                     'nurse_name' => optional($alloc->nurse)->ns_Name ?? 'N/A',
                                                     'nurse_id' => $alloc->nurse ? '#NS' . $alloc->nurse->ns_ID : 'N/A',
+                                                    'donor_id' => $donor->dn_ID ? '#D' . $donor->dn_ID : 'N/A',
+                                                    'donor_contact' => $donor->dn_Contact ?? 'N/A',
+                                                    'donor_consent' => $donor->dn_ConsentStatus ?? 'Granted'
                                                 ];
                                             })->toArray()
                                         ];
@@ -203,7 +208,7 @@
         </div>
         <div class="modal-body">
             
-            {{-- 1. Request & Doctor Info --}}
+            {{-- 2. Request & Doctor Info --}}
             <div class="section-title"><i class="fas fa-user-circle"></i> Request & Doctor Information</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -225,7 +230,7 @@
                 </div>
             </div>
 
-            {{-- 2. Feeding Details --}}
+            {{-- 3. Feeding Details --}}
             <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Feeding & Assignment</div>
             <div class="detail-grid">
                 <div class="detail-item">
@@ -239,7 +244,7 @@
                 </div>
             </div>
 
-            {{-- 3. Allocation History Table --}}
+            {{-- 4. Allocation History Table --}}
             <div class="section-title"><i class="fas fa-history"></i> Allocation History (Nurse Records)</div>
             <table class="allocation-list">
                 <thead>
@@ -249,6 +254,7 @@
                         <th>Volume</th>
                         <th>Time</th>
                         <th>Allocated By (Nurse)</th>
+                        <th>Donor Details</th>
                     </tr>
                 </thead>
                 <tbody id="allocationTableBody">
@@ -311,13 +317,22 @@
             details.allocations.forEach(alloc => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="font-weight:600; color:#0f172a;">${alloc.allocation_id}</td>
-                    <td>${alloc.post_id || 'N/A'}</td>
+                    <td style="font-weight:600; color:#0f172a;">#A${alloc.allocation_id}</td>
+                    <td>#P${alloc.post_id || 'N/A'}</td>
                     <td>${alloc.volume} ml</td>
                     <td>${alloc.time}</td>
                     <td>
                         <strong>${alloc.nurse_name}</strong><br>
                         <span style="color:#64748b; font-size:11px;">${alloc.nurse_id}</span>
+                    </td>
+                    <td>
+                        <div style="font-size:12px; line-height:1.4;">
+                            <strong style="color:#0ea5e9;">${alloc.donor_id}</strong><br>
+                            <i class="fas fa-phone fa-xs"></i> ${alloc.donor_contact}<br>
+                            <span class="badge-method badge-kinship" style="font-size:9px; padding:2px 5px;">
+                                ${alloc.donor_consent}
+                            </span>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
