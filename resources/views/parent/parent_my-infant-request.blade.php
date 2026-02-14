@@ -207,6 +207,27 @@
             <button class="modal-close-btn" onclick="closeAllocationModal()">Close</button>
         </div>
         <div class="modal-body">
+
+            {{-- 2. Donor & Consent Info --}}
+            <div class="section-title"><i class="fas fa-user-circle"></i> Donor & Consent Information</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Donor Name</label>
+                    <p id="modalDonorName">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Donor ID</label>
+                    <p id="modalDonorId">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Donor Consent Status</label>
+                    <p id="modalConsent" style="color:#166534; font-weight:700;">-</p>
+                </div>
+                <div class="detail-item">
+                    <label>Total Allocated Volume</label>
+                    <p id="modalTotalVol" style="color:#0369a1; font-weight:800; font-size:16px;">-</p>
+                </div>
+            </div>
             
             {{-- 2. Request & Doctor Info --}}
             <div class="section-title"><i class="fas fa-user-circle"></i> Request & Doctor Information</div>
@@ -295,6 +316,11 @@
         document.getElementById('modalDoctorName').textContent = details.doctor_name;
         document.getElementById('modalDoctorId').textContent = details.doctor_id;
         document.getElementById('modalTotalVol').textContent = volumePerFeed + " ml/feed";
+        if (details.allocations && details.allocations.length > 0) {
+        // document.getElementById('modalDonorName').textContent = details.allocations[0].donor_id; // Or donor_name if available
+        document.getElementById('modalDonorId').textContent = details.allocations[0].donor_id;
+        document.getElementById('modalConsent').textContent = details.allocations[0].donor_consent;
+    }
         
         // 2. Method Badge
         const badgeDiv = document.getElementById('modalMethodBadge');
